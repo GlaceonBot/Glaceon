@@ -1,0 +1,5 @@
+Bot written by valkyrie_pilot#2707
+Thanks to leduyquang753#3761 for help with SQLite
+Thanks to ! Thonk#2761, superpowers04#3887, elephant_1214#3698 and smallpepperz#0681 for general python help
+Thanks to sgtlaggy#5516, and gogurt enjoyer#8035 for telling me to use SQLite and help with the prefix system
+If you would like to invite this bot to your server, check out https://randomairborne.dev/glaceon

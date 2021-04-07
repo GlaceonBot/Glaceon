@@ -1,0 +1,6 @@
+`help`: shows this message
+`credits`: who helped with the bot
+`ping`: find bot ping
+`modmail`: sends a message to the moderators
+`modmailsetup <channel>`: sets up ModMail system (requires administrator permissions)
+`prefix`: Changes the bot's prefix (requires administrator permissions)

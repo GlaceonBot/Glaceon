@@ -1,0 +1,2 @@
+`clear <number>`: clears messages
+`modsend <message>`: sends a message for the staff
