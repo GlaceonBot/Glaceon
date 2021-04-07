@@ -16,12 +16,9 @@ class Logger(commands.Cog):
         pathlib.Path(path / f'logs/{message.guild}/{message.channel}').mkdir(parents=True, exist_ok=True)
         day = datetime.datetime.today().strftime('%Y-%m-%d')
         logfile = open(path / f'logs/{message.guild}/{message.channel}/{day}.txt', 'a+', encoding='utf-32')
-        try: logfile.write(
+        logfile.write(
             f"{message.author} said: {message.content}\n"
         )
-        except UnicodeEncodeError:
-            logfile.write(
-                "The above message also contained a Discord emote that could not be translated to ASCII.  Sorry for the inconvinence.\n")
 
         logfile.close()
 
@@ -31,13 +28,9 @@ class Logger(commands.Cog):
         pathlib.Path(path / f'logs/{message.guild}/{message.channel}').mkdir(parents=True, exist_ok=True)
         day = datetime.datetime.today().strftime('%Y-%m-%d')
         logfile = open(path / f'logs/{message.guild}/{message.channel}/{day}.txt', 'a+', encoding='utf-32')
-        try:
-            logfile.write(
+        logfile.write(
                 f"{message.author} edited their message from: {message_before.content} to: {message.content}\n"
             )
-        except UnicodeEncodeError:
-            logfile.write(
-                "The above message also contained a Discord emote that could not be translated to ASCII.  Sorry for the inconvinence.\n")
         logfile.close()
 
 
