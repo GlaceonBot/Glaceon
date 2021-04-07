@@ -29,8 +29,8 @@ class Logger(commands.Cog):
         day = datetime.datetime.today().strftime('%Y-%m-%d')
         logfile = open(path / f'logs/{message.guild}/{message.channel}/{day}.txt', 'a+', encoding='utf-32')
         logfile.write(
-                f"{message.author} edited their message from: {message_before.content} to: {message.content}\n"
-            )
+            f"{message.author} edited their message from: {message_before.content} to: {message.content}\n"
+        )
         logfile.close()
 
 
