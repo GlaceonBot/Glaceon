@@ -22,7 +22,7 @@ class Modsend(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def modmailsetup(self, ctx, channel: discord.TextChannel):
         serverid = ctx.guild.id
-        modmailchannel = sqlite3.connect(path / 'system/data.sqldb')
+        modmailchannel = sqlite3.connect(path / 'system/data.db')
         cur = modmailchannel.cursor()
         cur.execute('''CREATE TABLE IF NOT EXISTS mailchannels
                            (serverid INTEGER, channelid INTEGER)''')
@@ -40,7 +40,7 @@ class Modsend(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def modmail(self, ctx, *, message):
         sid = ctx.guild.id
-        prefixes = sqlite3.connect(path / 'system/data.sqldb')
+        prefixes = sqlite3.connect(path / 'system/data.db')
         cur = prefixes.cursor()
         cur.execute(f'''SELECT channelid FROM mailchannels WHERE serverid = {sid}''')
         channel = cur.fetchone()

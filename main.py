@@ -12,7 +12,7 @@ with open(path / 'system/token.txt', 'r') as file:
 
 def prefixgetter(bot, message):
     sid = message.guild.id
-    prefixes = sqlite3.connect(path / 'system/data.sqldb')
+    prefixes = sqlite3.connect(path / 'system/data.db')
     cur = prefixes.cursor()
     cur.execute('''CREATE TABLE IF NOT EXISTS prefixes
                    (serverid INTEGER, prefix TEXT)''')

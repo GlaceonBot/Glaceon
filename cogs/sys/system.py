@@ -15,7 +15,7 @@ class BotSystem(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def prefix(self, ctx, newprefix):
         serverid = ctx.guild.id
-        prefixesls = sqlite3.connect(path / 'system/data.sqldb')
+        prefixesls = sqlite3.connect(path / 'system/data.db')
         cur = prefixesls.cursor()
         cur.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')
         if cur.fetchone() is not None:
