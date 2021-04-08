@@ -7,12 +7,12 @@ embedcolor = 0xadd8e6
 class Hcommands(commands.Cog):
     @commands.command(aliases=['clean'])
     @commands.has_permissions(manage_messages=True)
-    async def clear(self, ctx, ClearInt):
+    async def clear(self, ctx, clear):
         await ctx.message.delete()
-        amount = int(ClearInt)
+        amount = int(clear)
         await ctx.channel.purge(limit=amount)
         embed = discord.Embed(colour=embedcolor)
-        embed.add_field(name="Clear", value="cleared " + ClearInt + " messages")
+        embed.add_field(name="Clear", value="cleared " + clear + " messages")
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed, delete_after=10)
 

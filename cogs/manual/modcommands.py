@@ -15,7 +15,11 @@ class Modcommands(commands.Cog):
         if member is None:
             await ctx.send("No member specified!")
         if not member.bot:
-            await member.send(f"You were kicked from {ctx.guild} for: {reason}")
+            try:
+                await member.send(f"You were banned from {ctx.guild} for: {reason}")
+            except discord.Forbidden:
+                await ctx.send("I could not DM the member, they must have DMs off or me blocked. Banning anyway.",
+                               delete_after=10)
         await member.kick(reason=reason)
         await ctx.send(f"User {member} Has Been Kicked!", delete_after=10)
 
@@ -27,7 +31,11 @@ class Modcommands(commands.Cog):
         if member is None:
             await ctx.send("No member specified!")
         if not member.bot:
-            await member.send(f"You were banned from {ctx.guild} for: {reason}")
+            try:
+                await member.send(f"You were banned from {ctx.guild} for: {reason}")
+            except discord.Forbidden:
+                await ctx.send("I could not DM the member, they must have DMs off or me blocked. Banning anyway.",
+                               delete_after=10)
         await member.ban(reason=reason)
         await ctx.send(f"User {member} Has Been Banned!", delete_after=10)
 
