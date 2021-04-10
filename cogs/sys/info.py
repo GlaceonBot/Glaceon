@@ -24,7 +24,7 @@ class Info(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
-        ctx.message.delete()
+        await ctx.message.delete()
         embed = discord.Embed(colour=embedcolor, title="Pong!")
         embed.add_field(name="Ping:",
                         value=str(round(self.bot.latency * 1000)) + " MS",
