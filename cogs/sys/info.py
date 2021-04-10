@@ -24,12 +24,10 @@ class Info(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
-        time_1 = time.perf_counter()
-        time_2 = time.perf_counter()
-        pingtime = str(round((time_2 - time_1) * 1000))
+        ctx.message.delete()
         embed = discord.Embed(colour=embedcolor, title="Pong!")
         embed.add_field(name="Ping:",
-                        value=pingtime,
+                        value=str(round(self.bot.latency * 1000)) + " MS",
                         inline=True)
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed)
