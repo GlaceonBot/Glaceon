@@ -20,7 +20,10 @@ class Modcommands(commands.Cog):
             except discord.Forbidden:
                 await ctx.send("I could not DM the member, they must have DMs off or me blocked. Banning anyway.",
                                delete_after=10)
-        await member.kick(reason=reason)
+        try:
+            await member.kick(reason=reason)
+        except discord.Forbidden:
+            await ctx.send("I do not have the requisite permissions to do this!")
         await ctx.send(f"User {member} Has Been Kicked!", delete_after=10)
 
     # ban
@@ -36,7 +39,10 @@ class Modcommands(commands.Cog):
             except discord.Forbidden:
                 await ctx.send("I could not DM the member, they must have DMs off or me blocked. Banning anyway.",
                                delete_after=10)
-        await member.ban(reason=reason)
+        try:
+            await member.ban(reason=reason)
+        except discord.Forbidden:
+            await ctx.send("I do not have the requisite permissions to do this!")
         await ctx.send(f"User {member} Has Been Banned!", delete_after=10)
 
     @commands.command(aliases=['lockdown', 'archive'])

@@ -7,9 +7,7 @@ class Antispam(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        
-        whoSent = ctx.author
-
+        pass
 
 
 def setup(glaceon):
