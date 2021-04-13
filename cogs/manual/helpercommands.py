@@ -5,7 +5,7 @@ embedcolor = 0xadd8e6
 
 
 class Hcommands(commands.Cog):
-    @commands.command(aliases=['clean'])
+    @commands.command(aliases=['clean', 'clear'])
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, clear: int = 10, user: discord.Member = None):
         if user:
