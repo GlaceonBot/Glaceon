@@ -7,12 +7,16 @@ embedcolor = 0xadd8e6
 class Hcommands(commands.Cog):
     @commands.command(aliases=['clean'])
     @commands.has_permissions(manage_messages=True)
-    async def clear(self, ctx, clear):
+    async def purge(self, ctx, clear: int = 10, user: discord.Member = None):
+        if user:
+            check_func = lambda msg: msg.author == user and not msg.pinned
+        else:
+            check_func = lambda msg: not msg.pinned
+
         await ctx.message.delete()
-        amount = int(clear)
-        await ctx.channel.purge(limit=amount)
+        await ctx.channel.purge(limit=clear, check=check_func)
         embed = discord.Embed(colour=embedcolor)
-        embed.add_field(name="Clear", value="cleared " + clear + " messages")
+        embed.add_field(name="Clear", value="cleared " + str(clear) + " messages")
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed, delete_after=10)
 
