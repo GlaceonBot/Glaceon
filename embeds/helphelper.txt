@@ -1,2 +1,2 @@
-`clear <number>`: clears messages
+`clear <number> [mention]`: clears messages
 `modsend <message>`: sends a message for the staff
