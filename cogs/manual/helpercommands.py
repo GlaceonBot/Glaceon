@@ -14,11 +14,14 @@ class Hcommands(commands.Cog):
             check_func = lambda msg: not msg.pinned
 
         await ctx.message.delete()
-        await ctx.channel.purge(limit=clear, check=check_func)
-        embed = discord.Embed(colour=embedcolor)
-        embed.add_field(name="Clear", value="cleared " + str(clear) + " messages")
-        embed.set_footer(text=f"Request by {ctx.author}")
-        await ctx.send(embed=embed, delete_after=10)
+        try:
+            await ctx.channel.purge(limit=clear, check=check_func)
+            embed = discord.Embed(colour=embedcolor)
+            embed.add_field(name="Clear", value="cleared " + str(clear) + " messages")
+            embed.set_footer(text=f"Request by {ctx.author}")
+            await ctx.send(embed=embed, delete_after=10)
+        except discord.Forbidden:
+            await ctx.send("Whoops! I don't have the `manage messages` permission!")
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
@@ -50,7 +53,10 @@ class Hcommands(commands.Cog):
                               colour=discord.Colour.light_gray())
         embed.add_field(name="reason:", value=reason, inline=False)
         await ctx.send(embed=embed, delete_after=10)
-        await member.add_roles(muted_role, reason=reason)
+        try:
+            await member.add_roles(muted_role, reason=reason)
+        except discord.Forbidden:
+            ctx.send("Whoops! I don't have the `manage roles` permission!")
         if time is None:
             time = "when it it manually revoked."
         await member.send(f" you have been muted from: {guild.name} for: {reason}. Your mute will expire {time}")
@@ -59,7 +65,10 @@ class Hcommands(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def unmute(self, ctx, member: discord.Member):
         muted_role = discord.utils.get(ctx.guild.roles, name="Muted")
-        await member.remove_roles(muted_role)
+        try:
+            await member.remove_roles(muted_role)
+        except discord.Forbidden:
+            ctx.send("Whoops! I don't have the `manage roles` permission!")
         await member.send(f" you have been unmuted in: - {ctx.guild.name}")
         embed = discord.Embed(title="unmute", description=f" unmuted-{member.mention}",
                               colour=discord.Colour.light_gray())
