@@ -42,4 +42,4 @@ class ModCommmunications(commands.Cog):
 
 
 def setup(glaceon):
-    glaceon.add_cog(ModComms(glaceon))
+    glaceon.add_cog(ModCommmunications(glaceon))
