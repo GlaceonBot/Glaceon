@@ -3,7 +3,7 @@ from discord.ext import commands
 
 
 # kick
-class Modcommands(commands.Cog):
+class ModCommands(commands.Cog):
     """Commands gated behind kick members, ban members, and manage channels."""
 
     def __init__(self, bot):

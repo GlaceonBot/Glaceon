@@ -6,7 +6,7 @@ from discord.ext import commands
 path = pathlib.PurePath()
 
 
-class ModComms(commands.Cog):
+class ModCommmunications(commands.Cog):
     """Communicate with the mods and for the mods"""
 
     def __init__(self, bot):
