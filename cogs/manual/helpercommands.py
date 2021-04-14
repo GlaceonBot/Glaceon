@@ -62,7 +62,7 @@ class Hcommands(commands.Cog):
         try:
             await member.send(f" you have been muted from: {guild.name} for: {reason}. Your mute will expire {time}")
         except discord.Forbidden:
-            await ctx.send("Unable to DM, muting anyway!")
+            await ctx.send("Unable to DM, muting anyway!", delete_after=10)
 
     @commands.command(description="Unmutes a specified user.")
     @commands.has_permissions(manage_messages=True)
