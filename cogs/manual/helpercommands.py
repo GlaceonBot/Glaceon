@@ -58,8 +58,11 @@ class Hcommands(commands.Cog):
         except discord.Forbidden:
             ctx.send("Whoops! I don't have the `manage roles` permission!")
         if time is None:
-            time = "when it it manually revoked."
-        await member.send(f" you have been muted from: {guild.name} for: {reason}. Your mute will expire {time}")
+            time = "when it is manually revoked."
+        try:
+            await member.send(f" you have been muted from: {guild.name} for: {reason}. Your mute will expire {time}")
+        except discord.Forbidden:
+            await ctx.send("Unable to DM, muting anyway!")
 
     @commands.command(description="Unmutes a specified user.")
     @commands.has_permissions(manage_messages=True)
