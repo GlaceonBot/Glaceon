@@ -36,7 +36,7 @@ class Help(commands.MinimalHelpCommand):
 
 intents = discord.Intents().all()
 glaceon = commands.AutoShardedBot(command_prefix=prefixgetter, case_insensitive=True, intents=intents)
-glaceon.help_command = commands.MinimalHelpCommand()
+glaceon.help_command = Help()
 embedcolor = 0xadd8e6
 
 
