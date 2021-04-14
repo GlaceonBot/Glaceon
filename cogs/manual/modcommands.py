@@ -70,6 +70,7 @@ class ModCommands(commands.Cog):
         ctx.send("This command is under construction!")
 
     @commands.command()
+    @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, member: discord.User):
         """Unbans user."""
         user = await self.bot.fetch_user(member.id)
