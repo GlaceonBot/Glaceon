@@ -17,7 +17,7 @@ class Info(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    @commands.cooldown(5)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def ping(self, ctx):
         """Shows bot ping. 5s cooldown to prevent spam."""
         await ctx.message.delete()
