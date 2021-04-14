@@ -39,10 +39,10 @@ class Help(commands.MinimalHelpCommand):
                 cog_name = getattr(cog, "qualified_name", "No Category")
                 embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
 
-        async def send_error_message(self, error):
-            embed = discord.Embed(title="Error", value=error)
-            channel = self.get_destination()
-            await channel.send(embed=embed)
+    async def send_error_message(self, error):
+        embed = discord.Embed(title="Error", value=error)
+        channel = self.get_destination()
+        await channel.send(embed=embed)
 
         channel = self.get_destination()
         await channel.send(embed=embed)
