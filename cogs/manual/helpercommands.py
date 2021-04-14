@@ -4,10 +4,14 @@ from discord.ext import commands
 embedcolor = 0xadd8e6
 
 
-class Hcommands(commands.Cog):
+class HelperCommands(commands.Cog):
+    """Commands gated to Manage Messages"""
+
     @commands.command(aliases=['clean', 'clear'])
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, clear: int = 10, user: discord.Member = None):
+        """Clear channel of messages, optionally from a specific user.
+        Add their ping/ID to the end of the comamnd to set it to only delete messages from that user."""
         if user:
             check_func = lambda msg: msg.author == user and not msg.pinned
         else:
@@ -26,6 +30,7 @@ class Hcommands(commands.Cog):
     @commands.command()
     @commands.has_permissions(manage_messages=True)
     async def warn(self, ctx, member: discord.Member, *, reason):
+        """Warn a member."""
         await ctx.message.delete()
         if member is None:
             await ctx.send("No member specified!")
@@ -39,6 +44,7 @@ class Hcommands(commands.Cog):
     @commands.command(description="Mutes the specified user.")
     @commands.has_permissions(manage_messages=True)
     async def mute(self, ctx, member: discord.Member, time=None, *, reason="No reason specified."):
+        """Mute a user. Optionally has a reason."""
         await ctx.message.delete()
         guild = ctx.guild
         muted_role = discord.utils.get(guild.roles, name="Muted")
@@ -67,6 +73,7 @@ class Hcommands(commands.Cog):
     @commands.command(description="Unmutes a specified user.")
     @commands.has_permissions(manage_messages=True)
     async def unmute(self, ctx, member: discord.Member):
+        """Unmutes a member."""
         muted_role = discord.utils.get(ctx.guild.roles, name="Muted")
         try:
             await member.remove_roles(muted_role)
@@ -82,4 +89,4 @@ class Hcommands(commands.Cog):
 
 
 def setup(glaceon):
-    glaceon.add_cog(Hcommands(glaceon))
+    glaceon.add_cog(HelperCommands(glaceon))

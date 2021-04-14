@@ -1,4 +1,0 @@
-`kick <ping> [reason]`: Kicks someone
-`ban <ping> [reason]`: Bans someone
-`lock`: locks the current channel to the default role
-`unlock`: undos the lock command

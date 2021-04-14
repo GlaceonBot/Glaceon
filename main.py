@@ -26,10 +26,18 @@ def prefixgetter(bot, message):
         return default_prefix
 
 
+class Help(commands.MinimalHelpCommand):
+    async def send_pages(self):
+        destination = self.get_destination()
+        for page in self.paginator.pages:
+            embed = discord.Embed(description=page)
+            await destination.send(embed=embed)
+
+
 intents = discord.Intents().all()
 glaceon = commands.AutoShardedBot(command_prefix=prefixgetter, case_insensitive=True, intents=intents)
+glaceon.help_command = commands.MinimalHelpCommand()
 embedcolor = 0xadd8e6
-glaceon.remove_command('help')
 
 
 @glaceon.event

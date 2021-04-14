@@ -6,7 +6,9 @@ from discord.ext import commands
 path = pathlib.PurePath()
 
 
-class Modsend(commands.Cog):
+class ModComms(commands.Cog):
+    """Communicate with the mods and for the mods"""
+
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
@@ -19,26 +21,9 @@ class Modsend(commands.Cog):
         await ctx.send(message)
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def modmailsetup(self, ctx, channel: discord.TextChannel):
-        serverid = ctx.guild.id
-        modmailchannel = sqlite3.connect(path / 'system/data.db')
-        cur = modmailchannel.cursor()
-        cur.execute('''CREATE TABLE IF NOT EXISTS mailchannels
-                           (serverid INTEGER, channelid INTEGER)''')
-        cur.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = {serverid}''')
-        if cur.fetchone() is not None:
-            cur.execute("""UPDATE mailchannels SET channelid = ? WHERE serverid = ?""", (channel, serverid))
-        else:
-            cur.execute("INSERT INTO mailchannels(serverid, channelid) VALUES (?,?)",
-                        (serverid, channel.id))
-        modmailchannel.commit()
-        modmailchannel.close()
-        await ctx.send(f"ModMail channel is now {channel}")
-
-    @commands.command()
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def modmail(self, ctx, *, message):
+        """Sends a message TO the moderators"""
         sid = ctx.guild.id
         prefixes = sqlite3.connect(path / 'system/data.db')
         cur = prefixes.cursor()
@@ -57,4 +42,4 @@ class Modsend(commands.Cog):
 
 
 def setup(glaceon):
-    glaceon.add_cog(Modsend(glaceon))
+    glaceon.add_cog(ModComms(glaceon))

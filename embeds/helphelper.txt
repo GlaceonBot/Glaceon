@@ -1,2 +1,0 @@
-`clear <number> [mention]`: clears messages (optionally from a specific user)
-`modsend <message>`: sends a message for the staff
