@@ -72,7 +72,10 @@ class Hcommands(commands.Cog):
             await member.remove_roles(muted_role)
         except discord.Forbidden:
             ctx.send("Whoops! I don't have the `manage roles` permission!")
-        await member.send(f" you have been unmuted in: - {ctx.guild.name}")
+        try:
+            await member.send(f" you have been unmuted in: - {ctx.guild.name}")
+        except discord.Forbidden:
+            pass
         embed = discord.Embed(title="unmute", description=f" unmuted-{member.mention}",
                               colour=discord.Colour.light_gray())
         await ctx.send(embed=embed, delete_after=10)
