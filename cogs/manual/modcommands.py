@@ -78,4 +78,4 @@ class ModCommands(commands.Cog):
 
 
 def setup(glaceon):
-    glaceon.add_cog(Modcommands(glaceon))
+    glaceon.add_cog(ModCommands(glaceon))
