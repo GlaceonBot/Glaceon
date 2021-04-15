@@ -10,7 +10,7 @@ class ModCommands(commands.Cog):
         self.bot = bot
         self._last_member = None
 
-    @commands.command()
+    @commands.command(aliases=["k"])
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason="No reason specified."):
         """Kicks a user."""
@@ -30,7 +30,7 @@ class ModCommands(commands.Cog):
         await ctx.send(f"User {member} Has Been Kicked!", delete_after=10)
 
     # ban
-    @commands.command()
+    @commands.command(aliases=["b"])
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason="No reason specified."):
         """Bans a user."""
@@ -69,7 +69,7 @@ class ModCommands(commands.Cog):
         """Temporarily bans a user."""
         ctx.send("This command is under construction!")
 
-    @commands.command()
+    @commands.command(aliases=['ub', 'pardon'])
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, member: discord.User):
         """Unbans user."""
