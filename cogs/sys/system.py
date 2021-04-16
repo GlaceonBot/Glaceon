@@ -63,14 +63,14 @@ class BotSystem(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_join(self, ctx):
         sent = False
-        for name in ctx.channels:
+        for name in ctx.text_channels:
             if not sent:
                 if name.name == "bot-spam":
                     await sendwelcome(name)
-                    sent = True
+                    break
                 elif name.name == "bot-commands":
                     await sendwelcome(name)
-                    sent = True
+
                 elif name.name == "bot":
                     await sendwelcome(name)
                     sent = True
@@ -80,14 +80,8 @@ class BotSystem(commands.Cog):
                 elif name.name == "general":
                     await sendwelcome(name)
                     sent = True
-                else:
-                    for text_channels in ctx.channels:
-                        if sent is False:
-                            try:
-                                await sendwelcome(text_channels)
-                                sent = True
-                            except AttributeError:
-                                pass
+        if not sent:
+            await sendwelcome(ctx.text_channels[0])
 
 
 def setup(glaceon):
