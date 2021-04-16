@@ -35,7 +35,7 @@ class ModCommmunications(commands.Cog):
             print(sendchannel)
             await sendchannel.send(message)
         else:
-            ctx.send(
+            await ctx.send(
                 "The moderators need to set up a modmail channel first, they can do so with the `modmailsetup` command!"
             )
         pass
