@@ -74,6 +74,7 @@ class HelperCommands(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def unmute(self, ctx, member: discord.Member):
         """Unmutes a member."""
+        ctx.message.delete()
         muted_role = discord.utils.get(ctx.guild.roles, name="Muted")
         try:
             await member.remove_roles(muted_role)
@@ -83,7 +84,7 @@ class HelperCommands(commands.Cog):
             await member.send(f" you have been unmuted in: - {ctx.guild.name}")
         except discord.Forbidden:
             pass
-        embed = discord.Embed(title="unmute", description=f" unmuted-{member.mention}",
+        embed = discord.Embed(title="Unmute", description=f" Unmuted-{member.mention}",
                               colour=discord.Colour.light_gray())
         await ctx.send(embed=embed, delete_after=10)
 
