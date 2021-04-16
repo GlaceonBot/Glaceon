@@ -2,5 +2,6 @@ Bot written by <@788222689126776832>
 Thanks to <@331644964801085442> for help with SQLite
 Thanks to <@755093458586173531>, <@267737465152864256>, <@363474138549059604> and <@545463550802395146> for general python help
 Thanks to <@103714384802480128>, and <@198233322080567296> for telling me to use SQLite and help with the prefix system
-thank you to <@155863164544614402> for teaching me about the right way to add a help command, because fuck google
+Thanks to <@541491300545855499> for help with the on_guild_join message
+Thank you to <@155863164544614402> for teaching me about the right way to add a help command, because fuck google
 If you would like to invite this bot to your server, check out https://randomairborne.dev/glaceon
