@@ -10,7 +10,7 @@ with open(path / 'system/token.txt', 'r') as file:
     TOKEN = file.read()
 
 
-def prefixgetter(bot, message):
+def prefixgetter(_, message):
     sid = message.guild.id
     prefixes = sqlite3.connect(path / 'system/data.db')
     cur = prefixes.cursor()
@@ -62,12 +62,10 @@ async def on_ready():
 
 
 @glaceon.event
-async def on_message(ctx):
-    if "<@!808149899182342145>" in ctx.content:
-        await ctx.channel.send(f'`{prefixgetter(1, ctx)}` is my prefix!')
-    if "<@808149899182342145>" in ctx.content:
-        await ctx.channel.send(f'`{prefixgetter(1, ctx)}` is my prefix!')
-    await glaceon.process_commands(ctx)
+async def on_message(message):
+    if "<@!808149899182342145>" in message.content or "<@808149899182342145>" in message.content:
+        await message.channel.send(f'`{glaceon.command_prefix(glaceon, message)}` is my prefix!')
+    await glaceon.process_commands(message)
 
 
 glaceon.coglist = ['cogs.sys.logger',

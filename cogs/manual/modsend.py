@@ -1,6 +1,5 @@
 import pathlib
 import sqlite3
-import discord
 from discord.ext import commands
 
 path = pathlib.PurePath()
@@ -39,7 +38,6 @@ class ModCommmunications(commands.Cog):
                 "The moderators need to set up a modmail channel first, they can do so with the `modmailsetup` command!"
             )
         pass
-
 
 def setup(glaceon):
     glaceon.add_cog(ModCommmunications(glaceon))

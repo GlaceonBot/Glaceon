@@ -63,12 +63,6 @@ class ModCommands(commands.Cog):
         await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)
         await ctx.send(ctx.channel.mention + " **has been unlocked.**")
 
-    @commands.command()
-    @commands.has_permissions(kick_members=True)
-    async def tempban(self, ctx):
-        """Temporarily bans a user."""
-        ctx.send("This command is under construction!")
-
     @commands.command(aliases=['ub', 'pardon'])
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, member: discord.User):
