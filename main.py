@@ -10,6 +10,10 @@ with open(path / 'system/token.txt', 'r') as file:
     TOKEN = file.read()
 
 
+def exitglaceon():
+    exit(0)
+
+
 def prefixgetter(_, message):
     sid = message.guild.id
     prefixes = sqlite3.connect(path / 'system/data.db')
