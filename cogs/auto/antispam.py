@@ -8,7 +8,7 @@ class Antispam(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        sender = ctx.user.id
+        sender = ctx.author.id
         pass
 
 
