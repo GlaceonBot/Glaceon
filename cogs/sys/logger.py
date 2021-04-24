@@ -13,9 +13,11 @@ class Logger(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         # logs
-        pathlib.Path(path / f'logs/{message.guild}/{message.channel}').mkdir(parents=True, exist_ok=True)
+        if message.channel is None:
+            message.channel = 0
+        pathlib.Path(path / f'logs/{message.guild.id}/{message.channel}').mkdir(parents=True, exist_ok=True)
         day = datetime.datetime.today().strftime('%Y-%m-%d')
-        logfile = open(path / f'logs/{message.guild}/{message.channel}/{day}.txt', 'a+', encoding='utf-32')
+        logfile = open(path / f'logs/{message.guild.id}/{message.channel}/{day}.txt', 'a+', encoding='utf-32')
         logfile.write(
             f"{message.author} said: {message.content}\n"
         )
@@ -25,9 +27,11 @@ class Logger(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self, message_before, message):
         # logs
-        pathlib.Path(path / f'logs/{message.guild}/{message.channel}').mkdir(parents=True, exist_ok=True)
+        if message.channel is None:
+            message.channel = 0
+        pathlib.Path(path / f'logs/{message.guild.id}/{message.channel}').mkdir(parents=True, exist_ok=True)
         day = datetime.datetime.today().strftime('%Y-%m-%d')
-        logfile = open(path / f'logs/{message.guild}/{message.channel}/{day}.txt', 'a+', encoding='utf-32')
+        logfile = open(path / f'logs/{message.guild.id}/{message.channel}/{day}.txt', 'a+', encoding='utf-32')
         logfile.write(
             f"{message.author} edited their message from: {message_before.content} to: {message.content}\n"
         )
