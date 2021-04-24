@@ -1,5 +1,6 @@
 import datetime
 import pathlib
+import emoji
 
 from discord.ext import commands
 
@@ -13,13 +14,15 @@ class Logger(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         # logs
-        if message.channel is None:
-            message.channel = 0
-        pathlib.Path(path / f'logs/{message.guild.id}/{message.channel}').mkdir(parents=True, exist_ok=True)
+        if message.guild is None:
+            guildid = -1
+        else:
+            guildid = message.guild.id
+        pathlib.Path(path / f'logs/{guildid}/{message.channel}').mkdir(parents=True, exist_ok=True)
         day = datetime.datetime.today().strftime('%Y-%m-%d')
-        logfile = open(path / f'logs/{message.guild.id}/{message.channel}/{day}.txt', 'a+', encoding='utf-32')
+        logfile = open(path / f'logs/{guildid}/{message.channel}/{day}.txt', 'a+', encoding='utf-16')
         logfile.write(
-            f"{message.author} said: {message.content}\n"
+            f"{message.author} said: {emoji.demojize(message.content)}\n"
         )
 
         logfile.close()
@@ -27,13 +30,15 @@ class Logger(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self, message_before, message):
         # logs
-        if message.channel is None:
-            message.channel = 0
-        pathlib.Path(path / f'logs/{message.guild.id}/{message.channel}').mkdir(parents=True, exist_ok=True)
+        if message.guild is None:
+            guildid = -1
+        else:
+            guildid = message.guild.id
+        pathlib.Path(path / f'logs/{guildid}/{message.channel}').mkdir(parents=True, exist_ok=True)
         day = datetime.datetime.today().strftime('%Y-%m-%d')
-        logfile = open(path / f'logs/{message.guild.id}/{message.channel}/{day}.txt', 'a+', encoding='utf-32')
+        logfile = open(path / f'logs/{guildid}/{message.channel}/{day}.txt', 'a+', encoding='utf-16')
         logfile.write(
-            f"{message.author} edited their message from: {message_before.content} to: {message.content}\n"
+            f"{message.author} edited their message from: {emoji.demojize(message_before.content)} to: {emoji.demojize(message.content)}\n"
         )
         logfile.close()
 

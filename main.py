@@ -12,13 +12,16 @@ with open(path / 'system/token.txt', 'r') as file:
 
 
 def prefixgetter(_, message):
-    sid = message.guild.id
+    default_prefix = "%"
+    try:
+        sid = message.guild.id
+    except AttributeError:
+        return default_prefix
     prefixes = sqlite3.connect(path / 'system/data.db')
     cur = prefixes.cursor()
     cur.execute('''CREATE TABLE IF NOT EXISTS prefixes
                    (serverid INTEGER, prefix TEXT)''')
     cur.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {sid}''')
-    default_prefix = "%"
     custom_prefix = cur.fetchone()
     prefixes.close()
     if custom_prefix:
