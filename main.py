@@ -60,8 +60,8 @@ embedcolor = 0xadd8e6
 @glaceon.event
 async def on_ready():
     print(f'Logged on as {glaceon.user.name}')
-    await glaceon.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
-                                                            name="the world go by"),
+    await glaceon.change_presence(activity=discord.Activity(type=discord.ActivityType.playing,
+                                                            name="glaceon.xyz"),
                                   status=discord.Status.do_not_disturb)
 
 
