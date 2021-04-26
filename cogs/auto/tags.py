@@ -15,12 +15,16 @@ class TagSystem(commands.Cog):
     @commands.command(aliases=["tmanage", "tagmanage"])
     @commands.has_permissions(manage_messages=True)
     async def tm(self, ctx, name, *, contents):
+        """add or edit tags"""
+        await ctx.message.delete()
         serverid = ctx.guild.id
         async with aiosqlite.connect(path / "system/tags.db") as db:
             await db.execute('''CREATE TABLE IF NOT EXISTS tags
                                    (serverid INTEGER, tagname TEXT, tagcontent TEXT)''')
         db = await aiosqlite.connect(path / "system/tags.db")
-        cur = await db.execute(f'''SELECT serverid FROM tags WHERE serverid = ? AND tagname = ?''', (serverid,name))
+        if contents is None:
+            await db.execute("""DELETE FROM tags WHERE tagname = ?""", (name,))
+        cur = await db.execute(f'''SELECT serverid FROM tags WHERE serverid = ? AND tagname = ?''', (serverid, name))
         if await cur.fetchone() is not None:
             await db.execute("""UPDATE tags SET tagcontent = ? WHERE serverid = ? AND tagname = ?""",
                              (contents, serverid, name))
@@ -29,17 +33,19 @@ class TagSystem(commands.Cog):
                              (serverid, name, contents))
         await db.commit()
         await db.close()
-        await ctx.send(f"Tag added with name `{name}` and contents `{contents}`")
+        await ctx.send(f"Tag added with name `{name}` and contents `{contents}`", delete_after=10)
 
     @commands.command(aliases=["t"])
     async def tag(self, ctx, *tags):
+        """Call a tag. (or two, or ten)"""
+        await ctx.message.delete()
         errors = False
         factoids = []
         sid = ctx.guild.id
         print(tags)
         for t in tags:
             db = await aiosqlite.connect(path / "system/tags.db")
-            cur = await db.execute("""SELECT tagcontent FROM tags WHERE serverid = ? AND tagname = ?""", (sid,t))
+            cur = await db.execute("""SELECT tagcontent FROM tags WHERE serverid = ? AND tagname = ?""", (sid, t))
             factoid = await cur.fetchone()
             if factoid is not None:
                 factoids.append(factoid[0])
