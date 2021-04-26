@@ -25,9 +25,9 @@ class ModCommands(commands.Cog):
                                delete_after=10)
         try:
             await member.kick(reason=reason)
+            await ctx.send(f"User {member} Has Been Kicked!", delete_after=10)
         except discord.Forbidden:
             await ctx.send("I do not have the requisite permissions to do this!")
-        await ctx.send(f"User {member} Has Been Kicked!", delete_after=10)
 
     # ban
     @commands.command(aliases=["b"])
@@ -45,9 +45,9 @@ class ModCommands(commands.Cog):
                                delete_after=10)
         try:
             await member.ban(reason=reason)
+            await ctx.send(f"User {member} Has Been Banned!", delete_after=10)
         except discord.Forbidden:
             await ctx.send("I do not have the requisite permissions to do this!")
-        await ctx.send(f"User {member} Has Been Banned!", delete_after=10)
 
     @commands.command(aliases=['lockdown', 'archive'])
     @commands.has_permissions(manage_channels=True)
