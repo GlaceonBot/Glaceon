@@ -42,7 +42,6 @@ class TagSystem(commands.Cog):
         errors = False
         factoids = []
         sid = ctx.guild.id
-        print(tags)
         for t in tags:
             db = await aiosqlite.connect(path / "system/tags.db")
             cur = await db.execute("""SELECT tagcontent FROM tags WHERE serverid = ? AND tagname = ?""", (sid, t))
