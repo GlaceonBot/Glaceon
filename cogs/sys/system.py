@@ -50,7 +50,7 @@ class BotSystem(commands.Cog):
         cur = modmailchannel.cursor()
         cur.execute('''CREATE TABLE IF NOT EXISTS mailchannels
                            (serverid INTEGER, channelid INTEGER)''')
-        cur.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = {serverid}''')
+        cur.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = ?''', serverid)
         if cur.fetchone() is not None:
             cur.execute("""UPDATE mailchannels SET channelid = ? WHERE serverid = ?""", (channel, serverid))
         else:

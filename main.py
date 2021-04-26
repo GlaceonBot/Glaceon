@@ -78,7 +78,8 @@ glaceon.coglist = ['cogs.sys.logger',
                    'cogs.manual.helpercommands',
                    'cogs.sys.system',
                    'cogs.sys.info',
-                   'cogs.auto.antispam']
+                   'cogs.auto.antispam',
+                   'cogs.auto.tags']
 
 if __name__ == '__main__':
     for extension in glaceon.coglist:
