@@ -67,7 +67,7 @@ async def on_ready():
 
 @glaceon.event
 async def on_message(message):
-    if "<@!808149899182342145>" in message.content or "<@808149899182342145>" in message.content:
+    if f"<@!{glaceon.user.id}>" in message.content or f"<@{glaceon.user.id}>" in message.content:
         await message.channel.send(f'`{glaceon.command_prefix(glaceon, message)}` is my prefix!')
     await glaceon.process_commands(message)
 
