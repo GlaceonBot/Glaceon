@@ -1,6 +1,7 @@
 import pathlib
 
 import aiosqlite
+import discord
 from discord.ext import commands
 
 path = pathlib.PurePath()
@@ -63,6 +64,19 @@ class TagSystem(commands.Cog):
             await db.execute("""DELETE FROM tags WHERE serverid = ? AND tagname = ?""", (sid, name))
             await db.commit()
             await ctx.send(f"tag `{name}` deleted", delete_after=10)
+
+    @commands.command(aliases=["tlist"])
+    async def tagslist(self, ctx):
+        """list the tags on this server"""
+        await ctx.message.delete()
+        sid = ctx.guild.id
+        db = await aiosqlite.connect(path / "system/tags.db")
+        cur = await db.execute("""SELECT tagname FROM tags WHERE serverid = ?""", (sid,))
+        factoids = await cur.fetchall()
+        try:
+            await ctx.send(" ".join([i for (i,) in factoids]))
+        except discord.HTTPException:
+            await ctx.send(f"This guild has no tags!")
 
 
 def setup(glaceon):
