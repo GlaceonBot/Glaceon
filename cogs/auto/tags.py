@@ -14,7 +14,7 @@ class TagSystem(commands.Cog):
 
     @commands.command(aliases=["tmanage", "tagmanage"])
     @commands.has_permissions(manage_messages=True)
-    async def tm(self, ctx, name, *, contents):
+    async def tm(self, ctx, name, *, contents=None):
         """add or edit tags"""
         await ctx.message.delete()
         serverid = ctx.guild.id
