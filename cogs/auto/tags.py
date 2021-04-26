@@ -12,9 +12,9 @@ class TagSystem(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=["tmanage", "tagmanage"])
+    @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tagadd"])
     @commands.has_permissions(manage_messages=True)
-    async def tm(self, ctx, name, *, contents=None):
+    async def tm(self, ctx, name, *, contents):
         """add or edit tags"""
         await ctx.message.delete()
         serverid = ctx.guild.id
@@ -22,8 +22,6 @@ class TagSystem(commands.Cog):
             await db.execute('''CREATE TABLE IF NOT EXISTS tags
                                    (serverid INTEGER, tagname TEXT, tagcontent TEXT)''')
         db = await aiosqlite.connect(path / "system/tags.db")
-        if contents is None:
-            await db.execute("""DELETE FROM tags WHERE tagname = ?""", (name,))
         cur = await db.execute(f'''SELECT serverid FROM tags WHERE serverid = ? AND tagname = ?''', (serverid, name))
         if await cur.fetchone() is not None:
             await db.execute("""UPDATE tags SET tagcontent = ? WHERE serverid = ? AND tagname = ?""",
@@ -54,6 +52,17 @@ class TagSystem(commands.Cog):
                 break
         if errors is False:
             await ctx.send("\n\n".join(factoids))
+
+    @commands.command(aliases=["trm", "tagremove"])
+    @commands.has_permissions(manage_messages=True)
+    async def tagdelete(self, ctx, name):
+        """Remove a tag"""
+        await ctx.message.delete()
+        sid = ctx.guild.id
+        async with aiosqlite.connect(path / "system/tags.db") as db:
+            await db.execute("""DELETE FROM tags WHERE serverid = ? AND tagname = ?""", (sid, name))
+            await db.commit()
+            await ctx.send(f"tag `{name}` deleted", delete_after=10)
 
 
 def setup(glaceon):
