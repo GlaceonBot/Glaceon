@@ -13,27 +13,6 @@ class TagSystem(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tagadd"])
-    @commands.has_permissions(manage_messages=True)
-    async def tm(self, ctx, name, *, contents):
-        """add or edit tags"""
-        await ctx.message.delete()
-        serverid = ctx.guild.id
-        async with aiosqlite.connect(path / "system/tags.db") as db:
-            await db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                   (serverid INTEGER, tagname TEXT, tagcontent TEXT)''')
-        db = await aiosqlite.connect(path / "system/tags.db")
-        cur = await db.execute(f'''SELECT serverid FROM tags WHERE serverid = ? AND tagname = ?''', (serverid, name))
-        if await cur.fetchone() is not None:
-            await db.execute("""UPDATE tags SET tagcontent = ? WHERE serverid = ? AND tagname = ?""",
-                             (contents, serverid, name))
-        else:
-            await db.execute("""INSERT INTO tags(serverid, tagname, tagcontent) VALUES (?,?,?)""",
-                             (serverid, name, contents))
-        await db.commit()
-        await db.close()
-        await ctx.send(f"Tag added with name `{name}` and contents `{contents}`", delete_after=10)
-
     @commands.command(aliases=["t"])
     async def tag(self, ctx, *tags):
         """Call a tag. (or two, or ten)"""
@@ -54,6 +33,27 @@ class TagSystem(commands.Cog):
         if errors is False:
             await ctx.send("\n\n".join(factoids))
 
+    @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tm", "ta"])
+    @commands.has_permissions(manage_messages=True)
+    async def tagadd(self, ctx, name, *, contents):
+        """add or edit tags"""
+        await ctx.message.delete()
+        serverid = ctx.guild.id
+        async with aiosqlite.connect(path / "system/tags.db") as db:
+            await db.execute('''CREATE TABLE IF NOT EXISTS tags
+                                   (serverid INTEGER, tagname TEXT, tagcontent TEXT)''')
+        db = await aiosqlite.connect(path / "system/tags.db")
+        cur = await db.execute(f'''SELECT serverid FROM tags WHERE serverid = ? AND tagname = ?''', (serverid, name))
+        if await cur.fetchone() is not None:
+            await db.execute("""UPDATE tags SET tagcontent = ? WHERE serverid = ? AND tagname = ?""",
+                             (contents, serverid, name))
+        else:
+            await db.execute("""INSERT INTO tags(serverid, tagname, tagcontent) VALUES (?,?,?)""",
+                             (serverid, name, contents))
+        await db.commit()
+        await db.close()
+        await ctx.send(f"Tag added with name `{name}` and contents `{contents}`", delete_after=10)
+
     @commands.command(aliases=["trm", "tagremove"])
     @commands.has_permissions(manage_messages=True)
     async def tagdelete(self, ctx, name):
@@ -65,7 +65,7 @@ class TagSystem(commands.Cog):
             await db.commit()
             await ctx.send(f"tag `{name}` deleted", delete_after=10)
 
-    @commands.command(aliases=["tlist"])
+    @commands.command(aliases=["tlist", "tl", "taglist"])
     async def tagslist(self, ctx):
         """list the tags on this server"""
         await ctx.message.delete()
