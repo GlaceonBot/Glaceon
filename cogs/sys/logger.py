@@ -18,9 +18,9 @@ class Logger(commands.Cog):
             guildid = -1
         else:
             guildid = message.guild.id
-        pathlib.Path(path / f'logs/{guildid}/{message.channel}').mkdir(parents=True, exist_ok=True)
+        pathlib.Path(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}').mkdir(parents=True, exist_ok=True)
         day = datetime.datetime.today().strftime('%Y-%m-%d')
-        logfile = open(path / f'logs/{guildid}/{message.channel}/{day}.txt', 'a+', encoding='utf-16')
+        logfile = open(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}/{day}.txt', 'a+', encoding='utf-16')
         logfile.write(
             f"{message.author} said: {emoji.demojize(message.content)}\n"
         )
@@ -34,9 +34,9 @@ class Logger(commands.Cog):
             guildid = -1
         else:
             guildid = message.guild.id
-        pathlib.Path(path / f'logs/{guildid}/{message.channel}').mkdir(parents=True, exist_ok=True)
+        pathlib.Path(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}').mkdir(parents=True, exist_ok=True)
         day = datetime.datetime.today().strftime('%Y-%m-%d')
-        logfile = open(path / f'logs/{guildid}/{message.channel}/{day}.txt', 'a+', encoding='utf-16')
+        logfile = open(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}/{day}.txt', 'a+', encoding='utf-16')
         logfile.write(
             f"{message.author} edited their message from: {emoji.demojize(message_before.content)} to: {emoji.demojize(message.content)}\n"
         )
