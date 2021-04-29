@@ -8,8 +8,11 @@ path = pathlib.PurePath()
 
 
 async def getattachments(message):
-    for attachment in message.attachments:
-        return '\n' + attachment.url
+    if message.attachments is not None:
+        for attachment in message.attachments:
+            return '\n' + attachment.url
+        else:
+            return " "
 
 
 class Logger(commands.Cog):
