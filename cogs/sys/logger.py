@@ -1,10 +1,15 @@
 import datetime
 import pathlib
-import emoji
 
+import emoji
 from discord.ext import commands
 
 path = pathlib.PurePath()
+
+
+async def getattachments(message):
+    for attachment in message.attachments:
+        return '\n' + attachment.url
 
 
 class Logger(commands.Cog):
@@ -22,7 +27,7 @@ class Logger(commands.Cog):
         day = datetime.datetime.today().strftime('%Y-%m-%d')
         logfile = open(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}/{day}.txt', 'a+', encoding='utf-16')
         logfile.write(
-            f"{message.author} said: {emoji.demojize(message.content)}\n"
+            f"{message.author} said: {emoji.demojize(message.content)} {await getattachments(message)}\n"
         )
 
         logfile.close()
@@ -38,7 +43,8 @@ class Logger(commands.Cog):
         day = datetime.datetime.today().strftime('%Y-%m-%d')
         logfile = open(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}/{day}.txt', 'a+', encoding='utf-16')
         logfile.write(
-            f"{message.author} edited their message from: {emoji.demojize(message_before.content)} to: {emoji.demojize(message.content)}\n"
+            f"{message.author} edited their message from: {emoji.demojize(message_before.content)}" 
+        f"{getattachments(message_before)} to: {emoji.demojize(message.content)} {await getattachments(message)}\n"
         )
         logfile.close()
 
