@@ -12,7 +12,7 @@ async def getattachments(message):
         for attachment in message.attachments:
             return '\n' + attachment.url
         else:
-            return " "
+            return ""
 
 
 class Logger(commands.Cog):
