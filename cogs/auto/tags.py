@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 
 path = pathlib.PurePath()
+embedcolor = 0xadd8e6
 
 
 class TagSystem(commands.Cog):
@@ -19,19 +20,28 @@ class TagSystem(commands.Cog):
         await ctx.message.delete()
         errors = False
         factoids = []
+        pings = []
         sid = ctx.guild.id
         for t in tags:
-            db = await aiosqlite.connect(path / "system/tags.db")
-            cur = await db.execute("""SELECT tagcontent FROM tags WHERE serverid = ? AND tagname = ?""", (sid, t))
-            factoid = await cur.fetchone()
-            if factoid is not None:
-                factoids.append(factoid[0])
+            if t is not discord.Member:
+                db = await aiosqlite.connect(path / "system/tags.db")
+                cur = await db.execute("""SELECT tagcontent FROM tags WHERE serverid = ? AND tagname = ?""", (sid, t))
+                factoid = await cur.fetchone()
+                if factoid is not None:
+                    factoids.append(factoid[0])
+                else:
+                    await ctx.send(f"tag `{t}` not found!")
+                    errors = True
+                    break
             else:
-                await ctx.send(f"tag `{t}` not found!")
-                errors = True
-                break
+                pings.append(t.mention)
         if errors is False:
-            await ctx.send("\n\n".join(factoids))
+            embed = discord.Embed(colour=embedcolor)
+            embed.add_field(name="\u200b",
+                            value="\n\n".join(factoids),
+                            inline=False)
+            embed.set_footer(text=f"I am a bot, i will not respond to you | Request by {ctx.author}")
+            await ctx.send(" ".join(pings), embed=embed)
 
     @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tm", "ta"])
     @commands.has_permissions(manage_messages=True)
