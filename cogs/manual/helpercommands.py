@@ -43,9 +43,10 @@ class HelperCommands(commands.Cog):
 
     @commands.command(description="Mutes the specified user.")
     @commands.has_permissions(manage_messages=True)
-    async def mute(self, ctx, member: discord.Member, time=None, *, reason="No reason specified."):
+    async def mute(self, ctx, member: discord.Member, *, reason="No reason specified."):
         """Mute a user. Optionally has a reason."""
         await ctx.message.delete()
+        time = None  # just for now, till i figure out when to trigger unmute-checks
         guild = ctx.guild
         muted_role = discord.utils.get(guild.roles, name="Muted")
 
