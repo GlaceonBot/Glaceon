@@ -75,7 +75,7 @@ class HelperCommands(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def unmute(self, ctx, member: discord.Member):
         """Unmutes a member."""
-        ctx.message.delete()
+        await ctx.message.delete()
         muted_role = discord.utils.get(ctx.guild.roles, name="Muted")
         try:
             await member.remove_roles(muted_role)
