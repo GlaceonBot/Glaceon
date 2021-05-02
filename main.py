@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import pathlib
-import sqlite3
 
+import aiosqlite
 import discord
 from discord.ext import commands
 from discord.ext.commands.errors import *
@@ -11,23 +11,24 @@ with open(path / 'system/token.txt', 'r') as file:
     TOKEN = file.read()
 
 
-def prefixgetter(_, message):
+async def prefixgetter(_, message):
     default_prefix = "%"
     try:
         sid = message.guild.id
     except AttributeError:
         return default_prefix
-    prefixes = sqlite3.connect(path / 'system/data.db')
-    cur = prefixes.cursor()
-    cur.execute('''CREATE TABLE IF NOT EXISTS prefixes
+    db = await aiosqlite.connect(path / 'system/data.db')
+    await db.execute('''CREATE TABLE IF NOT EXISTS prefixes
                    (serverid INTEGER, prefix TEXT)''')
-    cur.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {sid}''')
-    custom_prefix = cur.fetchone()
-    prefixes.close()
+    cur = await db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {sid}''')
+    custom_prefix = await cur.fetchone()
+    await db.close()
     if custom_prefix:
-        return str(custom_prefix[0])
+        return [str(custom_prefix[0]), f"<@!{glaceon.user.id}>", f"<@{glaceon.user.id}>", f"<@!{glaceon.user.id}> ",
+                f"<@{glaceon.user.id}> "]
     else:
-        return default_prefix
+        return [default_prefix, f"<@!{glaceon.user.id}>", f"<@{glaceon.user.id}>", f"<@!{glaceon.user.id}> ",
+                f"<@{glaceon.user.id}> "]
 
 
 class Help(commands.MinimalHelpCommand):
@@ -63,13 +64,6 @@ async def on_ready():
     await glaceon.change_presence(activity=discord.Activity(type=discord.ActivityType.playing,
                                                             name="glaceon.xyz"),
                                   status=discord.Status.do_not_disturb)
-
-
-@glaceon.event
-async def on_message(message):
-    if f"<@!{glaceon.user.id}>" in message.content or f"<@{glaceon.user.id}>" in message.content:
-        await message.channel.send(f'`{glaceon.command_prefix(glaceon, message)}` is my prefix!')
-    await glaceon.process_commands(message)
 
 
 glaceon.coglist = ['cogs.sys.logger',
