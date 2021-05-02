@@ -1,5 +1,5 @@
 import pathlib
-
+import re
 import aiosqlite
 import discord
 from discord.ext import commands
@@ -23,7 +23,8 @@ class TagSystem(commands.Cog):
         pings = []
         sid = ctx.guild.id
         for t in tags:
-            if t is not discord.Member:
+            id = None
+            if t != id:
                 db = await aiosqlite.connect(path / "system/tags.db")
                 cur = await db.execute("""SELECT tagcontent FROM tags WHERE serverid = ? AND tagname = ?""", (sid, t))
                 factoid = await cur.fetchone()

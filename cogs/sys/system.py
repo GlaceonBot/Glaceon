@@ -1,5 +1,5 @@
 import pathlib
-import sqlite3
+import aiosqlite
 
 import discord
 from discord.ext import commands
@@ -29,16 +29,15 @@ class BotSystem(commands.Cog):
     async def prefix(self, ctx, newprefix):
         """Sets the bot prefix for this server"""
         serverid = ctx.guild.id
-        prefixesls = sqlite3.connect(path / 'system/data.db')
-        cur = prefixesls.cursor()
-        cur.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')
-        if cur.fetchone() is not None:
-            cur.execute("""UPDATE prefixes SET prefix = ? WHERE serverid = ?""", (newprefix, serverid))
+        db = aiosqlite.connect(path / 'system/data.db')
+        cur = await db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')
+        if await cur.fetchone() is not None:
+            await db.execute("""UPDATE prefixes SET prefix = ? WHERE serverid = ?""", (newprefix, serverid))
         else:
-            cur.execute("INSERT INTO prefixes(serverid, prefix) VALUES (?,?)",
+            await db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (?,?)",
                         (serverid, newprefix))
-        prefixesls.commit()
-        prefixesls.close()
+        await db.commit()
+        await db.close()
         await ctx.send(f"Prefix set to {newprefix}")
 
     @commands.command()
@@ -46,18 +45,17 @@ class BotSystem(commands.Cog):
     async def modmailsetup(self, ctx, channel: discord.TextChannel):
         """Sets up ModMail"""
         serverid = ctx.guild.id
-        modmailchannel = sqlite3.connect(path / 'system/data.db')
-        cur = modmailchannel.cursor()
-        cur.execute('''CREATE TABLE IF NOT EXISTS mailchannels
+        db = await aiosqlite.connect(path / 'system/data.db')
+        await db.execute('''CREATE TABLE IF NOT EXISTS mailchannels
                            (serverid INTEGER, channelid INTEGER)''')
-        cur.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = ?''', serverid)
+        cur = await db.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = ?''', serverid)
         if cur.fetchone() is not None:
-            cur.execute("""UPDATE mailchannels SET channelid = ? WHERE serverid = ?""", (channel, serverid))
+            await db.execute("""UPDATE mailchannels SET channelid = ? WHERE serverid = ?""", (channel.id, serverid))
         else:
-            cur.execute("INSERT INTO mailchannels(serverid, channelid) VALUES (?,?)",
+            await db.execute("INSERT INTO mailchannels(serverid, channelid) VALUES (?,?)",
                         (serverid, channel.id))
-        modmailchannel.commit()
-        modmailchannel.close()
+        await db.commit()
+        await db.close()
         await ctx.send(f"ModMail channel is now {channel}")
 
     @commands.Cog.listener()

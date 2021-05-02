@@ -1,5 +1,5 @@
 import pathlib
-import sqlite3
+import aiosqlite
 from discord.ext import commands
 
 path = pathlib.PurePath()
@@ -20,15 +20,14 @@ class ModCommmunications(commands.Cog):
         await ctx.send(message)
 
     @commands.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def modmail(self, ctx, *, message):
         """Sends a message TO the moderators"""
         sid = ctx.guild.id
-        prefixes = sqlite3.connect(path / 'system/data.db')
-        cur = prefixes.cursor()
-        cur.execute(f'''SELECT channelid FROM mailchannels WHERE serverid = {sid}''')
-        channel = cur.fetchone()
-        prefixes.close()
+        db = await aiosqlite.connect(path / 'system/data.db')
+        cur = await db.execute(f'''SELECT channelid FROM mailchannels WHERE serverid = {sid}''')
+        channel = await cur.fetchone()
+        await db.close()
         if channel:
             sendchannel = self.bot.get_channel(channel[0])
             print(sendchannel)
