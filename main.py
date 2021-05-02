@@ -24,11 +24,9 @@ async def prefixgetter(_, message):
     custom_prefix = await cur.fetchone()
     await db.close()
     if custom_prefix:
-        return [str(custom_prefix[0]), f"<@!{glaceon.user.id}>", f"<@{glaceon.user.id}>", f"<@!{glaceon.user.id}> ",
-                f"<@{glaceon.user.id}> "]
+        return str(custom_prefix[0])
     else:
-        return [default_prefix, f"<@!{glaceon.user.id}>", f"<@{glaceon.user.id}>", f"<@!{glaceon.user.id}> ",
-                f"<@{glaceon.user.id}> "]
+        return default_prefix
 
 
 class Help(commands.MinimalHelpCommand):
@@ -64,6 +62,17 @@ async def on_ready():
     await glaceon.change_presence(activity=discord.Activity(type=discord.ActivityType.playing,
                                                             name="glaceon.xyz"),
                                   status=discord.Status.do_not_disturb)
+
+
+@glaceon.event
+async def on_message(message):
+    bot_mention_str = glaceon.user.mention.replace('@', '@!') + ' '
+    bot_mention_len = len(bot_mention_str)
+    if message.content[:bot_mention_len] == bot_mention_str:
+        message.content = await prefixgetter(glaceon, message) + message.content[bot_mention_len:]
+        await glaceon.process_commands(message)
+    else:
+        await glaceon.process_commands(message)
 
 
 glaceon.coglist = ['cogs.sys.logger',
