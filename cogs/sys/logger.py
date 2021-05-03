@@ -49,7 +49,7 @@ class Logger(commands.Cog):
                        encoding='utf-16')
         logfile.write(
             f"{message.author} edited their message from: {emoji.demojize(message_before.content)}"
-            f"{getattachments(message_before)} to: {emoji.demojize(message.content)} {await getattachments(message)}\n"
+            f"{await getattachments(message_before)} to: {emoji.demojize(message.content)} {await getattachments(message)}\n"
         )
         logfile.close()
 
