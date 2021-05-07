@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/home/gxhut/Glaceon/venv/bin/python3
 import pathlib
 
 import aiosqlite

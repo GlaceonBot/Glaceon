@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-killall ./main.py
+killall /usr/bin/python3
 git pull
 chmod +x ./main.py
 ./main.py
