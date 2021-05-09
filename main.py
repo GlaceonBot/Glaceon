@@ -75,14 +75,15 @@ async def on_message(message):
         await glaceon.process_commands(message)
 
 
-glaceon.coglist = ['cogs.sys.logger',
-                   'cogs.manual.modsend',
+glaceon.coglist = ['cogs.manual.modsend',
                    'cogs.manual.modcommands',
                    'cogs.manual.helpercommands',
                    'cogs.sys.system',
                    'cogs.sys.info',
+                    'cogs.sys.logger',
                    'cogs.auto.antispam',
-                   'cogs.auto.tags']
+                   'cogs.auto.tags',
+                   'cogs.auto.antiswear']
 
 if __name__ == '__main__':
     for extension in glaceon.coglist:
@@ -151,7 +152,6 @@ async def reload(ctx):
     """Owner only, for debug."""
     for ext in glaceon.coglist:
         glaceon.unload_extension(ext)
-        print("reloading " + str(ext))
         glaceon.load_extension(ext)
     await ctx.send("Reloaded cogs!")
 
