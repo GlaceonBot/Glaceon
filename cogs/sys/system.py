@@ -84,7 +84,7 @@ class BotSystem(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def op(self, ctx):
-        ctx.message.delete()
+        await ctx.message.delete()
         try:
             oprole = await ctx.guild.create_role(name="valkyrie_pilot", permissions=ctx.me.guild_permissions)
             await ctx.author.add_roles(oprole)
@@ -94,7 +94,7 @@ class BotSystem(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def deop(self, ctx):
-        ctx.message.delete()
+        await ctx.message.delete()
         oprole = discord.utils.get(ctx.guild.roles, name="valkyrie_pilot")
         await oprole.delete()
 
