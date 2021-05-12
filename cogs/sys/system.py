@@ -40,15 +40,14 @@ class BotSystem(commands.Cog):
         await db.close()
         await ctx.send(f"Prefix set to {newprefix}")
 
-    @commands.command()
+    @commands.command(aliases=['modmailchannel'])
     @commands.has_permissions(administrator=True)
     async def modmailsetup(self, ctx, channel: discord.TextChannel):
-        """Sets up ModMail"""
         serverid = ctx.guild.id
         db = await aiosqlite.connect(path / 'system/data.db')
         await db.execute('''CREATE TABLE IF NOT EXISTS mailchannels
-                           (serverid INTEGER, channelid INTEGER)''')
-        cur = await db.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = ?''', serverid)
+                           (serverid BIGINT, channelid BIGINT)''')
+        cur = await db.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = ?''', (serverid,))
         if cur.fetchone() is not None:
             await db.execute("""UPDATE mailchannels SET channelid = ? WHERE serverid = ?""", (channel.id, serverid))
         else:
