@@ -1,5 +1,6 @@
-import pathlib
+#TODO configurable regex antiswear
 
+import pathlib
 from discord.ext import commands
 
 path = pathlib.PurePath()
