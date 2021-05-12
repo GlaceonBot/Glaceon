@@ -30,7 +30,6 @@ class ModCommmunications(commands.Cog):
         await db.close()
         if channel:
             sendchannel = self.bot.get_channel(channel[0])
-            print(sendchannel)
             await sendchannel.send(message)
         else:
             await ctx.send(
