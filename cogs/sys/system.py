@@ -29,7 +29,7 @@ class BotSystem(commands.Cog):
     async def prefix(self, ctx, newprefix):
         """Sets the bot prefix for this server"""
         serverid = ctx.guild.id
-        db = aiosqlite.connect(path / 'system/data.db')
+        db = await aiosqlite.connect(path / 'system/data.db')
         cur = await db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')
         if await cur.fetchone() is not None:
             await db.execute("""UPDATE prefixes SET prefix = ? WHERE serverid = ?""", (newprefix, serverid))
