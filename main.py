@@ -1,95 +1,119 @@
 #!/home/gxhut/Glaceon/venv/bin/python3
 import pathlib
-
 import aiosqlite
 import discord
 from discord.ext import commands
 from discord.ext.commands.errors import *
 
+# load the token to its variable
 path = pathlib.PurePath()
 with open(path / 'system/token.txt', 'r') as file:
     TOKEN = file.read()
 
-
+# function to return the prefix based on a message and a bot instance
 async def prefixgetter(_, message):
+    # set default prefix
     default_prefix = "%"
+    # try to get the guild id. if there isn't one, then it's a DM and uses the default prefix.
     try:
         sid = message.guild.id
     except AttributeError:
         return default_prefix
+    # connect to the sqlite database for prefixes
     db = await aiosqlite.connect(path / 'system/data.db')
+    # make sure everything is set up correctly
     await db.execute('''CREATE TABLE IF NOT EXISTS prefixes
                    (serverid INTEGER, prefix TEXT)''')
+    # find which prefix matches this specific server id
     cur = await db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {sid}''')
+    # fetch the prefix
     custom_prefix = await cur.fetchone()
+    # close connection
     await db.close()
+    # if the custom prefix exists, then send it back, otherwise return the default one
     if custom_prefix:
         return str(custom_prefix[0])
     else:
         return default_prefix
 
-
+# help command class, mostly stolen so i don't fully understand it
 class Help(commands.MinimalHelpCommand):
     def get_command_signature(self, command):
+        # gets what the command should look like
         return '%s%s %s' % (self.clean_prefix, command.qualified_name, command.signature)
 
+    # actually sends the help
     async def send_bot_help(self, mapping):
+        # creates embed
         embed = discord.Embed(title="Help")
         for cog, commands in mapping.items():
+            # sorts commands
             filtered = await self.filter_commands(commands, sort=True)
             command_signatures = [self.get_command_signature(c) for c in filtered]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "System")
+                # adds the needed categorys for the commands
                 embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
         channel = self.get_destination()
         await channel.send(embed=embed)
 
+        # for when it breaks
     async def send_error_message(self, error):
         embed = discord.Embed(title="Error", value=error)
         channel = self.get_destination()
         await channel.send(embed=embed)
 
-
+# sets the discord intents to all
 intents = discord.Intents().all()
+# defines the glaceon class as an autoshardedbot with the prefixgetter prefix and case-insensitive commands
 glaceon = commands.AutoShardedBot(command_prefix=prefixgetter, case_insensitive=True, intents=intents)
+# sets the help command to the Help() class
 glaceon.help_command = Help()
+# global color for embeds
 embedcolor = 0xadd8e6
 
 
 @glaceon.event
 async def on_ready():
-    print(f'Logged on as {glaceon.user.name}')
+    print(f'Logged on as {glaceon.user.name}') # tells me weather i'm running Glaceon or Eevee
     await glaceon.change_presence(activity=discord.Activity(type=discord.ActivityType.playing,
                                                             name="glaceon.xyz"),
-                                  status=discord.Status.do_not_disturb)
+                                  status=discord.Status.do_not_disturb) # sets status and activity
 
 
+# this function changes the message so that the pings will also work as a prefix
 @glaceon.event
 async def on_message(message):
+    # gets the string for the mention
     bot_mention_str = glaceon.user.mention.replace('@', '@!') + ' '
+    # gets length to compare things
     bot_mention_len = len(bot_mention_str)
+    # magic
     if message.content[:bot_mention_len] == bot_mention_str:
+        # gets the prefix and checks what it is, then subs in the prefix for the ping
         message.content = await prefixgetter(glaceon, message) + message.content[bot_mention_len:]
         await glaceon.process_commands(message)
     else:
         await glaceon.process_commands(message)
 
 
+# bot's list of cogs that need to be loaded up, they are all in different files and all do something different.
 glaceon.coglist = ['cogs.manual.modsend',
                    'cogs.manual.modcommands',
                    'cogs.manual.helpercommands',
                    'cogs.sys.system',
                    'cogs.sys.info',
-                    'cogs.sys.logger',
+                   'cogs.sys.logger',
                    'cogs.auto.antispam',
                    'cogs.auto.tags',
                    'cogs.auto.antiswear']
 
+# makes sure this file is the main file, and then loads extentions
 if __name__ == '__main__':
     for extension in glaceon.coglist:
         glaceon.load_extension(extension)
 
-
+# error handling is the same as SachiBotPy by smallpepperz.
 @glaceon.event
 async def on_command_error(ctx, error):
     if hasattr(ctx.command, 'on_error'):
@@ -146,14 +170,17 @@ async def on_command_error(ctx, error):
                        delete_after=60)
 
 
+# my reload command, so i can reload the cogs without restarting the bot
 @glaceon.command()
+# only i can do this
 @commands.is_owner()
 async def reload(ctx):
     """Owner only, for debug."""
+    # for everything in that cog list, it unloads and then loads the extention.
     for ext in glaceon.coglist:
         glaceon.unload_extension(ext)
         glaceon.load_extension(ext)
     await ctx.send("Reloaded cogs!")
 
-
+# runs the bot with a token.
 glaceon.run(TOKEN)
