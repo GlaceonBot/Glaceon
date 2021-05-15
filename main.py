@@ -154,15 +154,15 @@ async def on_command_error(ctx, error):
             delete_after=min(10, error.retry_after))
         return
 
-    elif isinstance(error, error.MissingRequiredArgument):
+    elif isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
         await ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`", delete_after=30)
         return
 
-    elif isinstance(error, error.BadArgument):
+    elif isinstance(error, discord.ext.commands.errors.BadArgument):
         await ctx.reply(f"Invalid argument!\nUsage:`{ctx.command.signature}`", delete_after=30)
         return
 
-    elif isinstance(error, error.NoPrivateMessage):
+    elif isinstance(error, discord.ext.commands.errors.NoPrivateMessage):
         await ctx.reply("That can only be used in servers, not DMs!")
         return
 
