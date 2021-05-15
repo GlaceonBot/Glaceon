@@ -22,10 +22,10 @@ async def sendwelcomemessage(
 
 
 class BotSystem(commands.Cog):
-    """Commands for the bot configuration. Admin only."""  # This is called a docstring, the auto-help command uses it to tell what this class of commands does
+    """Commands for the bot configuration. Admin only."""  # This is a docstring, used by the auto-help command to describe this class.
 
     def __init__(self,
-                 glaceon):  # this is called an init function. it runs when the class is constructed, and basically just creates a few variables in this case.
+                 glaceon):  # This is an init function. Runs when the class is constructed, and in this case creates a few variables.
         self.glaceon = glaceon  # making local global
 
     @commands.command()

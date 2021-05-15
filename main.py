@@ -3,11 +3,13 @@ import pathlib
 import aiosqlite
 import discord
 from discord.ext import commands
+from discord.ext.commands.errors import *
 
 # load the token to its variable
 path = pathlib.PurePath()
 with open(path / 'system/token.txt', 'r') as file:
     TOKEN = file.read()
+
 
 # function to return the prefix based on a message and a bot instance
 async def prefixgetter(_, message):
@@ -34,6 +36,7 @@ async def prefixgetter(_, message):
         return str(custom_prefix[0])
     else:
         return default_prefix
+
 
 # help command class, mostly stolen so i don't fully understand it
 class Help(commands.MinimalHelpCommand):
@@ -62,7 +65,8 @@ class Help(commands.MinimalHelpCommand):
         channel = self.get_destination()
         await channel.send(embed=embed)
 
-# sets the discord intents to all
+
+# Sets the discord intents to all
 intents = discord.Intents().all()
 # defines the glaceon class as an autoshardedbot with the prefixgetter prefix and case-insensitive commands
 glaceon = commands.AutoShardedBot(command_prefix=prefixgetter, case_insensitive=True, intents=intents)
@@ -74,10 +78,10 @@ embedcolor = 0xadd8e6
 
 @glaceon.event
 async def on_ready():
-    print(f'Logged on as {glaceon.user.name}') # tells me weather i'm running Glaceon or Eevee
-    await glaceon.change_presence(activity=discord.Activity(type=discord.ActivityType.playing,
+    print(f'Logged on as {glaceon.user.name}')  # Tells me if I'm running Glaceon or Eevee
+    await glaceon.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
                                                             name="glaceon.xyz"),
-                                  status=discord.Status.do_not_disturb) # sets status and activity
+                                  status=discord.Status.do_not_disturb)  # Set the bot's status and activity
 
 
 # this function changes the message so that the pings will also work as a prefix
@@ -112,7 +116,8 @@ if __name__ == '__main__':
     for extension in glaceon.coglist:
         glaceon.load_extension(extension)
 
-# error handling is the same as SachiBotPy by smallpepperz.
+
+# error handling is the same as SachiBotPy by @SmallPepperZ.
 @glaceon.event
 async def on_command_error(ctx, error):
     if hasattr(ctx.command, 'on_error'):
