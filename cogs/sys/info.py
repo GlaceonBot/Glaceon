@@ -17,7 +17,7 @@ class Info(commands.Cog):
 
     @commands.command(aliases=['v', 'ver', '-v', '-ver', '-version'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def version(self):
+    async def version(self, ctx):
         async with open(path / "embeds/version.txt", "r") as file:
             ctx.send(file.read())
 

@@ -68,9 +68,7 @@ class Help(commands.MinimalHelpCommand):
 # Sets the discord intents to all
 intents = discord.Intents().all()
 # defines the glaceon class as an autoshardedbot with the prefixgetter prefix and case-insensitive commands
-glaceon = commands.AutoShardedBot(command_prefix=prefixgetter, case_insensitive=True, intents=intents)
-# sets the help command to the Help() class
-glaceon.help_command = Help()
+glaceon = commands.AutoShardedBot(command_prefix=prefixgetter, case_insensitive=True, intents=intents, help_command=Help())
 # global color for embeds
 embedcolor = 0xadd8e6
 
@@ -169,7 +167,7 @@ async def on_command_error(ctx, error):
     else:
         # Send user a message
         await ctx.send("Error:\n```" + str(
-            error) + "```\nvalkyrie_pilot will be informed.  Most likley this is a bug, but check your syntax.",
+            error) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
                        delete_after=60)
 
 
