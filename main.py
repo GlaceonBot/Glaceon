@@ -119,26 +119,26 @@ async def on_command_error(ctx, error):
         # await ctx.message.add_reaction('<:CommandError:804193351758381086>')
         return
 
-    elif isinstance(error, CommandNotFound) or ctx.command.hidden:
+    elif isinstance(error, discord.ext.commands.errors.CommandNotFound) or ctx.command.hidden:
         return
 
-    elif isinstance(error, NotOwner):
+    elif isinstance(error, discord.ext.commands.errors.NotOwner):
         await ctx.reply("lol only valk can do that")
         return
 
-    elif isinstance(error, MissingPermissions):
+    elif isinstance(error, discord.ext.commands.errors.MissingPermissions):
         await ctx.reply("You are not allowed to do that!")
         return
 
-    elif isinstance(error, BotMissingPermissions):
+    elif isinstance(error, discord.ext.commands.errors.BotMissingPermissions):
         await ctx.reply("I do not have the requisite permissions to do that!")
         return
 
-    elif isinstance(error, MissingRole):
+    elif isinstance(error, discord.ext.commands.errors.MissingRole):
         await ctx.send("I am missing the role to do that!")
         return
 
-    elif isinstance(error, CommandOnCooldown):
+    elif isinstance(error, discord.ext.commands.errors.CommandOnCooldown):
         if str(error.cooldown.type.name) != "default":
             cooldowntype = f'per {error.cooldown.type.name}'
 
@@ -150,15 +150,15 @@ async def on_command_error(ctx, error):
             delete_after=min(10, error.retry_after))
         return
 
-    elif isinstance(error, MissingRequiredArgument):
+    elif isinstance(error, error.MissingRequiredArgument):
         await ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`", delete_after=30)
         return
 
-    elif isinstance(error, BadArgument):
+    elif isinstance(error, error.BadArgument):
         await ctx.reply(f"Invalid argument!\nUsage:`{ctx.command.signature}`", delete_after=30)
         return
 
-    elif isinstance(error, NoPrivateMessage):
+    elif isinstance(error, error.NoPrivateMessage):
         await ctx.reply("That can only be used in servers, not DMs!")
         return
 

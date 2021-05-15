@@ -21,24 +21,20 @@ class Info(commands.Cog):
     async def ping(self, ctx):
         """Shows bot ping. 5s cooldown to prevent spam."""
         await ctx.message.delete()
-        embed = discord.Embed(colour=embedcolor, title="Pong!")
-        embed.add_field(name="Ping:",
-                        value=str(round(self.bot.latency * 1000)) + " MS",
-                        inline=True)
+        embed = discord.Embed(colour=embedcolor, title="Pong!", description=str(round(self.bot.latency * 1000)) + " MS")
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed)
 
     @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def credits(self, ctx):
         """People who helped with bot <Panda_Love_Purple:832029566427856956>"""
-        embed = discord.Embed(colour=embedcolor, title="Commands")
-        embed.add_field(name="Bot credits:",
-                        value=botcredits,
-                        inline=True)
+        embed = discord.Embed(colour=embedcolor, title="Credits", description=botcredits)
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed)
 
     @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def invite(self, ctx):
         """Invite Glaceon to other servers."""
         embed = discord.Embed(color=embedcolor)
@@ -46,7 +42,7 @@ class Info(commands.Cog):
             name="**__You can invite Glaceon to your server with the link below__**",
             value="**[Invite](https://discord.com/oauth2/authorize?client_id=808149899182342145&permissions=3100503255"
                   "&scope=bot)**",
-            inline=True, )
+            inline=True)
         await ctx.send(embed=embed)
 
 

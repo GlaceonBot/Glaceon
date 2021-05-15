@@ -21,7 +21,7 @@ class ModCommands(commands.Cog):
             try:
                 await member.send(f"You were banned from {ctx.guild} for: {reason}")
             except discord.Forbidden:
-                await ctx.send("I could not DM the member, they must have DMs off or me blocked. Banning anyway.",
+                await ctx.send("Could not normally ban the user, Forcekick?",
                                delete_after=10)
         try:
             await member.kick(reason=reason)
@@ -41,7 +41,7 @@ class ModCommands(commands.Cog):
             try:
                 await member.send(f"You were banned from {ctx.guild} for: {reason}")
             except discord.Forbidden:
-                await ctx.send("I could not DM the member, they must have DMs off or me blocked. Banning anyway.",
+                await ctx.send("Could not normally ban the user, Forceban?",
                                delete_after=10)
         try:
             await member.ban(reason=reason)
