@@ -79,7 +79,7 @@ embedcolor = 0xadd8e6
 @glaceon.event
 async def on_ready():
     print(f'Logged on as {glaceon.user.name}')  # Tells me if I'm running Glaceon or Eevee
-    await glaceon.change_presence(activity=discord.Activity(type=discord.ActivityType.playing,
+    await glaceon.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
                                                             name="glaceon.xyz"),
                                   status=discord.Status.do_not_disturb)  # Set the bot's status and activity
 
