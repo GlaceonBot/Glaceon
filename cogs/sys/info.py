@@ -15,7 +15,7 @@ class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['v', 'ver'])
+    @commands.command(aliases=['v', 'ver', '-v', '-ver', '-version'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def version(self):
         async with open(path / "embeds/version.txt", "r") as file:
