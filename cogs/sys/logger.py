@@ -1,8 +1,10 @@
+#TODO make the code website-compatible, somehow
+
 import datetime
 import pathlib
-
 import emoji
 from discord.ext import commands
+
 
 path = pathlib.PurePath()
 
