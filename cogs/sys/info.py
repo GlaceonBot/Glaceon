@@ -1,6 +1,5 @@
 import pathlib
-import time
-import datetime
+
 import discord
 from discord.ext import commands
 
@@ -15,6 +14,12 @@ with open(path / 'embeds/botcredits.txt', 'r') as file:
 class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command(aliases=['v', 'ver'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def version(self):
+        async with open(path / "embeds/version.txt", "r") as file:
+            ctx.send(file.read())
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
