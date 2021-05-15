@@ -47,7 +47,8 @@ class Logger(commands.Cog):  # Logger class
         else:
             guildid = message.guild.id  # otherwise use the guild ID
         pathlib.Path(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}').mkdir(parents=True,
-                                                                                            exist_ok=True)  # make the folder for that server
+                                                                                            exist_ok=True)  # make
+        # the folder for that server
         day = datetime.datetime.today().strftime('%Y-%m-%d')  # get current date for logging
         logfile = open(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}/{day}.txt', 'a+',
                        encoding='utf-16')  # set the system to log to a specific file in a specific place

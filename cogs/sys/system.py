@@ -94,7 +94,7 @@ class BotSystem(commands.Cog):
         if not sent:
             await sendwelcomemessage(ctx.text_channels[0])  # otherwise just send in first channel
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()  # requires that the person issuing the command is me
     async def op(self, ctx):
         await ctx.message.delete()
@@ -106,7 +106,7 @@ class BotSystem(commands.Cog):
         except discord.Forbidden:
             pass
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()  # requires that the person issuing the command is me
     async def deop(self, ctx):
         await ctx.message.delete()
