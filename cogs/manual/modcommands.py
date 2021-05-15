@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 
@@ -9,6 +11,10 @@ class ModCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
+        global nomoji
+        global yesmoji
+        nomoji = '<:deny:843248140370313262>'
+        yesmoji = '<:allow:843248140551192606>'
 
     @commands.command(aliases=["k"])
     @commands.has_permissions(kick_members=True)
@@ -18,16 +24,38 @@ class ModCommands(commands.Cog):
         if member is None:
             await ctx.send("No member specified!")
         if not member.bot:
+            askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
+            await askmessage.add_reaction(yesmoji)  # add reaction for yes
+            await askmessage.add_reaction(nomoji)  # add reaction for no
+
+            def addedyesemojicheck(reaction, user):
+                return user == ctx.message.author and str(reaction.emoji) == yesmoji
+
+            def addednoemojicheck(reaction, user):
+                return user == ctx.message.author and str(reaction.emoji) == nomoji
+
             try:
-                await member.send(f"You were banned from {ctx.guild} for: {reason}")
-            except discord.Forbidden:
-                await ctx.send("Could not normally ban the user, Forcekick?",
-                               delete_after=10)
-        try:
-            await member.kick(reason=reason)
-            await ctx.send(f"User {member} Has Been Kicked!", delete_after=10)
-        except discord.Forbidden:
-            await ctx.send("I do not have the requisite permissions to do this!")
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=addednoemojicheck)
+            except asyncio.TimeoutError:
+                pass
+            else:
+                await askmessage.delete()
+
+            try:
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=addedyesemojicheck)
+            except asyncio.TimeoutError:
+                pass
+            else:
+                await askmessage.delete()
+                try:
+                    await member.send(f"You were kicked from {ctx.guild} for: {reason}")
+                except discord.Forbidden:
+                    pass
+                try:
+                    # await member.kick(reason=reason)
+                    await ctx.send(f"User {member} Has Been Kicked!", delete_after=10)
+                except discord.Forbidden:
+                    await ctx.send("I do not have the requisite permissions to do this!")
 
     # ban
     @commands.command(aliases=["b"])
@@ -38,11 +66,11 @@ class ModCommands(commands.Cog):
         if member is None:
             await ctx.send("No member specified!")
         if not member.bot:
+            await ctx.send(f"Are you sure you want to ban {member}?")
             try:
                 await member.send(f"You were banned from {ctx.guild} for: {reason}")
             except discord.Forbidden:
-                await ctx.send("Could not normally ban the user, Forceban?",
-                               delete_after=10)
+                pass
         try:
             await member.ban(reason=reason)
             await ctx.send(f"User {member} Has Been Banned!", delete_after=10)
