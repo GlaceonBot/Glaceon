@@ -1,4 +1,4 @@
-#TODO TensorFlow AntiSpam
+# TODO TensorFlow AntiSpam
 
 from discord.ext import commands
 
