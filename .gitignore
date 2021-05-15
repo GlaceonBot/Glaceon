@@ -3,6 +3,7 @@
 **/.vscode
 **/system
 **/venv
+.gitignore
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
