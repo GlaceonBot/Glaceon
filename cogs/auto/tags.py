@@ -37,10 +37,7 @@ class TagSystem(commands.Cog):
             else:
                 pings.append(t.mention)
         if errors is False:
-            embed = discord.Embed(colour=embedcolor)
-            embed.add_field(name="\u200b",
-                            value="\n\n".join(factoids),
-                            inline=False)
+            embed = discord.Embed(colour=embedcolor, description="\n\n".join(factoids))
             embed.set_footer(text=f"I am a bot, i will not respond to you | Request by {ctx.author}")
             await ctx.send(" ".join(pings), embed=embed)
 
