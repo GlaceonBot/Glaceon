@@ -2,7 +2,6 @@
 
 import datetime
 import pathlib
-
 import emoji
 from discord.ext import commands
 
