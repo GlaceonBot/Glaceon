@@ -1,0 +1,4 @@
+pkill -f '/home/gxhut/Glaceon/venv/bin/python3 ./main.py'
+git pull
+chmod +x ./main.py
+./main.py
