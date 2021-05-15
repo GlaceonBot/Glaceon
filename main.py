@@ -3,7 +3,6 @@ import pathlib
 import aiosqlite
 import discord
 from discord.ext import commands
-from discord.ext.commands.errors import *
 
 # load the token to its variable
 path = pathlib.PurePath()
