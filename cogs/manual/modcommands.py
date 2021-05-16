@@ -96,6 +96,8 @@ class ModCommands(commands.Cog):
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
+        elif member == ctx.me:
+            await ctx.send("I can't kick myself!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
@@ -120,6 +122,8 @@ class ModCommands(commands.Cog):
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
+        elif member == ctx.me:
+            await ctx.send("I can't ban myself!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
