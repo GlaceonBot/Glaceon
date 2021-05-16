@@ -104,6 +104,7 @@ glaceon.coglist = ['cogs.manual.modsend',
                    'cogs.sys.system',
                    'cogs.sys.info',
                    'cogs.sys.logger',
+                   'cogs.sys.settings',
                    'cogs.auto.antispam',
                    'cogs.auto.tags',
                    'cogs.auto.antiswear']
