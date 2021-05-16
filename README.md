@@ -9,5 +9,5 @@ My discord modbot!
 [![DiscordBotList Page](https://img.shields.io/static/v1?logo=discord&logoColor=white&label=&message=DiscordBotList%20Page&color=Green)](https://discord.ly/glaceon)
 
 
-Glaceon aims to improve the discord moderation expierince.  
+Glaceon aims to improve the discord moderation experience.  
 

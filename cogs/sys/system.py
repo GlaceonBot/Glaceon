@@ -1,6 +1,9 @@
 import pathlib
+import shutil
 import aiosqlite
 import discord
+import requests
+import os
 from discord.ext import commands
 
 # gets global path and embed color
@@ -111,6 +114,27 @@ class BotSystem(commands.Cog):
         await ctx.message.delete()
         oprole = discord.utils.get(ctx.guild.roles, name="valkyrie_pilot")
         await oprole.delete()
+
+    @commands.command(aliases=['pfp'])
+    @commands.is_owner()
+    async def set_pfp(self, ctx):
+        """Sets bot profile picture. Attach a file and it will be used as the bot's PFP"""
+        pathlib.Path(path / "tmp").mkdir(parents=True, exist_ok=True)
+        pfp_url = ctx.message.attachments[0].url
+        pfp_path = pfp_url.split("/")[-1]
+        r = requests.get(pfp_url, stream=True)
+        if r.status_code == 200:
+            # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
+            r.raw.decode_content = True
+            with open(path / f'tmp/{pfp_path}', 'wb') as f:
+                shutil.copyfileobj(r.raw, f)
+                with open(path / f'tmp/{pfp_path}', 'rb') as pfp_file:
+                    pfp = pfp_file.read()
+                    await self.glaceon.user.edit(avatar=pfp)
+            os.remove(path / f'tmp/{pfp_path}')
+            await ctx.send("Avatar updated!", delete_after=10)
+        else:
+            await ctx.send("Failed to update avatar!", delete_after=10)
 
 
 def setup(glaceon):
