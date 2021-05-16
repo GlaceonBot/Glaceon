@@ -25,7 +25,10 @@ class ModCommands(commands.Cog):
         except asyncio.TimeoutError:  # if command times out then do nothing
             pass
         else:  # delete the confirmation message if the x is pressed
-            await askmessage.delete()
+            try:  # makes sure if someone presses both buttons no errors happen
+                await askmessage.delete()
+            except discord.HTTPException:
+                pass
 
     async def if_yes_reacted(self, ctx, askmessage, member, reason, ban):  # If yes is reacted. Takes params for the
         # message that asked, the member who should be banned, the reason for the action, and weather it is a kick or
@@ -38,7 +41,10 @@ class ModCommands(commands.Cog):
         except asyncio.TimeoutError:  # if the timeout is reached do nothing
             pass
         else:
-            await askmessage.delete()  # delete confirmation message
+            try:  # makes sure if someone presses both buttons no errors happen
+                await askmessage.delete()  # delete confirmation message
+            except discord.HTTPException:
+                pass
             if ban is True:  # check if we are banning or kicking
                 try:  # try to notify user
                     await member.send(f"You were banned from {ctx.guild} for: {reason}")
@@ -69,57 +75,62 @@ class ModCommands(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason="No reason specified."):
         """Kicks a user."""
-        await ctx.message.delete()
-        if member is None:
+        await ctx.message.delete()  # deletes command invocation
+        if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
-        if not member.bot:
+        if not member.bot:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
-            confirmation_yes_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))
-            confirmation_no_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, False))
-            await confirmation_yes_task
-            await confirmation_no_task
+            confirmation_no_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
+            # creates async task for yes
+            confirmation_yes_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, False))
+            await confirmation_no_task  # starts no task
+            await confirmation_yes_task  # starts yes task
 
     # ban
     @commands.command(aliases=["b"])
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason="No reason specified."):
         """Bans a user."""
-        await ctx.message.delete()
-        if member is None:
+        await ctx.message.delete()  # deletes command invocation
+        if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
-        if not member.bot:
+        if not member.bot:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
-            yeschecktask = asyncio.create_task(self.if_no_reacted(ctx, askmessage))
-            nochecktask = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, True))
-            await yeschecktask
-            await nochecktask
+            no_check_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
+            # creates async task for yes
+            yes_check_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, True))
+            await no_check_task  # starts no task
+            await yes_check_task  # starts yes task
 
     @commands.command(aliases=['lockdown', 'archive'])
     @commands.has_permissions(manage_channels=True)
     async def lock(self, ctx):
         """Locks a channel"""
-        await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=False)
-        await ctx.send(ctx.channel.mention + " **has been locked.**")
+        await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=False)  # disallows default role
+        # chatting perms in that channel
+        await ctx.send(ctx.channel.mention + " **has been locked.**")  # notifies users the channel is locked
 
     @commands.command()
     @commands.has_permissions(manage_channels=True)
     async def unlock(self, ctx):
         """Unlocks a channel"""
-        await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)
-        await ctx.send(ctx.channel.mention + " **has been unlocked.**")
+        await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)  # allows default role chatting
+        # perms in that channel
+        await ctx.send(ctx.channel.mention + " **has been unlocked.**")  # notifies users it has been unlocked
 
     @commands.command(aliases=['ub', 'pardon'])
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, member: discord.User):
         """Unbans user."""
-        user = await self.bot.fetch_user(member.id)
-        await ctx.guild.unban(user)
-        await ctx.send(f"Unbanned {user}!", delete_after=10)
+        await ctx.message.delete()  # deletes invocation
+        user = await self.bot.fetch_user(member.id)  # gets the user id so the unban method can be invoked
+        await ctx.guild.unban(user)  # unbans
+        await ctx.send(f"Unbanned {user}!", delete_after=10)  # Notifies mods
 
 
-def setup(glaceon):
+def setup(glaceon):  # dpy setup cog
     glaceon.add_cog(ModCommands(glaceon))
