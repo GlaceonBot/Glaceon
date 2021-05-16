@@ -33,7 +33,6 @@ class Logger(commands.Cog):  # Logger class
             else:
                 return 1
 
-
     @commands.Cog.listener()
     async def on_message(self, message):
         if await self.is_logging_enabled(message) == 1:

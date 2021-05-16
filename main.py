@@ -72,7 +72,7 @@ class Help(commands.MinimalHelpCommand):
 # Sets the discord intents to all
 intents = discord.Intents().all()
 # defines the glaceon class as an autoshardedbot with the prefixgetter prefix and case-insensitive commands
-glaceon = commands.AutoShardedBot(command_prefix=prefixgetter, case_insensitive=True, intents=intents, help_command=Help())
+glaceon = commands.AutoShardedBot(command_prefix=prefixgetter, case_insensitive=True, intents=intents, help_command=Help(), activity=discord.Activity(type=discord.ActivityType.watching, name="glaceon.xyz"), status=discord.Status.do_not_disturb)
 # global color for embeds
 embedcolor = 0xadd8e6
 
@@ -80,9 +80,6 @@ embedcolor = 0xadd8e6
 @glaceon.event
 async def on_ready():
     print(f'Logged on as {glaceon.user.name}')  # Tells me if I'm running Glaceon or Eevee
-    await glaceon.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
-                                                            name="glaceon.xyz"),
-                                  status=discord.Status.do_not_disturb)  # Set the bot's status and activity
 
 
 # this function changes the message so that the pings will also work as a prefix
