@@ -2,12 +2,15 @@
 import pathlib
 import aiosqlite
 import discord
+import os
 from discord.ext import commands
+from dotenv import load_dotenv
+
 
 # load the token to its variable
+load_dotenv()
 path = pathlib.PurePath()
-with open(path / 'system/token.txt', 'r') as file:
-    TOKEN = file.read()
+TOKEN = os.getenv('TOKEN')
 
 
 # function to return the prefix based on a message and a bot instance

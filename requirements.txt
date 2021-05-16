@@ -2,3 +2,4 @@ discord
 aiosqlite
 emoji
 aiofile
+python-dotenv
