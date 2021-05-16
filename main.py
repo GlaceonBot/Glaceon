@@ -1,4 +1,5 @@
 #!/home/gxhut/Glaceon/venv/bin/python3
+import traceback
 import pathlib
 import aiosqlite
 import discord
@@ -167,8 +168,20 @@ async def on_command_error(ctx, error):
 
     else:
         # Send user a message
+        # get data from exception
+        etype = type(error)
+        trace = error.__traceback__
+
+        # 'traceback' is the stdlib module, `import traceback`.
+        lines = traceback.format_exception(etype, error, trace)
+
+        # format_exception returns a list with line breaks embedded in the lines, so let's just stitch the elements together
+        traceback_text = ''.join(lines)
+
+        # now we can send it to the user
+        # it would probably be best to wrap this in a codeblock via e.g. a Paginator
         await ctx.send("Error:\n```" + str(
-            error) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
+            traceback_text) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
                        delete_after=60)
 
 
