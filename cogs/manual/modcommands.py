@@ -91,11 +91,16 @@ class ModCommands(commands.Cog):
 
     @commands.command(aliases=["k"])
     @commands.has_permissions(kick_members=True)
+    @commands.bot_has_guild_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason="No reason specified."):
         """Kicks a user."""
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
+        elif member.top_role >= ctx.me.top_role:
+            await ctx.send("This user has a role above mine in the role hierarchy!")
+        elif member == ctx.me:
+            await ctx.send("I can't kick myself!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
@@ -115,11 +120,16 @@ class ModCommands(commands.Cog):
     # ban
     @commands.command(aliases=["b"])
     @commands.has_permissions(ban_members=True)
+    @commands.bot_has_guild_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason="No reason specified."):
         """Bans a user."""
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
+        elif member.top_role >= ctx.me.top_role:
+            await ctx.send("This user has a role above mine in the role hierarchy!")
+        elif member == ctx.me:
+            await ctx.send("I can't ban myself!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
