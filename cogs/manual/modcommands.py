@@ -99,7 +99,7 @@ class ModCommands(commands.Cog):
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
-        if not member.bot:  # bots can't be DMd by other bots
+        elif not member.bot:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
@@ -108,6 +108,9 @@ class ModCommands(commands.Cog):
             yes_check_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, True))
             await no_check_task  # starts no task
             await yes_check_task  # starts yes task
+        else:
+            await ctx.send("User is a bot, I can not DM other bots. Banning without sending DM.")
+            await member.ban(reason=reason)
 
     @commands.command(aliases=['lockdown', 'archive'])
     @commands.has_permissions(manage_channels=True)
