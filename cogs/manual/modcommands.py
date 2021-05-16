@@ -111,7 +111,7 @@ class ModCommands(commands.Cog):
             await ctx.send(f"Kicked user {member}", delete_after=5)
             await member.kick(reason=reason)
         else:
-            await ctx.send("User is a bot, I can not DM other bots. Kicking without sending DM.", delete_after=5)
+            await ctx.send(f"{member} is a bot, I can not DM other bots. Kicking without sending DM.", delete_after=5)
             await member.kick(reason=reason)
 
     # ban
@@ -140,7 +140,7 @@ class ModCommands(commands.Cog):
             await ctx.send(f"Banned user {member}", delete_after=5)
             await member.ban(reason=reason, delete_message_days=0)
         else:
-            await ctx.send("User is a bot, I can not DM other bots. Banning without sending DM.", delete_after=5)
+            await ctx.send(f"{member} is a bot, I can not DM other bots. Banning without sending DM.", delete_after=5)
             await member.ban(reason=reason, delete_message_days=0)
 
     @commands.command(aliases=['lockdown', 'archive'])
