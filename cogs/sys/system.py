@@ -1,9 +1,10 @@
+import os
 import pathlib
 import shutil
+
 import aiosqlite
 import discord
 import requests
-import os
 from discord.ext import commands
 
 # gets global path and embed color
@@ -130,7 +131,11 @@ class BotSystem(commands.Cog):
                 shutil.copyfileobj(r.raw, f)
                 with open(path / f'tmp/{pfp_path}', 'rb') as pfp_file:
                     pfp = pfp_file.read()
-                    await self.glaceon.user.edit(avatar=pfp)
+                    try:
+                        await self.glaceon.user.edit(avatar=pfp)
+                    except discord.HTTPException:
+                        await ctx.send("You're trying to change my PFP too fast! Try using the console, "
+                                       "https://discord.com/developers/applications/808149899182342145/bot")
             os.remove(path / f'tmp/{pfp_path}')
             await ctx.send("Avatar updated!", delete_after=10)
         else:
