@@ -1,5 +1,6 @@
 import pathlib
 import aiofile
+import requests
 import discord
 from discord.ext import commands
 
@@ -18,9 +19,8 @@ class Info(commands.Cog):
     @commands.command(aliases=['v', 'ver', '-v', '-ver', '-version'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def version(self, ctx):
-        async with aiofile.async_open(path / "embeds/version.txt", "r") as file:
-            version = await file.read()
-            await ctx.send(version)
+        version = requests.get('http://127.0.0.1/version.txt')
+        await ctx.send(version.text)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
