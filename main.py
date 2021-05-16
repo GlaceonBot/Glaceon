@@ -182,10 +182,9 @@ async def on_command_error(ctx, error):
         traceback_text = ''.join(lines)
 
         # now we can send it to the user
-        # it would probably be best to wrap this in a codeblock via e.g. a Paginator
         await ctx.send("Error:\n```" + str(
             traceback_text) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
-                       delete_after=60)
+                       delete_after=30)
 
 
 # my reload command, so i can reload the cogs without restarting the bot

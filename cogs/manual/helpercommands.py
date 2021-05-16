@@ -43,7 +43,7 @@ class HelperCommands(commands.Cog):
 
     @commands.command(description="Mutes the specified user.")
     @commands.has_permissions(manage_messages=True)
-    async def mute(self, ctx, member: discord.Member, *, reason="No reason specified."):
+    async def mute(self, ctx, member: discord.Member, *, reason="No reason specified"):
         """Mute a user. Optionally has a reason."""
         await ctx.message.delete()
         time = None  # just for now, till i figure out when to trigger unmute-checks
@@ -67,7 +67,7 @@ class HelperCommands(commands.Cog):
         if time is None:
             time = "when it is manually revoked."
         try:
-            await member.send(f" you have been muted from: {guild.name} for: {reason}. Your mute will expire {time}")
+            await member.send(f"You have been muted in: {guild.name} for: {reason}. Your mute will expire {time}")
         except discord.Forbidden:
             await ctx.send("Unable to DM, muting anyway!", delete_after=10)
 
