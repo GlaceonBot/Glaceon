@@ -9,12 +9,61 @@ class ModCommands(commands.Cog):
     """Commands gated behind kick members, ban members, and manage channels."""
 
     def __init__(self, bot):
-        self.bot = bot
+        self.bot = bot  # set self.bot
         self._last_member = None
         global nomoji
         global yesmoji
-        nomoji = '<:deny:843248140370313262>'
+        nomoji = '<:deny:843248140370313262>'  # global variables for yes and no emojis
         yesmoji = '<:allow:843248140551192606>'
+
+    async def if_no_reacted(self, ctx, askmessage):  # what should be done if the user reacts with no
+        def added_no_emoji_check(reaction, user):  # the actual check
+            return user == ctx.message.author and str(reaction.emoji) == nomoji
+
+        try:  # checks to see if this happens
+            reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=added_no_emoji_check)
+        except asyncio.TimeoutError:  # if command times out then do nothing
+            pass
+        else:  # delete the confirmation message if the x is pressed
+            await askmessage.delete()
+
+    async def if_yes_reacted(self, ctx, askmessage, member, reason, ban):  # If yes is reacted. Takes params for the
+        # message that asked, the member who should be banned, the reason for the action, and weather it is a kick or
+        # a ban
+        def added_yes_emoji_check(reaction, user):  # the actual check
+            return user == ctx.message.author and str(reaction.emoji) == yesmoji
+
+        try:  # checks to see if this happens
+            reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=added_yes_emoji_check)
+        except asyncio.TimeoutError:  # if the timeout is reached do nothing
+            pass
+        else:
+            await askmessage.delete()  # delete confirmation message
+            if ban is True:  # check if we are banning or kicking
+                try:  # try to notify user
+                    await member.send(f"You were banned from {ctx.guild} for: {reason}")
+                except discord.Forbidden:  # if the user could not be messaged, do nothing
+                    pass
+                try:
+                    await member.ban(reason=reason,
+                                     delete_message_days=0)  # actually bans user, does not delete history
+                    await ctx.send(f"User {member} Has Been banned!",
+                                   delete_after=5)  # says in chat that the user was banned successfully, deletes
+                    # after 5s
+                except discord.Forbidden:  # if the bot can't ban people, notify the mods
+                    await ctx.send("I do not have the requisite permissions to do this!")
+            else:  # if a kick is desired
+                try:  # try to notify user
+                    await member.send(f"You were kicked from {ctx.guild} for: {reason}")
+                except discord.Forbidden:  # if the user could not be messaged, do nothing
+                    pass
+                try:
+                    await member.kick(reason=reason)  # actually kicks the user
+                    await ctx.send(f"User {member} Has Been Kicked!",
+                                   delete_after=5)  # says in chat that the user was kicked successfully, deletes
+                    # after 5s
+                except discord.Forbidden:  # if the bot can't kick people, say so
+                    await ctx.send("I do not have the requisite permissions to do this!")
 
     @commands.command(aliases=["k"])
     @commands.has_permissions(kick_members=True)
@@ -27,35 +76,10 @@ class ModCommands(commands.Cog):
             askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
-
-            def addedyesemojicheck(reaction, user):
-                return user == ctx.message.author and str(reaction.emoji) == yesmoji
-
-            def addednoemojicheck(reaction, user):
-                return user == ctx.message.author and str(reaction.emoji) == nomoji
-
-            try:
-                reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=addednoemojicheck)
-            except asyncio.TimeoutError:
-                pass
-            else:
-                await askmessage.delete()
-
-            try:
-                reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=addedyesemojicheck)
-            except asyncio.TimeoutError:
-                pass
-            else:
-                await askmessage.delete()
-                try:
-                    await member.send(f"You were kicked from {ctx.guild} for: {reason}")
-                except discord.Forbidden:
-                    pass
-                try:
-                    # await member.kick(reason=reason)
-                    await ctx.send(f"User {member} Has Been Kicked!", delete_after=10)
-                except discord.Forbidden:
-                    await ctx.send("I do not have the requisite permissions to do this!")
+            confirmation_yes_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))
+            confirmation_no_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, False))
+            await confirmation_yes_task
+            await confirmation_no_task
 
     # ban
     @commands.command(aliases=["b"])
@@ -66,16 +90,13 @@ class ModCommands(commands.Cog):
         if member is None:
             await ctx.send("No member specified!")
         if not member.bot:
-            await ctx.send(f"Are you sure you want to ban {member}?")
-            try:
-                await member.send(f"You were banned from {ctx.guild} for: {reason}")
-            except discord.Forbidden:
-                pass
-        try:
-            await member.ban(reason=reason)
-            await ctx.send(f"User {member} Has Been Banned!", delete_after=10)
-        except discord.Forbidden:
-            await ctx.send("I do not have the requisite permissions to do this!")
+            askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
+            await askmessage.add_reaction(yesmoji)  # add reaction for yes
+            await askmessage.add_reaction(nomoji)  # add reaction for no
+            yeschecktask = asyncio.create_task(self.if_no_reacted(ctx, askmessage))
+            nochecktask = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, True))
+            await yeschecktask
+            await nochecktask
 
     @commands.command(aliases=['lockdown', 'archive'])
     @commands.has_permissions(manage_channels=True)
