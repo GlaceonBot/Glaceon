@@ -1,7 +1,11 @@
 import asyncio
+import pathlib
 
+import aiosqlite
 import discord
 from discord.ext import commands
+
+path = pathlib.PurePath()
 
 
 # kick
@@ -15,6 +19,17 @@ class ModCommands(commands.Cog):
         global yesmoji
         nomoji = '<:deny:843248140370313262>'  # global variables for yes and no emojis
         yesmoji = '<:allow:843248140551192606>'
+
+    async def are_ban_confirms_enabled(self, message):
+        async with aiosqlite.connect(path / "system/data.db") as db:
+            await db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
+                (serverid INTEGER, setto INTEGER)""")
+            cur = await db.execute(f'''SELECT setto FROM settingsbanconfirm WHERE serverid = {message.guild.id}''')
+            settings = await cur.fetchone()
+            if settings is not None:
+                return settings[0]
+            else:
+                return 1
 
     async def if_no_reacted(self, ctx, askmessage):  # what should be done if the user reacts with no
         def added_no_emoji_check(reaction, user):  # the actual check
@@ -81,7 +96,7 @@ class ModCommands(commands.Cog):
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
-        elif not member.bot:  # bots can't be DMd by other bots
+        elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
@@ -90,8 +105,11 @@ class ModCommands(commands.Cog):
             confirmation_yes_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, False))
             await confirmation_no_task  # starts no task
             await confirmation_yes_task  # starts yes task
+        elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 0:
+            await ctx.send(f"Kicked user {member}", delete_after=5)
+            await member.kick(reason=reason)
         else:
-            await ctx.send("User is a bot, I can not DM other bots. Kicking without sending DM.")
+            await ctx.send("User is a bot, I can not DM other bots. Kicking without sending DM.", delete_after=5)
             await member.kick(reason=reason)
 
     # ban
@@ -102,7 +120,7 @@ class ModCommands(commands.Cog):
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
-        elif not member.bot:  # bots can't be DMd by other bots
+        elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
@@ -111,9 +129,12 @@ class ModCommands(commands.Cog):
             yes_check_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, True))
             await no_check_task  # starts no task
             await yes_check_task  # starts yes task
+        elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 0:
+            await ctx.send(f"Banned user {member}", delete_after=5)
+            await member.ban(reason=reason, delete_message_days=0)
         else:
-            await ctx.send("User is a bot, I can not DM other bots. Banning without sending DM.")
-            await member.ban(reason=reason)
+            await ctx.send("User is a bot, I can not DM other bots. Banning without sending DM.", delete_after=5)
+            await member.ban(reason=reason, delete_message_days=0)
 
     @commands.command(aliases=['lockdown', 'archive'])
     @commands.has_permissions(manage_channels=True)
@@ -137,7 +158,12 @@ class ModCommands(commands.Cog):
         """Unbans user."""
         await ctx.message.delete()  # deletes invocation
         user = await self.bot.fetch_user(member.id)  # gets the user id so the unban method can be invoked
-        await ctx.guild.unban(user)  # unbans
+        try:
+            await ctx.guild.unban(user)  # unbans
+        except discord.Forbidden:
+            await ctx.send("I do not have permission to do this!")
+        except discord.HTTPException:
+            await ctx.send("User is not banned!")
         await ctx.send(f"Unbanned {user}!", delete_after=10)  # Notifies mods
 
 
