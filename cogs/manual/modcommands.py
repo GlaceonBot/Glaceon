@@ -23,7 +23,10 @@ class ModCommands(commands.Cog):
         try:  # checks to see if this happens
             reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=added_no_emoji_check)
         except asyncio.TimeoutError:  # if command times out then do nothing
-            pass
+            try:
+                await askmessage.delete()
+            except discord.HTTPException:
+                pass
         else:  # delete the confirmation message if the x is pressed
             try:  # makes sure if someone presses both buttons no errors happen
                 await askmessage.delete()
