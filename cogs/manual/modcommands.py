@@ -7,7 +7,8 @@ from discord.ext import commands
 
 path = pathlib.PurePath()
 
-
+NO_EMOJI = '<:deny:843248140370313262>'  # global variables for yes and no emojis
+YES_EMOJI = '<:allow:843248140551192606>'
 # kick
 class ModCommands(commands.Cog):
     """Commands gated behind kick members, ban members, and manage channels."""
@@ -15,10 +16,6 @@ class ModCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot  # set self.bot
         self._last_member = None
-        global nomoji
-        global yesmoji
-        nomoji = '<:deny:843248140370313262>'  # global variables for yes and no emojis
-        yesmoji = '<:allow:843248140551192606>'
 
     async def are_ban_confirms_enabled(self, message):
         async with aiosqlite.connect(path / "system/data.db") as db:
@@ -33,7 +30,7 @@ class ModCommands(commands.Cog):
 
     async def if_no_reacted(self, ctx, askmessage):  # what should be done if the user reacts with no
         def added_no_emoji_check(reaction, user):  # the actual check
-            return user == ctx.message.author and str(reaction.emoji) == nomoji
+            return user == ctx.message.author and str(reaction.emoji) == NO_EMOJI
 
         try:  # checks to see if this happens
             reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=added_no_emoji_check)
@@ -52,7 +49,7 @@ class ModCommands(commands.Cog):
         # message that asked, the member who should be banned, the reason for the action, and weather it is a kick or
         # a ban
         def added_yes_emoji_check(reaction, user):  # the actual check
-            return user == ctx.message.author and str(reaction.emoji) == yesmoji
+            return user == ctx.message.author and str(reaction.emoji) == YES_EMOJI
 
         try:  # checks to see if this happens
             reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=added_yes_emoji_check)
@@ -103,8 +100,8 @@ class ModCommands(commands.Cog):
             await ctx.send("I can't kick myself!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
-            await askmessage.add_reaction(yesmoji)  # add reaction for yes
-            await askmessage.add_reaction(nomoji)  # add reaction for no
+            await askmessage.add_reaction(YES_EMOJI)  # add reaction for yes
+            await askmessage.add_reaction(NO_EMOJI)  # add reaction for no
             confirmation_no_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
             # creates async task for yes
             confirmation_yes_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, False))
@@ -132,8 +129,8 @@ class ModCommands(commands.Cog):
             await ctx.send("I can't ban myself!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
-            await askmessage.add_reaction(yesmoji)  # add reaction for yes
-            await askmessage.add_reaction(nomoji)  # add reaction for no
+            await askmessage.add_reaction(YES_EMOJI)  # add reaction for yes
+            await askmessage.add_reaction(NO_EMOJI)  # add reaction for no
             no_check_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
             # creates async task for yes
             yes_check_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, True))
