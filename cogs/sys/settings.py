@@ -20,6 +20,7 @@ class Settings(discord.ext.commands.Cog):
         self.glaceon = glaceon  # making local global
 
     @commands.group()
+    @commands.has_permissions(administrator=True)
     async def settings(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send("You must specify a setting to change!")
