@@ -68,7 +68,7 @@ class ModCommands(commands.Cog):
                 try:
                     await member.ban(reason=reason,
                                      delete_message_days=0)  # actually bans user, does not delete history
-                    await ctx.send(f"User {member} Has Been banned!",
+                    await ctx.send(f"User {member} has been banned!",
                                    delete_after=5)  # says in chat that the user was banned successfully, deletes
                     # after 5s
                 except discord.Forbidden:  # if the bot can't ban people, notify the mods
@@ -80,7 +80,7 @@ class ModCommands(commands.Cog):
                     pass
                 try:
                     await member.kick(reason=reason)  # actually kicks the user
-                    await ctx.send(f"User {member} Has Been Kicked!",
+                    await ctx.send(f"User {member} has been kicked!",
                                    delete_after=5)  # says in chat that the user was kicked successfully, deletes
                     # after 5s
                 except discord.Forbidden:  # if the bot can't kick people, say so
