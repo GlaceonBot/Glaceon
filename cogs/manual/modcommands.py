@@ -45,7 +45,7 @@ class ModCommands(commands.Cog):
             except discord.HTTPException:
                 pass
 
-    async def if_yes_reacted(self, ctx, confirmation_message: discord.Message, member: discord.Member, reason: str, ban: bool):  # If yes is reacted. Takes params for the
+    async def if_yes_reacted(self, ctx, confirmation_message: discord.Message, member: discord.Member, reason: str, action: str):  # If yes is reacted. Takes params for the
         # message that asked, the member who should be banned, the reason for the action, and weather it is a kick or
         # a ban
         def added_yes_emoji_check(reaction, user: discord.Member) -> bool:  # the actual check
@@ -60,31 +60,25 @@ class ModCommands(commands.Cog):
                 await confirmation_message.delete()  # delete confirmation message
             except discord.HTTPException:
                 pass
-            if ban is True:  # check if we are banning or kicking
-                try:  # try to notify user
-                    await member.send(f"You were banned from {ctx.guild} for: {reason}")
-                except discord.Forbidden:  # if the user could not be messaged, do nothing
-                    pass
-                try:
+            try:  # try to notify user
+                
+                await member.send(f"You were {'banned' if action == 'ban' else 'kicked' } from {ctx.guild} for: {reason}")
+            except discord.Forbidden:  # if the user could not be messaged, do nothing
+                pass
+            try:
+                if action == "ban": # Check if action is ban or kick
                     await member.ban(reason=reason,
-                                     delete_message_days=0)  # actually bans user, does not delete history
+                                        delete_message_days=0)  # actually bans user, does not delete history
                     await ctx.send(f"User {member} has been banned!",
-                                   delete_after=5)  # says in chat that the user was banned successfully, deletes
-                    # after 5s
-                except discord.Forbidden:  # if the bot can't ban people, notify the mods
-                    await ctx.send("I do not have the requisite permissions to do this!")
-            else:  # if a kick is desired
-                try:  # try to notify user
-                    await member.send(f"You were kicked from {ctx.guild} for: {reason}")
-                except discord.Forbidden:  # if the user could not be messaged, do nothing
-                    pass
-                try:
-                    await member.kick(reason=reason)  # actually kicks the user
+                                    delete_after=5)  # says in chat that the user was banned successfully, deletes
+                elif action == "kick":
+                    await member.kick(reason=reason,)  # actually kicks user
                     await ctx.send(f"User {member} has been kicked!",
-                                   delete_after=5)  # says in chat that the user was kicked successfully, deletes
-                    # after 5s
-                except discord.Forbidden:  # if the bot can't kick people, say so
-                    await ctx.send("I do not have the requisite permissions to do this!")
+                                    delete_after=5)  # says in chat that the user was kicked successfully, deletes
+                # after 5s
+            except discord.Forbidden:  # if the bot can't ban people, notify the mods
+                await ctx.send("I do not have the requisite permissions to do this!")
+                
 
     # kick
     @commands.command(aliases=["k"])
@@ -105,7 +99,7 @@ class ModCommands(commands.Cog):
             await confirmation_message.add_reaction(NO_EMOJI)  # add reaction for no
             confirmation_no_task = asyncio.create_task(self.if_no_reacted(ctx, confirmation_message))  # creates async task for no
             # creates async task for yes
-            confirmation_yes_task = asyncio.create_task(self.if_yes_reacted(ctx, confirmation_message, member, reason, False))
+            confirmation_yes_task = asyncio.create_task(self.if_yes_reacted(ctx, confirmation_message, member, reason, "kick"))
             await confirmation_no_task  # starts no task
             await confirmation_yes_task  # starts yes task
         elif not member.bot and not await self.are_ban_confirms_enabled(ctx):
@@ -134,7 +128,7 @@ class ModCommands(commands.Cog):
             await confirmation_message.add_reaction(NO_EMOJI)  # add reaction for no
             no_check_task = asyncio.create_task(self.if_no_reacted(ctx, confirmation_message))  # creates async task for no
             # creates async task for yes
-            yes_check_task = asyncio.create_task(self.if_yes_reacted(ctx, confirmation_message, member, reason, True))
+            yes_check_task = asyncio.create_task(self.if_yes_reacted(ctx, confirmation_message, member, reason, "ban"))
             await no_check_task  # starts no task
             await yes_check_task  # starts yes task
         elif not member.bot and not await self.are_ban_confirms_enabled(ctx):
