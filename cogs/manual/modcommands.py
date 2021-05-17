@@ -9,7 +9,7 @@ path = pathlib.PurePath()
 
 NO_EMOJI = '<:deny:843248140370313262>'  # global variables for yes and no emojis
 YES_EMOJI = '<:allow:843248140551192606>'
-# kick
+
 class ModCommands(commands.Cog):
     """Commands gated behind kick members, ban members, and manage channels."""
 
@@ -28,7 +28,7 @@ class ModCommands(commands.Cog):
             else:
                 return True
 
-    async def if_no_reacted(self, ctx, askmessage):  # what should be done if the user reacts with no
+    async def if_no_reacted(self, ctx, askmessage) -> None:  # what should be done if the user reacts with no
         def added_no_emoji_check(reaction, user):  # the actual check
             return user == ctx.message.author and str(reaction.emoji) == NO_EMOJI
 
@@ -48,7 +48,7 @@ class ModCommands(commands.Cog):
     async def if_yes_reacted(self, ctx, askmessage, member, reason, ban):  # If yes is reacted. Takes params for the
         # message that asked, the member who should be banned, the reason for the action, and weather it is a kick or
         # a ban
-        def added_yes_emoji_check(reaction, user):  # the actual check
+        def added_yes_emoji_check(reaction, user) -> bool:  # the actual check
             return user == ctx.message.author and str(reaction.emoji) == YES_EMOJI
 
         try:  # checks to see if this happens
@@ -86,6 +86,7 @@ class ModCommands(commands.Cog):
                 except discord.Forbidden:  # if the bot can't kick people, say so
                     await ctx.send("I do not have the requisite permissions to do this!")
 
+    # kick
     @commands.command(aliases=["k"])
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_guild_permissions(kick_members=True)
@@ -143,6 +144,7 @@ class ModCommands(commands.Cog):
             await ctx.send(f"{member} is a bot, I can not DM other bots. Banning without sending DM.", delete_after=5)
             await member.ban(reason=f'Banned by {ctx.author} | {reason}', delete_message_days=0)
 
+    # lock
     @commands.command(aliases=['lockdown', 'archive'])
     @commands.has_permissions(manage_channels=True)
     async def lock(self, ctx):
@@ -151,6 +153,7 @@ class ModCommands(commands.Cog):
         # chatting perms in that channel
         await ctx.send(ctx.channel.mention + " **has been locked.**")  # notifies users the channel is locked
 
+    # unlock
     @commands.command()
     @commands.has_permissions(manage_channels=True)
     async def unlock(self, ctx):
@@ -159,6 +162,7 @@ class ModCommands(commands.Cog):
         # perms in that channel
         await ctx.send(ctx.channel.mention + " **has been unlocked.**")  # notifies users it has been unlocked
 
+    # unban
     @commands.command(aliases=['ub', 'pardon'])
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, member: discord.User):
