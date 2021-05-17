@@ -28,7 +28,7 @@ class ModCommands(commands.Cog):
             else:
                 return True
 
-    async def if_no_reacted(self, ctx, confirmation_message) -> None:  # what should be done if the user reacts with no
+    async def if_no_reacted(self, ctx, confirmation_message: discord.Message) -> None:  # what should be done if the user reacts with no
         def added_no_emoji_check(reaction, user):  # the actual check
             return user == ctx.message.author and str(reaction.emoji) == NO_EMOJI
 
@@ -45,10 +45,10 @@ class ModCommands(commands.Cog):
             except discord.HTTPException:
                 pass
 
-    async def if_yes_reacted(self, ctx, confirmation_message, member, reason, ban):  # If yes is reacted. Takes params for the
+    async def if_yes_reacted(self, ctx, confirmation_message: discord.Message, member: discord.Member, reason: str, ban: bool):  # If yes is reacted. Takes params for the
         # message that asked, the member who should be banned, the reason for the action, and weather it is a kick or
         # a ban
-        def added_yes_emoji_check(reaction, user) -> bool:  # the actual check
+        def added_yes_emoji_check(reaction, user: discord.Member) -> bool:  # the actual check
             return user == ctx.message.author and str(reaction.emoji) == YES_EMOJI
 
         try:  # checks to see if this happens
@@ -90,7 +90,7 @@ class ModCommands(commands.Cog):
     @commands.command(aliases=["k"])
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_guild_permissions(kick_members=True)
-    async def kick(self, ctx, member: discord.Member, *, reason="No reason specified."):
+    async def kick(self, ctx, member: discord.Member, *, reason: str="No reason specified."):
         """Kicks a user."""
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
@@ -119,7 +119,7 @@ class ModCommands(commands.Cog):
     @commands.command(aliases=["b"])
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, *, reason="No reason specified."):
+    async def ban(self, ctx, member: discord.Member, *, reason: str="No reason specified."):
         """Bans a user."""
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
