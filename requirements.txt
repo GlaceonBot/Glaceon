@@ -4,3 +4,5 @@ emoji
 aiofile
 python-dotenv
 requests
+python-dotenv
+requests
