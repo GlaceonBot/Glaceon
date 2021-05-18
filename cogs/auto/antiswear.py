@@ -15,7 +15,7 @@ defaultre = [
     ''
 ]
 path = pathlib.PurePath()
-embedcolor = 0xadd8e6
+embed_color = 0xadd8e6
 
 
 class AntiSwear(commands.Cog):
