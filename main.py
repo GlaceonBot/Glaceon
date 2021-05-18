@@ -99,16 +99,9 @@ async def on_message(message):
 
 
 # bot's list of cogs that need to be loaded up, they are all in different files and all do something different.
-glaceon.coglist = ['cogs.manual.modsend',
-                   'cogs.manual.modcommands',
-                   'cogs.manual.helpercommands',
-                   'cogs.sys.system',
-                   'cogs.sys.info',
-                   'cogs.sys.logger',
-                   'cogs.sys.settings',
-                   'cogs.auto.antispam',
-                   'cogs.auto.tags',
-                   'cogs.auto.antiswear']
+glaceon.coglist = []
+for x in pathlib.Path(path / 'cogs').rglob('*.py'):
+    glaceon.coglist.append(str(x).replace('\\', '.').replace('/', '.').replace('.py', ''))
 
 # makes sure this file is the main file, and then loads extentions
 if __name__ == '__main__':
