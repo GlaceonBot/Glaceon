@@ -4,3 +4,4 @@ emoji
 aiofile
 python-dotenv
 requests
+disputils==0.1.3

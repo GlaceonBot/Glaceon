@@ -6,7 +6,7 @@ import discord
 import os
 from discord.ext import commands
 from dotenv import load_dotenv
-
+from disputils import BotEmbedPaginator
 
 # load the token to its variable
 load_dotenv()
