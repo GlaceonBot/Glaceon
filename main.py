@@ -50,6 +50,7 @@ class Help(commands.MinimalHelpCommand):
     # actually sends the help
     async def send_bot_help(self, mapping):
         # creates embed
+        embeds = []
         embed = discord.Embed(title="Help")
         for cog, commands in mapping.items():
             # sorts commands
@@ -58,9 +59,11 @@ class Help(commands.MinimalHelpCommand):
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "System")
                 # adds the needed categories for the commands
-                embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
-        channel = self.get_destination()
-        await channel.send(embed=embed)
+                embeds.append(discord.Embed(title=f"Help - {cog_name}", description="\n".join(command_signatures)))
+        raise NameError("I don't have a context")#FIXME: This would work, but I need a way to get a context or message object.
+        ctx = None 
+        paginator = BotEmbedPaginator(ctx, embeds)
+        await paginator.run()
 
         # for when it breaks
     async def send_error_message(self, error):
