@@ -101,6 +101,8 @@ class ModCommands(commands.Cog):
             await ctx.send("This user has a role above mine in the role hierarchy!")
         elif member == ctx.me:
             await ctx.send("I can't kick myself!")
+        elif member.top_role >= ctx.me.top_role:
+            await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
@@ -130,6 +132,8 @@ class ModCommands(commands.Cog):
             await ctx.send("This user has a role above mine in the role hierarchy!")
         elif member == ctx.me:
             await ctx.send("I can't ban myself!")
+        elif member.top_role >= ctx.me.top_role:
+            await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
             askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
