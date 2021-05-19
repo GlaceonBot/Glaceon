@@ -82,7 +82,7 @@ class TagSystem(commands.Cog):
         cur = await db.execute("""SELECT tagname FROM tags WHERE serverid = ?""", (sid,))
         factoids = await cur.fetchall()
         try:
-            await ctx.send(", ".join([i for (i,) in factoids]))
+            await ctx.send('`' + "`, `".join([i for (i,) in factoids]) + '`')
         except discord.HTTPException:
             await ctx.send(f"This guild has no tags!")
 
