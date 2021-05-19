@@ -39,7 +39,7 @@ class TagSystem(commands.Cog):
         if errors is False:
             embed = discord.Embed(colour=embedcolor, description="\n\n".join(factoids))
             embed.set_footer(text=f"I am a bot, i will not respond to you | Request by {ctx.author}")
-            await ctx.send(" ".join(pings), embed=embed)
+            await ctx.send("Please refer to the below information" + " ".join(pings), embed=embed)
 
     @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tm", "ta"])
     @commands.has_permissions(manage_messages=True)
