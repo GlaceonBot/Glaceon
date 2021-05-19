@@ -41,7 +41,7 @@ async def prefixgetter(_, message):
         return default_prefix
 
 
-# help command class, mostly stolen so i don't fully understand it
+# help command class, mostly stolen so I don't fully understand it
 class Help(commands.MinimalHelpCommand):
     def get_command_signature(self, command):
         # gets what the command should look like
@@ -57,7 +57,7 @@ class Help(commands.MinimalHelpCommand):
             command_signatures = [self.get_command_signature(c) for c in filtered]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "System")
-                # adds the needed categorys for the commands
+                # adds the needed categories for the commands
                 embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
         channel = self.get_destination()
         await channel.send(embed=embed)
