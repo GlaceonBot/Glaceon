@@ -31,7 +31,7 @@ class UnCog(commands.Cog):
             # find which prefix matches this specific server id
             cur = await db.execute(
                 f'''SELECT userid FROM current_bans WHERE serverid = {guild.id} AND banfinish >= {current_time}''')
-            member = discord.Object(id=userid)
+            member: discord.member
             await guild.unban(member)
 
     @tasks.loop(seconds=5.0)
