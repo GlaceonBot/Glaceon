@@ -30,13 +30,15 @@ class UnCog(commands.Cog):
                                        (serverid INTEGER,  userid INTEGER, banfinish INTEGER)''')
             # find which prefix matches this specific server id
             cur = await db.execute(
-                '''SELECT userid FROM current_bans WHERE serverid = ? AND banfinish >= ? AND banfinish != -1''', (guild.id, current_time))
+                '''SELECT userid FROM current_bans WHERE serverid = ? AND banfinish >= ? AND banfinish != ?''',
+                (guild.id, current_time, -1))
             member_line = await cur.fetchone()
             if member_line is not None:
-                member = member_line[0]
-                print(member_line)
-                member: discord.Member
-                await guild.unban(member)
+                member = self.glaceon.get_user(member_line[0])
+                try:
+                    await guild.unban(member)
+                except discord.Forbidden:
+                    pass
 
     @tasks.loop(seconds=5.0)
     async def unmuter(self):
@@ -46,10 +48,23 @@ class UnCog(commands.Cog):
             db = await aiosqlite.connect(path / 'system/moderation.db')
             # make sure everything is set up correctly
             await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
-                           (serverid INTEGER,  userid INTEGER, mutefinish INTEGER)''')
+                                               (serverid INTEGER,  userid INTEGER, mutefinish INTEGER)''')
             # find which prefix matches this specific server id
             cur = await db.execute(
-                f'''SELECT userid FROM current_mutes WHERE serverid = {guild.id} AND mutefinish >= {current_time}''')
+                '''SELECT userid FROM current_mutes WHERE serverid = ? AND mutefinish >= ? AND mutefinish != ?''',
+                (guild.id, current_time, -1))
+            await db.execute(
+                '''DELETE FROM current_mutes WHERE serverid = ? AND mutefinish >= ? AND mutefinish != ?''',
+                (guild.id, current_time, -1))
+            member_line = await cur.fetchone()
+            if member_line is not None:
+                member = guild.get_member(member_line[0])
+                print(member)
+                muted_role = discord.utils.get(guild.roles, name="Muted")
+                try:
+                    await member.remove_roles(muted_role)
+                except discord.Forbidden:
+                    pass
 
     @unmuter.before_loop
     async def before_umuter(self):

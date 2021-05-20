@@ -1,7 +1,12 @@
 import discord
 from discord.ext import commands
-
+import aiosqlite
+import pathlib
+from datetime import datetime
 embedcolor = 0xadd8e6
+
+
+path = pathlib.PurePath()
 
 
 class HelperCommands(commands.Cog):
@@ -43,10 +48,37 @@ class HelperCommands(commands.Cog):
 
     @commands.command(description="Mutes the specified user.")
     @commands.has_permissions(manage_messages=True)
-    async def mute(self, ctx, member: discord.Member, *, reason="No reason specified"):
+    async def mute(self, ctx, member: discord.Member, time, *, reason="No reason specified"):
         """Mute a user. Optionally has a reason."""
         await ctx.message.delete()
-        time = None  # just for now, till i figure out when to trigger unmute-checks
+        if time is not None:
+            if time.lower().endswith("y"):
+                revoke_in_secs = int(time[:-1]) * 31536000
+            elif time.lower().endswith("w"):
+                revoke_in_secs = int(time[:-1]) * 604800
+            elif time.lower().endswith("d"):
+                revoke_in_secs = int(time[:-1]) * 86400
+            elif time.lower().endswith("h"):
+                revoke_in_secs = int(time[:-1]) * 3600
+            elif time.lower().endswith("m"):
+                revoke_in_secs = int(time[:-1]) * 60
+            elif time.lower().endswith("s"):
+                revoke_in_secs = int(time[:-1])
+            else:
+                revoke_in_secs = -1
+            ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
+            async with aiosqlite.connect(path / "system/moderation.db") as db:
+                await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
+                                                       (serverid INTEGER,  userid INTEGER, mutefinish INTEGER)''')
+                dataline = await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = ?''', (
+                    ctx.guild.id,))  # get the current prefix for that server, if it exists
+                if await dataline.fetchone() is not None:  # actually check if it exists
+                    await db.execute("""UPDATE current_mutes SET mutefinish = ? WHERE serverid = ? AND userid = ?""",
+                                     (ban_ends_at, ctx.guild.id, member.id))  # update prefix
+                else:
+                    await db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (?,?,?)",
+                                     (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
+                await db.commit()
         guild = ctx.guild
         muted_role = discord.utils.get(guild.roles, name="Muted")
 

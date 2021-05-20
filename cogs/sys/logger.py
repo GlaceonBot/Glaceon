@@ -26,7 +26,10 @@ class Logger(commands.Cog):  # Logger class
         async with aiosqlite.connect(path / "system/data.db") as db:
             await db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
                 (serverid INTEGER, setto INTEGER)""")
-            cur = await db.execute(f'''SELECT setto FROM settingslogging WHERE serverid = {message.guild.id}''')
+            try:
+                cur = await db.execute(f'''SELECT setto FROM settingslogging WHERE serverid = {message.guild.id}''')
+            except AttributeError:
+                return 1
             settings = await cur.fetchone()
             if settings is not None:
                 return settings[0]

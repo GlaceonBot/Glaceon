@@ -49,7 +49,8 @@ class ModCommands(commands.Cog):
             except discord.HTTPException:
                 pass
 
-    async def if_yes_reacted(self, ctx, askmessage, member, reason, ban, time):  # If yes is reacted. Takes params for the
+    async def if_yes_reacted(self, ctx, askmessage, member, reason, ban,
+                             time):  # If yes is reacted. Takes params for the
         # message that asked, the member who should be banned, the reason for the action, and weather it is a kick or
         # a ban
         def added_yes_emoji_check(reaction, user):  # the actual check
@@ -74,19 +75,32 @@ class ModCommands(commands.Cog):
                                      delete_message_days=0)  # actually bans user, does not delete history
                     if time is not None:
                         if time.lower().endswith("y"):
-                            revoke_time = int(time[:-1]) * 31536000
+                            revoke_in_secs = int(time[:-1]) * 31536000
                         elif time.lower().endswith("w"):
-                            revoke_time = int(time[:-1]) * 604800
+                            revoke_in_secs = int(time[:-1]) * 604800
                         elif time.lower().endswith("d"):
-                            revoke_time = int(time[:-1]) * 86400
+                            revoke_in_secs = int(time[:-1]) * 86400
                         elif time.lower().endswith("h"):
-                            revoke_time = int(time[:-1]) * 3600
+                            revoke_in_secs = int(time[:-1]) * 3600
                         elif time.lower().endswith("m"):
-                            revoke_time = int(time[:-1]) * 60
+                            revoke_in_secs = int(time[:-1]) * 60
                         elif time.lower().endswith("s"):
-                            revoke_time = int(time[:-1])
+                            revoke_in_secs = int(time[:-1])
                         else:
-                            revoke_time = -1
+                            revoke_in_secs = -1
+                        ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
+                        async with aiosqlite.connect(path / "system/moderation.db") as db:
+                            await db.execute('''CREATE TABLE IF NOT EXISTS current_bans
+                                                                   (serverid INTEGER,  userid INTEGER, banfinish INTEGER)''')
+                            dataline = await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = ?''', (
+                            ctx.guild.id,))  # get the current prefix for that server, if it exists
+                            if await dataline.fetchone() is not None:  # actually check if it exists
+                                await db.execute("""UPDATE current_bans SET banfinish = ? WHERE serverid = ? AND userid = ?""",
+                                                 (ban_ends_at, ctx.guild.id, member.id))  # update prefix
+                            else:
+                                await db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (?,?,?)",
+                                                 (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
+                            await db.commit()
                     await ctx.send(f"User {member} Has Been banned!",
                                    delete_after=5)  # says in chat that the user was banned successfully, deletes
                     # after 5s
@@ -124,8 +138,7 @@ class ModCommands(commands.Cog):
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
             confirmation_no_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
-            # creates async task for yes
-            confirmation_yes_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, False, time=None))
+            confirmation_yes_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, False, time=None))  # creates async task for yes
             await confirmation_no_task  # starts no task
             await confirmation_yes_task  # starts yes task
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 0:
