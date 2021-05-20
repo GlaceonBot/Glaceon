@@ -1,5 +1,6 @@
 import asyncio
 import pathlib
+from datetime import datetime
 
 import aiosqlite
 import discord
@@ -48,7 +49,7 @@ class ModCommands(commands.Cog):
             except discord.HTTPException:
                 pass
 
-    async def if_yes_reacted(self, ctx, askmessage, member, reason, ban):  # If yes is reacted. Takes params for the
+    async def if_yes_reacted(self, ctx, askmessage, member, reason, ban, time):  # If yes is reacted. Takes params for the
         # message that asked, the member who should be banned, the reason for the action, and weather it is a kick or
         # a ban
         def added_yes_emoji_check(reaction, user):  # the actual check
@@ -71,6 +72,21 @@ class ModCommands(commands.Cog):
                 try:
                     await member.ban(reason=reason,
                                      delete_message_days=0)  # actually bans user, does not delete history
+                    if time is not None:
+                        if time.lower().endswith("y"):
+                            revoke_time = int(time[:-1]) * 31536000
+                        elif time.lower().endswith("w"):
+                            revoke_time = int(time[:-1]) * 604800
+                        elif time.lower().endswith("d"):
+                            revoke_time = int(time[:-1]) * 86400
+                        elif time.lower().endswith("h"):
+                            revoke_time = int(time[:-1]) * 3600
+                        elif time.lower().endswith("m"):
+                            revoke_time = int(time[:-1]) * 60
+                        elif time.lower().endswith("s"):
+                            revoke_time = int(time[:-1])
+                        else:
+                            revoke_time = -1
                     await ctx.send(f"User {member} Has Been banned!",
                                    delete_after=5)  # says in chat that the user was banned successfully, deletes
                     # after 5s
@@ -109,7 +125,7 @@ class ModCommands(commands.Cog):
             await askmessage.add_reaction(nomoji)  # add reaction for no
             confirmation_no_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
             # creates async task for yes
-            confirmation_yes_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, False))
+            confirmation_yes_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, False, time=None))
             await confirmation_no_task  # starts no task
             await confirmation_yes_task  # starts yes task
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 0:
@@ -123,7 +139,7 @@ class ModCommands(commands.Cog):
     @commands.command(aliases=["b"])
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, *, reason="No reason specified."):
+    async def ban(self, ctx, member: discord.Member, time, *, reason="No reason specified."):
         """Bans a user."""
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
@@ -140,7 +156,7 @@ class ModCommands(commands.Cog):
             await askmessage.add_reaction(nomoji)  # add reaction for no
             no_check_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
             # creates async task for yes
-            yes_check_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, True))
+            yes_check_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, True, time))
             await no_check_task  # starts no task
             await yes_check_task  # starts yes task
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 0:

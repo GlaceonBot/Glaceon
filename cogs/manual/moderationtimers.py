@@ -30,9 +30,13 @@ class UnCog(commands.Cog):
                                        (serverid INTEGER,  userid INTEGER, banfinish INTEGER)''')
             # find which prefix matches this specific server id
             cur = await db.execute(
-                f'''SELECT userid FROM current_bans WHERE serverid = {guild.id} AND banfinish >= {current_time}''')
-            member: discord.member
-            await guild.unban(member)
+                '''SELECT userid FROM current_bans WHERE serverid = ? AND banfinish >= ? AND banfinish != -1''', (guild.id, current_time))
+            member_line = await cur.fetchone()
+            if member_line is not None:
+                member = member_line[0]
+                print(member_line)
+                member: discord.Member
+                await guild.unban(member)
 
     @tasks.loop(seconds=5.0)
     async def unmuter(self):
