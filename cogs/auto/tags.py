@@ -39,7 +39,7 @@ class TagSystem(commands.Cog):
         if errors is False:
             embed = discord.Embed(colour=embedcolor, description="\n\n".join(factoids))
             embed.set_footer(text=f"I am a bot, i will not respond to you | Request by {ctx.author}")
-            await ctx.send(" ".join(pings), embed=embed)
+            await ctx.send("Please refer to the below information" + " ".join(pings), embed=embed)
 
     @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tm", "ta"])
     @commands.has_permissions(manage_messages=True)
@@ -82,7 +82,7 @@ class TagSystem(commands.Cog):
         cur = await db.execute("""SELECT tagname FROM tags WHERE serverid = ?""", (sid,))
         factoids = await cur.fetchall()
         try:
-            await ctx.send(" ".join([i for (i,) in factoids]))
+            await ctx.send('`' + "`, `".join([i for (i,) in factoids]) + '`')
         except discord.HTTPException:
             await ctx.send(f"This guild has no tags!")
 
