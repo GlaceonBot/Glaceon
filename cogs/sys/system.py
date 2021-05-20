@@ -2,7 +2,7 @@ import os
 import pathlib
 import shutil
 
-import aiosqlite
+import mysql.connector
 import discord
 import requests
 from discord.ext import commands

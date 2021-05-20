@@ -2,7 +2,7 @@ import asyncio
 import pathlib
 from datetime import datetime
 
-import aiosqlite
+import mysql.connector
 import discord
 from discord.ext import commands
 

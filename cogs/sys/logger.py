@@ -3,7 +3,7 @@
 import datetime
 import pathlib
 
-import aiosqlite
+import mysql.connector
 import emoji
 from discord.ext import commands
 

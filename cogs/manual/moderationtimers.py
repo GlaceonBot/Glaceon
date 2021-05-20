@@ -1,11 +1,18 @@
 import pathlib
 from datetime import datetime
-
-import aiosqlite
+from dotenv import load_dotenv
+import os
 import discord
+import mysql.connector
 from discord.ext import tasks, commands
 
 path = pathlib.PurePath()
+load_dotenv()
+mydb = mysql.connector.connect(
+    host="localhost",
+    user=os.getenv("SQLname"),
+    password=os.getenv("SQLpass")
+)
 
 
 class UnCog(commands.Cog):

@@ -1,6 +1,6 @@
 import pathlib
 
-import aiosqlite
+import mysql.connector
 import discord
 from discord.ext import commands
 
