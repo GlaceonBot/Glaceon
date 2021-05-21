@@ -31,7 +31,7 @@ class UnCog(commands.Cog):
         current_time = int(datetime.utcnow().timestamp())
         for guild in self.glaceon.guilds:
             # connect to the sqlite database for prefixes
-            db = await aiosqlite.connect(path / 'system/moderation.db')
+            db = await mysql.connector.connect(path / 'system/moderation.db')
             # make sure everything is set up correctly
             await db.execute('''CREATE TABLE IF NOT EXISTS current_bans
                                        (serverid INTEGER,  userid INTEGER, banfinish INTEGER)''')
@@ -52,7 +52,9 @@ class UnCog(commands.Cog):
         current_time = int(datetime.utcnow().timestamp())
         for guild in self.glaceon.guilds:
             # connect to the sqlite database for prefixes
-            db = await aiosqlite.connect(path / 'system/moderation.db')
+            db = await mysql.connector.connect(user='root',
+                                               password='Highline',
+                                               host='127.0.0.1')
             # make sure everything is set up correctly
             await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
                                                (serverid INTEGER,  userid INTEGER, mutefinish INTEGER)''')

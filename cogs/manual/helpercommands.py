@@ -67,7 +67,7 @@ class HelperCommands(commands.Cog):
             else:
                 revoke_in_secs = -1
             ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
-            async with aiosqlite.connect(path / "system/moderation.db") as db:
+            async with mysql.connector.connect(path / "system/moderation.db") as db:
                 await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
                                                        (serverid INTEGER,  userid INTEGER, mutefinish INTEGER)''')
                 dataline = await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = ?''', (

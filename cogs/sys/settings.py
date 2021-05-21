@@ -29,7 +29,7 @@ class Settings(discord.ext.commands.Cog):
     async def enable_logging(self, ctx, isenabled: bool):
         if isenabled is True:
             isenabled = 1
-            async with aiosqlite.connect(path / "system/data.db") as db:
+            async with mysql.connector.connect(path / "system/data.db") as db:
                 await db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
                 (serverid INTEGER, setto INTEGER)""")
                 dataline = await db.execute(f'''SELECT serverid FROM settingslogging WHERE serverid = ?''',
@@ -44,7 +44,7 @@ class Settings(discord.ext.commands.Cog):
                 await ctx.send("Logging enabled!")
         else:
             isenabled = 0
-            async with aiosqlite.connect(path / "system/data.db") as db:
+            async with mysql.connector.connect(path / "system/data.db") as db:
                 await db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
                 (serverid INTEGER, setto INTEGER)""")
                 dataline = await db.execute(f'''SELECT serverid FROM settingslogging WHERE serverid = ?''',
@@ -62,7 +62,7 @@ class Settings(discord.ext.commands.Cog):
     async def confirm_bans(self, ctx, isenabled: bool):
         if isenabled is True:
             isenabled = 1
-            async with aiosqlite.connect(path / "system/data.db") as db:
+            async with mysql.connector.connect(path / "system/data.db") as db:
                 await db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
                 (serverid INTEGER, setto INTEGER)""")
                 dataline = await db.execute(f'''SELECT serverid FROM settingsbanconfirm WHERE serverid = ?''',
@@ -77,7 +77,7 @@ class Settings(discord.ext.commands.Cog):
                 await ctx.send("Ban confirms enabled!")
         else:
             isenabled = 0
-            async with aiosqlite.connect(path / "system/data.db") as db:
+            async with mysql.connector.connect(path / "system/data.db") as db:
                 await db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
                 (serverid INTEGER, setto INTEGER)""")
                 dataline = await db.execute(f'''SELECT serverid FROM settingsbanconfirm WHERE serverid = ?''',

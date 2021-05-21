@@ -37,7 +37,7 @@ class BotSystem(commands.Cog):
     async def prefix(self, ctx, newprefix):  # context and what we should set the new prefix to
         """Sets the bot prefix for this server"""
         serverid = ctx.guild.id  # gets serverid for convinience
-        db = await aiosqlite.connect(path / 'system/data.db')  # connect to our server data db
+        db = await mysql.connector.connect(path / 'system/data.db')  # connect to our server data db
         dataline = await db.execute(
             f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')  # get the current prefix for that server, if it exists
         if await dataline.fetchone() is not None:  # actually check if it exists
@@ -56,7 +56,7 @@ class BotSystem(commands.Cog):
         administrator=True)  # requires that the person issuing the command has administrator perms
     async def modmailsetup(self, ctx, channel: discord.TextChannel):  # there's the textchannel constructor again
         serverid = ctx.guild.id  # get serverid for convience
-        db = await aiosqlite.connect(path / 'system/data.db')  # connect to the sqlite db
+        db = await mysql.connector.connect(path / 'system/data.db')  # connect to the sqlite db
         await db.execute('''CREATE TABLE IF NOT EXISTS mailchannels
                            (serverid BIGINT, channelid BIGINT)''')  # set up mailchannel system
         dataline = await db.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = ?''',

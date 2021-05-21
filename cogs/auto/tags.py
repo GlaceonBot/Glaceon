@@ -25,7 +25,7 @@ class TagSystem(commands.Cog):
         for t in tags:
             id = None
             if t != id:
-                db = await aiosqlite.connect(path / "system/tags.db")
+                db = await mysql.connector.connect(path / "system/tags.db")
                 cur = await db.execute("""SELECT tagcontent FROM tags WHERE serverid = ? AND tagname = ?""", (sid, t))
                 factoid = await cur.fetchone()
                 if factoid is not None:
@@ -47,10 +47,10 @@ class TagSystem(commands.Cog):
         """add or edit tags"""
         await ctx.message.delete()
         serverid = ctx.guild.id
-        async with aiosqlite.connect(path / "system/tags.db") as db:
+        async with mysql.connector.connect(path / "system/tags.db") as db:
             await db.execute('''CREATE TABLE IF NOT EXISTS tags
                                    (serverid INTEGER, tagname TEXT, tagcontent TEXT)''')
-        db = await aiosqlite.connect(path / "system/tags.db")
+        db = await mysql.connector.connect(path / "system/tags.db")
         cur = await db.execute(f'''SELECT serverid FROM tags WHERE serverid = ? AND tagname = ?''', (serverid, name))
         if await cur.fetchone() is not None:
             await db.execute("""UPDATE tags SET tagcontent = ? WHERE serverid = ? AND tagname = ?""",
@@ -68,7 +68,7 @@ class TagSystem(commands.Cog):
         """Remove a tag"""
         await ctx.message.delete()
         sid = ctx.guild.id
-        async with aiosqlite.connect(path / "system/tags.db") as db:
+        async with mysql.connector.connect(path / "system/tags.db") as db:
             await db.execute("""DELETE FROM tags WHERE serverid = ? AND tagname = ?""", (sid, name))
             await db.commit()
             await ctx.send(f"tag `{name}` deleted", delete_after=10)
@@ -78,7 +78,7 @@ class TagSystem(commands.Cog):
         """list the tags on this server"""
         await ctx.message.delete()
         sid = ctx.guild.id
-        db = await aiosqlite.connect(path / "system/tags.db")
+        db = await mysql.connector.connect(path / "system/tags.db")
         cur = await db.execute("""SELECT tagname FROM tags WHERE serverid = ?""", (sid,))
         factoids = await cur.fetchall()
         try:

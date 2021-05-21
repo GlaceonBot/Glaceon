@@ -23,7 +23,7 @@ class Logger(commands.Cog):  # Logger class
         self.glaceon = glaceon
 
     async def is_logging_enabled(self, message):
-        async with aiosqlite.connect(path / "system/data.db") as db:
+        async with mysql.connector.connect(path / "system/data.db") as db:
             await db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
                 (serverid INTEGER, setto INTEGER)""")
             try:

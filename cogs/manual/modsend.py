@@ -34,7 +34,7 @@ class ModCommmunications(commands.Cog):
     async def modmail(self, ctx, *, message):
         """Sends a message TO the moderators"""
         sid = ctx.guild.id
-        db = await aiosqlite.connect(path / 'system/data.db')
+        db = await mysql.connector.connect(path / 'system/data.db')
         cur = await db.execute(f'''SELECT channelid FROM mailchannels WHERE serverid = {sid}''')
         channel = await cur.fetchone()
         await db.close()
