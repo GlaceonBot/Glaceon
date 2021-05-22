@@ -35,16 +35,22 @@ class UnCog(commands.Cog):
             db = sql_server_connection.cursor()
             # make sure everything is set up correctly
             db.execute('''CREATE TABLE IF NOT EXISTS current_bans
-                                       (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
+                                                       (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
             # find which prefix matches this specific server id
             db.execute(
-                '''SELECT userid FROM current_bans WHERE serverid = %s AND banfinish >= %s AND banfinish != %s''',
+                '''SELECT userid FROM current_bans WHERE serverid = %s AND banfinish <= %s AND banfinish <> %s''',
                 (guild.id, current_time, -1))
             member_line = db.fetchone()
             if member_line:
+                db.execute(
+                    '''DELETE FROM current_bans WHERE serverid = %s AND banfinish <= %s AND banfinish <> %s''',
+                    (guild.id, current_time, -1))
                 member = self.glaceon.get_user(member_line[0])
+                sql_server_connection.commit()
+                sql_server_connection.close()
                 try:
                     await guild.unban(member)
+                    await member.send(f"You have been unmuted in {guild}!")
                 except discord.Forbidden:
                     pass
 
@@ -64,18 +70,20 @@ class UnCog(commands.Cog):
                                                (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
             # find which prefix matches this specific server id
             db.execute(
-                '''SELECT userid FROM current_mutes WHERE serverid = %s AND mutefinish >= %s AND mutefinish != %s''',
+                '''SELECT userid FROM current_mutes WHERE serverid = %s AND mutefinish <= %s AND mutefinish <> %s''',
                 (guild.id, current_time, -1))
             member_line = db.fetchone()
             if member_line:
                 db.execute(
-                    '''DELETE FROM current_mutes WHERE serverid = %s AND mutefinish >= %s AND mutefinish != %s''',
+                    '''DELETE FROM current_mutes WHERE serverid = %s AND mutefinish <= %s AND mutefinish <> %s''',
                     (guild.id, current_time, -1))
                 member = guild.get_member(member_line[0])
                 muted_role = discord.utils.get(guild.roles, name="Muted")
+                sql_server_connection.commit()
                 sql_server_connection.close()
                 try:
                     await member.remove_roles(muted_role)
+                    await member.send(f"You have been unmuted in {guild}!")
                 except discord.Forbidden:
                     pass
 

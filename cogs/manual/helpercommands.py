@@ -105,6 +105,8 @@ class HelperCommands(commands.Cog):
             ctx.send("Whoops! I don't have the `manage roles` permission!")
         if time is None:
             time = "when it is manually revoked."
+        else:
+            time = "in" + time
         try:
             await member.send(f"You have been muted in: {guild.name} for: {reason}. Your mute will expire {time}")
         except discord.Forbidden:
