@@ -1,10 +1,11 @@
 # TODO make the code website-compatible, somehow
 
 import datetime
+import os
 import pathlib
 
-import mysql.connector
 import emoji
+import mysql.connector
 from discord.ext import commands
 
 path = pathlib.PurePath()  # get path
@@ -22,15 +23,20 @@ class Logger(commands.Cog):  # Logger class
     def __init__(self, glaceon):  # initializes Glaceon
         self.glaceon = glaceon
 
-    async def is_logging_enabled(self, message):
-        async with mysql.connector.connect(path / "system/data.db") as db:
-            await db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
+    def is_logging_enabled(self, message):
+        with mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                     user=os.getenv('SQLname'),
+                                     password=os.getenv('SQLpassword'),
+                                     database=os.getenv('SQLdatabase')
+                                     ) as sql_server_connection:
+            db = sql_server_connection.cursor()
+            db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
                 (serverid INTEGER, setto INTEGER)""")
             try:
-                cur = await db.execute(f'''SELECT setto FROM settingslogging WHERE serverid = {message.guild.id}''')
+                db.execute(f'''SELECT setto FROM settingslogging WHERE serverid = {message.guild.id}''')
             except AttributeError:
                 return 1
-            settings = await cur.fetchone()
+            settings = db.fetchone()
             if settings is not None:
                 return settings[0]
             else:
@@ -38,7 +44,7 @@ class Logger(commands.Cog):  # Logger class
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if await self.is_logging_enabled(message) == 1:
+        if self.is_logging_enabled(message) == 1:
             # logs
             if message.guild is None:  # For DMs set the guild ID to one
                 guildid = -1
@@ -57,7 +63,7 @@ class Logger(commands.Cog):  # Logger class
 
     @commands.Cog.listener()
     async def on_message_edit(self, message_before, message):
-        if await self.is_logging_enabled(message) == 1:
+        if self.is_logging_enabled(message) == 1:
             # logs
             if message.guild is None:  # For DMs set the guild ID to one
                 guildid = -1

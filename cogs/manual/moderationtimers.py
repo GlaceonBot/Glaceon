@@ -1,18 +1,14 @@
+import os
 import pathlib
 from datetime import datetime
-from dotenv import load_dotenv
-import os
+
 import discord
 import mysql.connector
 from discord.ext import tasks, commands
+from dotenv import load_dotenv
 
 path = pathlib.PurePath()
 load_dotenv()
-mydb = mysql.connector.connect(
-    host="localhost",
-    user=os.getenv("SQLname"),
-    password=os.getenv("SQLpass")
-)
 
 
 class UnCog(commands.Cog):
@@ -31,15 +27,20 @@ class UnCog(commands.Cog):
         current_time = int(datetime.utcnow().timestamp())
         for guild in self.glaceon.guilds:
             # connect to the sqlite database for prefixes
-            db = await mysql.connector.connect(path / 'system/moderation.db')
+            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                            user=os.getenv('SQLname'),
+                                                            password=os.getenv('SQLpassword'),
+                                                            database=os.getenv('SQLdatabase')
+                                                            )
+            db = sql_server_connection.cursor()
             # make sure everything is set up correctly
-            await db.execute('''CREATE TABLE IF NOT EXISTS current_bans
+            db.execute('''CREATE TABLE IF NOT EXISTS current_bans
                                        (serverid INTEGER,  userid INTEGER, banfinish INTEGER)''')
             # find which prefix matches this specific server id
-            cur = await db.execute(
-                '''SELECT userid FROM current_bans WHERE serverid = ? AND banfinish >= ? AND banfinish != ?''',
+            db.execute(
+                '''SELECT userid FROM current_bans WHERE serverid = %s AND banfinish >= %s AND banfinish != %s''',
                 (guild.id, current_time, -1))
-            member_line = await cur.fetchone()
+            member_line = db.fetchone()
             if member_line is not None:
                 member = self.glaceon.get_user(member_line[0])
                 try:
@@ -52,21 +53,24 @@ class UnCog(commands.Cog):
         current_time = int(datetime.utcnow().timestamp())
         for guild in self.glaceon.guilds:
             # connect to the sqlite database for prefixes
-            db = await mysql.connector.connect(user='root',
-                                               password='Highline',
-                                               host='127.0.0.1')
+            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                            user=os.getenv('SQLname'),
+                                                            password=os.getenv('SQLpassword'),
+                                                            database=os.getenv('SQLdatabase')
+                                                            )
+            db = sql_server_connection.cursor()
             # make sure everything is set up correctly
-            await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
+            db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
                                                (serverid INTEGER,  userid INTEGER, mutefinish INTEGER)''')
             # find which prefix matches this specific server id
-            cur = await db.execute(
-                '''SELECT userid FROM current_mutes WHERE serverid = ? AND mutefinish >= ? AND mutefinish != ?''',
+            db.execute(
+                '''SELECT userid FROM current_mutes WHERE serverid = %s AND mutefinish >= %s AND mutefinish != %s''',
                 (guild.id, current_time, -1))
-            await db.execute(
-                '''DELETE FROM current_mutes WHERE serverid = ? AND mutefinish >= ? AND mutefinish != ?''',
-                (guild.id, current_time, -1))
-            member_line = await cur.fetchone()
+            member_line = db.fetchone()
             if member_line is not None:
+                db.execute(
+                    '''DELETE FROM current_mutes WHERE serverid = %s AND mutefinish >= %s AND mutefinish != %s''',
+                    (guild.id, current_time, -1))
                 member = guild.get_member(member_line[0])
                 print(member)
                 muted_role = discord.utils.get(guild.roles, name="Muted")

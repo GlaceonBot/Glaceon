@@ -70,13 +70,13 @@ class HelperCommands(commands.Cog):
             async with mysql.connector.connect(path / "system/moderation.db") as db:
                 await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
                                                        (serverid INTEGER,  userid INTEGER, mutefinish INTEGER)''')
-                dataline = await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = ?''', (
+                dataline = await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                     ctx.guild.id,))  # get the current prefix for that server, if it exists
                 if await dataline.fetchone() is not None:  # actually check if it exists
-                    await db.execute("""UPDATE current_mutes SET mutefinish = ? WHERE serverid = ? AND userid = ?""",
+                    await db.execute("""UPDATE current_mutes SET mutefinish = %s WHERE serverid = %s AND userid = %s""",
                                      (ban_ends_at, ctx.guild.id, member.id))  # update prefix
                 else:
-                    await db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (?,?,?)",
+                    await db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
                                      (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
                 await db.commit()
         guild = ctx.guild

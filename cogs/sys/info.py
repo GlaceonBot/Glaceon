@@ -46,7 +46,7 @@ class Info(commands.Cog):
         embed = discord.Embed(color=embedcolor)
         embed.add_field(
             name="**__You can invite Glaceon to your server with the link below__**",
-            value="**[Invite](https://discord.com/oauth2/authorize?client_id=808149899182342145&permissions=3100503255"
+            value="**[Invite](https://discord.com/oauth2/authorize%sclient_id=808149899182342145&permissions=3100503255"
                   "&scope=bot)**",
             inline=True)
         await ctx.send(embed=embed)

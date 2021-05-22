@@ -26,7 +26,7 @@ class TagSystem(commands.Cog):
             id = None
             if t != id:
                 db = await mysql.connector.connect(path / "system/tags.db")
-                cur = await db.execute("""SELECT tagcontent FROM tags WHERE serverid = ? AND tagname = ?""", (sid, t))
+                cur = await db.execute("""SELECT tagcontent FROM tags WHERE serverid = %s AND tagname = %s""", (sid, t))
                 factoid = await cur.fetchone()
                 if factoid is not None:
                     factoids.append(factoid[0])
@@ -51,12 +51,12 @@ class TagSystem(commands.Cog):
             await db.execute('''CREATE TABLE IF NOT EXISTS tags
                                    (serverid INTEGER, tagname TEXT, tagcontent TEXT)''')
         db = await mysql.connector.connect(path / "system/tags.db")
-        cur = await db.execute(f'''SELECT serverid FROM tags WHERE serverid = ? AND tagname = ?''', (serverid, name))
+        cur = await db.execute(f'''SELECT serverid FROM tags WHERE serverid = %s AND tagname = %s''', (serverid, name))
         if await cur.fetchone() is not None:
-            await db.execute("""UPDATE tags SET tagcontent = ? WHERE serverid = ? AND tagname = ?""",
+            await db.execute("""UPDATE tags SET tagcontent = %s WHERE serverid = %s AND tagname = %s""",
                              (contents, serverid, name))
         else:
-            await db.execute("""INSERT INTO tags(serverid, tagname, tagcontent) VALUES (?,?,?)""",
+            await db.execute("""INSERT INTO tags(serverid, tagname, tagcontent) VALUES (%s,%s,%s)""",
                              (serverid, name, contents))
         await db.commit()
         await db.close()
@@ -69,7 +69,7 @@ class TagSystem(commands.Cog):
         await ctx.message.delete()
         sid = ctx.guild.id
         async with mysql.connector.connect(path / "system/tags.db") as db:
-            await db.execute("""DELETE FROM tags WHERE serverid = ? AND tagname = ?""", (sid, name))
+            await db.execute("""DELETE FROM tags WHERE serverid = %s AND tagname = %s""", (sid, name))
             await db.commit()
             await ctx.send(f"tag `{name}` deleted", delete_after=10)
 
@@ -79,7 +79,7 @@ class TagSystem(commands.Cog):
         await ctx.message.delete()
         sid = ctx.guild.id
         db = await mysql.connector.connect(path / "system/tags.db")
-        cur = await db.execute("""SELECT tagname FROM tags WHERE serverid = ?""", (sid,))
+        cur = await db.execute("""SELECT tagname FROM tags WHERE serverid = %s""", (sid,))
         factoids = await cur.fetchall()
         try:
             await ctx.send('`' + "`, `".join([i for (i,) in factoids]) + '`')

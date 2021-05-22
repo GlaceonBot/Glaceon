@@ -41,10 +41,10 @@ class BotSystem(commands.Cog):
         dataline = await db.execute(
             f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')  # get the current prefix for that server, if it exists
         if await dataline.fetchone() is not None:  # actually check if it exists
-            await db.execute("""UPDATE prefixes SET prefix = ? WHERE serverid = ?""",
+            await db.execute("""UPDATE prefixes SET prefix = %s WHERE serverid = %s""",
                              (newprefix, serverid))  # update prefix
         else:
-            await db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (?,?)",
+            await db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (%s,%s)",
                              (serverid, newprefix))  # set new prefix
         await db.commit()  # say "yes i want to do this for sure"
         await db.close()  # close connection
@@ -59,13 +59,13 @@ class BotSystem(commands.Cog):
         db = await mysql.connector.connect(path / 'system/data.db')  # connect to the sqlite db
         await db.execute('''CREATE TABLE IF NOT EXISTS mailchannels
                            (serverid BIGINT, channelid BIGINT)''')  # set up mailchannel system
-        dataline = await db.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = ?''',
+        dataline = await db.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = %s''',
                                     (serverid,))  # get the mailchannels
         if dataline.fetchone() is not None:
-            await db.execute("""UPDATE mailchannels SET channelid = ? WHERE serverid = ?""",
+            await db.execute("""UPDATE mailchannels SET channelid = %s WHERE serverid = %s""",
                              (channel.id, serverid))  # update the old mailchannel
         else:
-            await db.execute("INSERT INTO mailchannels(serverid, channelid) VALUES (?,?)",
+            await db.execute("INSERT INTO mailchannels(serverid, channelid) VALUES (%s,%s)",
                              (serverid, channel.id))  # set the new mailchannel
         await db.commit()  # say "yes i want to do this for sure"
         await db.close()  # close connection

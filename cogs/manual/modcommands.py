@@ -92,13 +92,13 @@ class ModCommands(commands.Cog):
                         async with mysql.connector.connect(path / "system/moderation.db") as db:
                             await db.execute('''CREATE TABLE IF NOT EXISTS current_bans
                                                                    (serverid INTEGER,  userid INTEGER, banfinish INTEGER)''')
-                            dataline = await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = ?''', (
+                            dataline = await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                             ctx.guild.id,))  # get the current prefix for that server, if it exists
                             if await dataline.fetchone() is not None:  # actually check if it exists
-                                await db.execute("""UPDATE current_bans SET banfinish = ? WHERE serverid = ? AND userid = ?""",
+                                await db.execute("""UPDATE current_bans SET banfinish = %s WHERE serverid = %s AND userid = %s""",
                                                  (ban_ends_at, ctx.guild.id, member.id))  # update prefix
                             else:
-                                await db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (?,?,?)",
+                                await db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (%s,%s,%s)",
                                                  (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
                             await db.commit()
                     await ctx.send(f"User {member} Has Been banned!",
@@ -134,7 +134,7 @@ class ModCommands(commands.Cog):
         elif member.top_role >= ctx.me.top_role:
             await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
-            askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
+            askmessage = await ctx.send(f"Are you sure you want to kick {member}%s")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
             confirmation_no_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
@@ -164,7 +164,7 @@ class ModCommands(commands.Cog):
         elif member.top_role >= ctx.me.top_role:
             await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
-            askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
+            askmessage = await ctx.send(f"Are you sure you want to ban {member}%s")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
             no_check_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
