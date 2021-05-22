@@ -1,7 +1,8 @@
+import os
 import pathlib
 
-import aiosqlite
 import discord
+import mysql.connector
 from discord.ext import commands
 
 # gets global path and embed color
@@ -29,67 +30,87 @@ class Settings(discord.ext.commands.Cog):
     async def enable_logging(self, ctx, isenabled: bool):
         if isenabled is True:
             isenabled = 1
-            async with aiosqlite.connect(path / "system/data.db") as db:
-                await db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
-                (serverid INTEGER, setto INTEGER)""")
-                dataline = await db.execute(f'''SELECT serverid FROM settingslogging WHERE serverid = ?''',
-                                            (ctx.guild.id,))  # get the current setting
-                if await dataline.fetchone() is not None:
-                    await db.execute("""UPDATE settingslogging SET setto = ? WHERE serverid = ?""",
-                                     (isenabled, ctx.guild.id))  # update the old setting
-                else:
-                    await db.execute("INSERT INTO settingslogging VALUES (?,?)",
-                                     (ctx.guild.id, isenabled))  # set the new setting
-                await db.commit()  # say "yes i want to do this for sure"
-                await ctx.send("Logging enabled!")
+            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                            user=os.getenv('SQLname'),
+                                                            password=os.getenv('SQLpassword'),
+                                                            database=os.getenv('SQLdatabase')
+                                                            )
+            db = sql_server_connection.cursor()
+            db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
+                (serverid BIGINT, setto BIGINT)""")
+            db.execute(f'''SELECT serverid FROM settingslogging WHERE serverid = %s''',
+                       (ctx.guild.id,))  # get the current setting
+            if db.fetchone():
+                db.execute("""UPDATE settingslogging SET setto = %s WHERE serverid = %s""",
+                           (isenabled, ctx.guild.id))  # update the old setting
+            else:
+                db.execute("INSERT INTO settingslogging VALUES (%s,%s)",
+                           (ctx.guild.id, isenabled))  # set the new setting
+            sql_server_connection.commit()  # say "yes i want to do this for sure"
+            await ctx.send("Logging enabled!")
         else:
             isenabled = 0
-            async with aiosqlite.connect(path / "system/data.db") as db:
-                await db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
-                (serverid INTEGER, setto INTEGER)""")
-                dataline = await db.execute(f'''SELECT serverid FROM settingslogging WHERE serverid = ?''',
-                                            (ctx.guild.id,))  # get the current setting
-                if await dataline.fetchone() is not None:
-                    await db.execute("""UPDATE settingslogging SET setto = ? WHERE serverid = ?""",
-                                     (isenabled, ctx.guild.id))  # update the old setting
-                else:
-                    await db.execute("INSERT INTO settingslogging VALUES (?,?)",
-                                     (ctx.guild.id, isenabled))  # set the setting newly
-                await db.commit()  # say "yes i want to do this for sure"
-                await ctx.send("Logging disabled!")
+            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                            user=os.getenv('SQLname'),
+                                                            password=os.getenv('SQLpassword'),
+                                                            database=os.getenv('SQLdatabase')
+                                                            )
+            db = sql_server_connection.cursor()
+            db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
+                (serverid BIGINT, setto BIGINT)""")
+            db.execute(f'''SELECT serverid FROM settingslogging WHERE serverid = %s''',
+                       (ctx.guild.id,))  # get the current setting
+            if db.fetchone():
+                db.execute("""UPDATE settingslogging SET setto = %s WHERE serverid = %s""",
+                           (isenabled, ctx.guild.id))  # update the old setting
+            else:
+                db.execute("INSERT INTO settingslogging VALUES (%s,%s)",
+                           (ctx.guild.id, isenabled))  # set the setting newly
+            sql_server_connection.commit()  # say "yes i want to do this for sure"
+            await ctx.send("Logging disabled!")
 
     @settings.command()
     async def confirm_bans(self, ctx, isenabled: bool):
         if isenabled is True:
             isenabled = 1
-            async with aiosqlite.connect(path / "system/data.db") as db:
-                await db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
-                (serverid INTEGER, setto INTEGER)""")
-                dataline = await db.execute(f'''SELECT serverid FROM settingsbanconfirm WHERE serverid = ?''',
+            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                            user=os.getenv('SQLname'),
+                                                            password=os.getenv('SQLpassword'),
+                                                            database=os.getenv('SQLdatabase')
+                                                            )
+            db = sql_server_connection.cursor()
+            db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
+                (serverid BIGINT, setto BIGINT)""")
+            db.execute(f'''SELECT serverid FROM settingsbanconfirm WHERE serverid = %s''',
                                             (ctx.guild.id,))  # get the current setting
-                if await dataline.fetchone() is not None:
-                    await db.execute("""UPDATE settingsbanconfirm SET setto = ? WHERE serverid = ?""",
+            if db.fetchone():
+                db.execute("""UPDATE settingsbanconfirm SET setto = %s WHERE serverid = %s""",
                                      (isenabled, ctx.guild.id))  # update the old setting
-                else:
-                    await db.execute("INSERT INTO settingsbanconfirm VALUES (?,?)",
+            else:
+                db.execute("INSERT INTO settingsbanconfirm VALUES (%s,%s)",
                                      (ctx.guild.id, isenabled))  # set the new setting
-                await db.commit()  # say "yes i want to do this for sure"
-                await ctx.send("Ban confirms enabled!")
+            sql_server_connection.commit()  # say "yes i want to do this for sure"
+            await ctx.send("Ban confirms enabled!")
         else:
             isenabled = 0
-            async with aiosqlite.connect(path / "system/data.db") as db:
-                await db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
-                (serverid INTEGER, setto INTEGER)""")
-                dataline = await db.execute(f'''SELECT serverid FROM settingsbanconfirm WHERE serverid = ?''',
+            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                            user=os.getenv('SQLname'),
+                                                            password=os.getenv('SQLpassword'),
+                                                            database=os.getenv('SQLdatabase')
+                                                            )
+            db = sql_server_connection.cursor()
+            db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
+                (serverid BIGINT, setto BIGINT)""")
+            db.execute(f'''SELECT serverid FROM settingsbanconfirm WHERE serverid = %s''',
                                             (ctx.guild.id,))  # get the current setting
-                if await dataline.fetchone() is not None:
-                    await db.execute("""UPDATE settingsbanconfirm SET setto = ? WHERE serverid = ?""",
+            if db.fetchone():
+                db.execute("""UPDATE settingsbanconfirm SET setto = %s WHERE serverid = %s""",
                                      (isenabled, ctx.guild.id))  # update the old setting
-                else:
-                    await db.execute("INSERT INTO settingsbanconfirm VALUES (?,?)",
+            else:
+                db.execute("INSERT INTO settingsbanconfirm VALUES (%s,%s)",
                                      (ctx.guild.id, isenabled))  # set the setting newly
-                await db.commit()  # say "yes i want to do this for sure"
-                await ctx.send("Ban confirms disabled!")
+            sql_server_connection.commit()  # say "yes i want to do this for sure"
+            await ctx.send("Ban confirms disabled!")
 
 
 def setup(glaceon):

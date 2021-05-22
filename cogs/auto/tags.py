@@ -1,7 +1,8 @@
+import os
 import pathlib
 
-import aiosqlite
 import discord
+import mysql.connector
 from discord.ext import commands
 
 path = pathlib.PurePath()
@@ -25,21 +26,29 @@ class TagSystem(commands.Cog):
         for t in tags:
             id = None
             if t != id:
-                db = await aiosqlite.connect(path / "system/tags.db")
-                cur = await db.execute("""SELECT tagcontent FROM tags WHERE serverid = ? AND tagname = ?""", (sid, t))
-                factoid = await cur.fetchone()
-                if factoid is not None:
+                sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                                user=os.getenv('SQLname'),
+                                                                password=os.getenv('SQLpassword'),
+                                                                database=os.getenv('SQLdatabase')
+                                                                )
+                db = sql_server_connection.cursor()
+                db.execute("""SELECT tagcontent FROM tags WHERE serverid = %s AND tagname = %s""", (sid, t))
+                factoid = db.fetchone()
+                if factoid:
                     factoids.append(factoid[0])
                 else:
-                    await ctx.send(f"tag `{t}` not found!")
+                    await ctx.send(f"tag `{t}` not found!", delete_after=15)
                     errors = True
                     break
             else:
                 pings.append(t.mention)
         if errors is False:
-            embed = discord.Embed(colour=embedcolor, description="\n\n".join(factoids))
-            embed.set_footer(text=f"I am a bot, i will not respond to you | Request by {ctx.author}")
-            await ctx.send("Please refer to the below information" + " ".join(pings), embed=embed)
+            if factoids is not []:
+                embed = discord.Embed(colour=embedcolor, description="\n\n".join(factoids))
+                embed.set_footer(text=f"I am a bot, i will not respond to you | Request by {ctx.author}")
+                await ctx.send("Please refer to the below information:" + " ".join(pings), embed=embed)
+            else:
+                await ctx.send("You need to specify a tag!", delete_after=5)
 
     @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tm", "ta"])
     @commands.has_permissions(manage_messages=True)
@@ -47,20 +56,26 @@ class TagSystem(commands.Cog):
         """add or edit tags"""
         await ctx.message.delete()
         serverid = ctx.guild.id
-        async with aiosqlite.connect(path / "system/tags.db") as db:
-            await db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                   (serverid INTEGER, tagname TEXT, tagcontent TEXT)''')
-        db = await aiosqlite.connect(path / "system/tags.db")
-        cur = await db.execute(f'''SELECT serverid FROM tags WHERE serverid = ? AND tagname = ?''', (serverid, name))
-        if await cur.fetchone() is not None:
-            await db.execute("""UPDATE tags SET tagcontent = ? WHERE serverid = ? AND tagname = ?""",
-                             (contents, serverid, name))
+        sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                        user=os.getenv('SQLname'),
+                                                        password=os.getenv('SQLpassword'),
+                                                        database=os.getenv('SQLdatabase')
+                                                        )
+        db = sql_server_connection.cursor()
+        if len(contents) > 1900:
+            await ctx.send("That factoid is too long!")
         else:
-            await db.execute("""INSERT INTO tags(serverid, tagname, tagcontent) VALUES (?,?,?)""",
-                             (serverid, name, contents))
-        await db.commit()
-        await db.close()
-        await ctx.send(f"Tag added with name `{name}` and contents `{contents}`", delete_after=10)
+            db.execute('''CREATE TABLE IF NOT EXISTS tags
+                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
+            db.execute(f'''SELECT serverid FROM tags WHERE serverid = %s AND tagname = %s''', (serverid, name))
+            if db.fetchone():
+                db.execute("""UPDATE tags SET tagcontent = %s WHERE serverid = %s AND tagname = %s""",
+                           (contents, serverid, name))
+            else:
+                db.execute("""INSERT INTO tags(serverid, tagname, tagcontent) VALUES (%s,%s,%s)""",
+                           (serverid, name, contents))
+            sql_server_connection.commit()
+            await ctx.send(f"Tag added with name `{name}` and contents `{contents}`", delete_after=10)
 
     @commands.command(aliases=["trm", "tagremove"])
     @commands.has_permissions(manage_messages=True)
@@ -68,22 +83,32 @@ class TagSystem(commands.Cog):
         """Remove a tag"""
         await ctx.message.delete()
         sid = ctx.guild.id
-        async with aiosqlite.connect(path / "system/tags.db") as db:
-            await db.execute("""DELETE FROM tags WHERE serverid = ? AND tagname = ?""", (sid, name))
-            await db.commit()
-            await ctx.send(f"tag `{name}` deleted", delete_after=10)
+        sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                        user=os.getenv('SQLname'),
+                                                        password=os.getenv('SQLpassword'),
+                                                        database=os.getenv('SQLdatabase')
+                                                        )
+        db = sql_server_connection.cursor()
+        db.execute("""DELETE FROM tags WHERE serverid = %s AND tagname = %s""", (sid, name))
+        sql_server_connection.commit()
+        await ctx.send(f"tag `{name}` deleted", delete_after=10)
 
     @commands.command(aliases=["tlist", "tl", "taglist"])
     async def tagslist(self, ctx):
         """list the tags on this server"""
         await ctx.message.delete()
         sid = ctx.guild.id
-        db = await aiosqlite.connect(path / "system/tags.db")
-        cur = await db.execute("""SELECT tagname FROM tags WHERE serverid = ?""", (sid,))
-        factoids = await cur.fetchall()
-        try:
+        sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                        user=os.getenv('SQLname'),
+                                                        password=os.getenv('SQLpassword'),
+                                                        database=os.getenv('SQLdatabase')
+                                                        )
+        db = sql_server_connection.cursor()
+        db.execute("""SELECT tagname FROM tags WHERE serverid = %s""", (sid,))
+        factoids = db.fetchall()
+        if factoids:
             await ctx.send('`' + "`, `".join([i for (i,) in factoids]) + '`')
-        except discord.HTTPException:
+        else:
             await ctx.send(f"This guild has no tags!")
 
 
