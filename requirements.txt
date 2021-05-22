@@ -3,5 +3,3 @@ mysql-connector-python
 emoji
 python-dotenv
 requests
-python-dotenv
-requests
