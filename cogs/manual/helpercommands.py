@@ -106,7 +106,7 @@ class HelperCommands(commands.Cog):
         if time is None:
             time = "when it is manually revoked."
         else:
-            time = "in" + time
+            time = "in " + time
         try:
             await member.send(f"You have been muted in: {guild.name} for: {reason}. Your mute will expire {time}")
         except discord.Forbidden:
