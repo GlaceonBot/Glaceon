@@ -2,8 +2,8 @@ import os
 import pathlib
 import shutil
 
-import aiosqlite
 import discord
+import mysql.connector
 import requests
 from discord.ext import commands
 
@@ -37,17 +37,21 @@ class BotSystem(commands.Cog):
     async def prefix(self, ctx, newprefix):  # context and what we should set the new prefix to
         """Sets the bot prefix for this server"""
         serverid = ctx.guild.id  # gets serverid for convinience
-        db = await aiosqlite.connect(path / 'system/data.db')  # connect to our server data db
-        dataline = await db.execute(
+        sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                        user=os.getenv('SQLname'),
+                                                        password=os.getenv('SQLpassword'),
+                                                        database=os.getenv('SQLdatabase')
+                                                        )
+        db = sql_server_connection.cursor()  # connect to our server data db
+        db.execute(
             f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')  # get the current prefix for that server, if it exists
-        if await dataline.fetchone() is not None:  # actually check if it exists
-            await db.execute("""UPDATE prefixes SET prefix = ? WHERE serverid = ?""",
-                             (newprefix, serverid))  # update prefix
+        if db.fetchone():  # actually check if it exists
+            db.execute("""UPDATE prefixes SET prefix = %s WHERE serverid = %s""",
+                       (newprefix, serverid))  # update prefix
         else:
-            await db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (?,?)",
-                             (serverid, newprefix))  # set new prefix
-        await db.commit()  # say "yes i want to do this for sure"
-        await db.close()  # close connection
+            db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (%s,%s)",
+                       (serverid, newprefix))  # set new prefix
+        sql_server_connection.commit()  # close connection
         await ctx.send(f"Prefix set to {newprefix}")  # tell admin what happened
 
     @commands.command(
@@ -56,19 +60,23 @@ class BotSystem(commands.Cog):
         administrator=True)  # requires that the person issuing the command has administrator perms
     async def modmailsetup(self, ctx, channel: discord.TextChannel):  # there's the textchannel constructor again
         serverid = ctx.guild.id  # get serverid for convience
-        db = await aiosqlite.connect(path / 'system/data.db')  # connect to the sqlite db
-        await db.execute('''CREATE TABLE IF NOT EXISTS mailchannels
+        sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                        user=os.getenv('SQLname'),
+                                                        password=os.getenv('SQLpassword'),
+                                                        database=os.getenv('SQLdatabase')
+                                                        )
+        db = sql_server_connection.cursor()  # connect to the sqlite db
+        db.execute('''CREATE TABLE IF NOT EXISTS mailchannels
                            (serverid BIGINT, channelid BIGINT)''')  # set up mailchannel system
-        dataline = await db.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = ?''',
+        db.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = %s''',
                                     (serverid,))  # get the mailchannels
-        if dataline.fetchone() is not None:
-            await db.execute("""UPDATE mailchannels SET channelid = ? WHERE serverid = ?""",
+        if db.fetchone():
+            db.execute("""UPDATE mailchannels SET channelid = %s WHERE serverid = %s""",
                              (channel.id, serverid))  # update the old mailchannel
         else:
-            await db.execute("INSERT INTO mailchannels(serverid, channelid) VALUES (?,?)",
+            db.execute("INSERT INTO mailchannels(serverid, channelid) VALUES (%s,%s)",
                              (serverid, channel.id))  # set the new mailchannel
-        await db.commit()  # say "yes i want to do this for sure"
-        await db.close()  # close connection
+        sql_server_connection.commit()  # say "yes i want to do this for sure"
         await ctx.send(f"ModMail channel is now {channel}")
 
     @commands.Cog.listener()

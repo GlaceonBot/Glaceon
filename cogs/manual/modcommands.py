@@ -1,8 +1,10 @@
 import asyncio
+import os
 import pathlib
+from datetime import datetime
 
-import aiosqlite
 import discord
+import mysql.connector
 from discord.ext import commands
 
 path = pathlib.PurePath()
@@ -21,15 +23,20 @@ class ModCommands(commands.Cog):
         yesmoji = '<:allow:843248140551192606>'
 
     async def are_ban_confirms_enabled(self, message):
-        async with aiosqlite.connect(path / "system/data.db") as db:
-            await db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
-                (serverid INTEGER, setto INTEGER)""")
-            cur = await db.execute(f'''SELECT setto FROM settingsbanconfirm WHERE serverid = {message.guild.id}''')
-            settings = await cur.fetchone()
-            if settings is not None:
-                return settings[0]
-            else:
-                return 1
+        sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                        user=os.getenv('SQLname'),
+                                                        password=os.getenv('SQLpassword'),
+                                                        database=os.getenv('SQLdatabase')
+                                                        )
+        db = sql_server_connection.cursor()
+        db.execute("""CREATE TABLE IF NOT EXISTS settings_ban_confirm 
+                (serverid BIGINT, setto BIGINT)""")
+        db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
+        settings = await db.fetchone()
+        if settings:
+            return settings[0]
+        else:
+            return 1
 
     async def if_no_reacted(self, ctx, askmessage):  # what should be done if the user reacts with no
         def added_no_emoji_check(reaction, user):  # the actual check
@@ -48,7 +55,8 @@ class ModCommands(commands.Cog):
             except discord.HTTPException:
                 pass
 
-    async def if_yes_reacted(self, ctx, askmessage, member, reason, ban):  # If yes is reacted. Takes params for the
+    async def if_yes_reacted(self, ctx, askmessage, member, reason, ban,
+                             time):  # If yes is reacted. Takes params for the
         # message that asked, the member who should be banned, the reason for the action, and weather it is a kick or
         # a ban
         def added_yes_emoji_check(reaction, user):  # the actual check
@@ -71,6 +79,39 @@ class ModCommands(commands.Cog):
                 try:
                     await member.ban(reason=reason,
                                      delete_message_days=0)  # actually bans user, does not delete history
+                    if time is not None:
+                        if time.lower().endswith("y"):
+                            revoke_in_secs = int(time[:-1]) * 31536000
+                        elif time.lower().endswith("w"):
+                            revoke_in_secs = int(time[:-1]) * 604800
+                        elif time.lower().endswith("d"):
+                            revoke_in_secs = int(time[:-1]) * 86400
+                        elif time.lower().endswith("h"):
+                            revoke_in_secs = int(time[:-1]) * 3600
+                        elif time.lower().endswith("m"):
+                            revoke_in_secs = int(time[:-1]) * 60
+                        elif time.lower().endswith("s"):
+                            revoke_in_secs = int(time[:-1])
+                        else:
+                            revoke_in_secs = -1
+                        ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
+                        sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                                        user=os.getenv('SQLname'),
+                                                                        password=os.getenv('SQLpassword'),
+                                                                        database=os.getenv('SQLdatabase')
+                                                                        )
+                        db = sql_server_connection.cursor()
+                        db.execute('''CREATE TABLE IF NOT EXISTS current_bans
+                                                                   (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
+                        db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
+                            ctx.guild.id,))  # get the current prefix for that server, if it exists
+                        if db.fetchone():  # actually check if it exists
+                            db.execute("""UPDATE current_bans SET banfinish = %s WHERE serverid = %s AND userid = %s""",
+                                       (ban_ends_at, ctx.guild.id, member.id))  # update prefix
+                        else:
+                            db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (%s,%s,%s)",
+                                       (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
+                        sql_server_connection.commit()
                     await ctx.send(f"User {member} Has Been banned!",
                                    delete_after=5)  # says in chat that the user was banned successfully, deletes
                     # after 5s
@@ -104,12 +145,12 @@ class ModCommands(commands.Cog):
         elif member.top_role >= ctx.me.top_role:
             await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
-            askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
+            askmessage = await ctx.send(f"Are you sure you want to kick {member}%s")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
             confirmation_no_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
-            # creates async task for yes
-            confirmation_yes_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, False))
+            confirmation_yes_task = asyncio.create_task(
+                self.if_yes_reacted(ctx, askmessage, member, reason, False, time=None))  # creates async task for yes
             await confirmation_no_task  # starts no task
             await confirmation_yes_task  # starts yes task
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 0:
@@ -123,7 +164,7 @@ class ModCommands(commands.Cog):
     @commands.command(aliases=["b"])
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, *, reason="No reason specified."):
+    async def ban(self, ctx, member: discord.Member, time, *, reason="No reason specified."):
         """Bans a user."""
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
@@ -135,12 +176,12 @@ class ModCommands(commands.Cog):
         elif member.top_role >= ctx.me.top_role:
             await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
-            askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
+            askmessage = await ctx.send(f"Are you sure you want to ban {member}%s")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
             no_check_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
             # creates async task for yes
-            yes_check_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, True))
+            yes_check_task = asyncio.create_task(self.if_yes_reacted(ctx, askmessage, member, reason, True, time))
             await no_check_task  # starts no task
             await yes_check_task  # starts yes task
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 0:

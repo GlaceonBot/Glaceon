@@ -1,7 +1,14 @@
+import os
+import pathlib
+from datetime import datetime
+
 import discord
+import mysql.connector
 from discord.ext import commands
 
 embedcolor = 0xadd8e6
+
+path = pathlib.PurePath()
 
 
 class HelperCommands(commands.Cog):
@@ -43,10 +50,42 @@ class HelperCommands(commands.Cog):
 
     @commands.command(description="Mutes the specified user.")
     @commands.has_permissions(manage_messages=True)
-    async def mute(self, ctx, member: discord.Member, *, reason="No reason specified"):
+    async def mute(self, ctx, member: discord.Member, time, *, reason="No reason specified"):
         """Mute a user. Optionally has a reason."""
         await ctx.message.delete()
-        time = None  # just for now, till i figure out when to trigger unmute-checks
+        if time is not None:
+            if time.lower().endswith("y"):
+                revoke_in_secs = int(time[:-1]) * 31536000
+            elif time.lower().endswith("w"):
+                revoke_in_secs = int(time[:-1]) * 604800
+            elif time.lower().endswith("d"):
+                revoke_in_secs = int(time[:-1]) * 86400
+            elif time.lower().endswith("h"):
+                revoke_in_secs = int(time[:-1]) * 3600
+            elif time.lower().endswith("m"):
+                revoke_in_secs = int(time[:-1]) * 60
+            elif time.lower().endswith("s"):
+                revoke_in_secs = int(time[:-1])
+            else:
+                revoke_in_secs = -1
+            ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
+            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                            user=os.getenv('SQLname'),
+                                                            password=os.getenv('SQLpassword'),
+                                                            database=os.getenv('SQLdatabase')
+                                                            )
+            db = sql_server_connection.cursor()
+            db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
+                                                       (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
+            db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
+                ctx.guild.id,))  # get the current prefix for that server, if it exists
+            if db.fetchone():  # actually check if it exists
+                db.execute("""UPDATE current_mutes SET mutefinish = %s WHERE serverid = %s AND userid = %s""",
+                           (ban_ends_at, ctx.guild.id, member.id))  # update prefix
+            else:
+                db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
+                           (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
+            sql_server_connection.commit()
         guild = ctx.guild
         muted_role = discord.utils.get(guild.roles, name="Muted")
 
@@ -66,6 +105,8 @@ class HelperCommands(commands.Cog):
             ctx.send("Whoops! I don't have the `manage roles` permission!")
         if time is None:
             time = "when it is manually revoked."
+        else:
+            time = "in" + time
         try:
             await member.send(f"You have been muted in: {guild.name} for: {reason}. Your mute will expire {time}")
         except discord.Forbidden:

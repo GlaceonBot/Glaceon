@@ -1,6 +1,7 @@
 discord
-aiosqlite
+mysql-connector-python
 emoji
-aiofile
+python-dotenv
+requests
 python-dotenv
 requests
