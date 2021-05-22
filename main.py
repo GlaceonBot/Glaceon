@@ -172,8 +172,9 @@ async def on_command_error(ctx, error):
         traceback_text = ''.join(lines)
 
         # now we can send it to the user
-        await ctx.send("Error:\n```" + str(
-            traceback_text) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
+        bug_channel = glaceon.get_channel(845453425722261515)
+        await bug_channel.send("```\n" + str(traceback_text) + "\n```")
+        await ctx.send("Error!\n```" + str(error) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
                        delete_after=30)
 
 
