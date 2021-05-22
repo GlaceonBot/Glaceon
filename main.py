@@ -77,7 +77,7 @@ class Help(commands.MinimalHelpCommand):
 # Sets the discord intents to all
 intents = discord.Intents().all()
 # defines the glaceon class as an autoshardedbot with the prefixgetter prefix and case-insensitive commands
-glaceon = commands.AutoShardedBot(command_prefix=prefixgetter, case_insensitive=True, intents=intents, help_command=Help(), activity=discord.Activity(type=discord.ActivityType.watching, name="glaceon.xyz"), status=discord.Status.do_not_disturb)
+glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, intents=intents, help_command=Help(), activity=discord.Activity(type=discord.ActivityType.watching, name="glaceon.xyz"), status=discord.Status.do_not_disturb)
 # global color for embeds
 embedcolor = 0xadd8e6
 
