@@ -1,10 +1,12 @@
-import discord
-from discord.ext import commands
-import mysql.connector
+import os
 import pathlib
 from datetime import datetime
-embedcolor = 0xadd8e6
 
+import discord
+import mysql.connector
+from discord.ext import commands
+
+embedcolor = 0xadd8e6
 
 path = pathlib.PurePath()
 
@@ -67,20 +69,25 @@ class HelperCommands(commands.Cog):
             else:
                 revoke_in_secs = -1
             ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
-            async with mysql.connector.connect(path / "system/moderation.db") as db:
-                await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
+            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                            user=os.getenv('SQLname'),
+                                                            password=os.getenv('SQLpassword'),
+                                                            database=os.getenv('SQLdatabase')
+                                                            )
+            db = sql_server_connection.cursor()
+            db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
                                                        (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
-                dataline = await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
-                    ctx.guild.id,))  # get the current prefix for that server, if it exists
-                if await dataline.fetchone() is not None:  # actually check if it exists
-                    await db.execute("""UPDATE current_mutes SET mutefinish = %s WHERE serverid = %s AND userid = %s""",
-                                     (ban_ends_at, ctx.guild.id, member.id))  # update prefix
-                else:
-                    await db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
-                                     (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
-                await db.commit()
+            db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
+                ctx.guild.id,))  # get the current prefix for that server, if it exists
+            if db.fetchone() is not None:  # actually check if it exists
+                db.execute("""UPDATE current_mutes SET mutefinish = %s WHERE serverid = %s AND userid = %s""",
+                                 (ban_ends_at, ctx.guild.id, member.id))  # update prefix
+            else:
+                db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
+                                 (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
+            sql_server_connection.commit()
         guild = ctx.guild
-        muted_role = discord.utils.get(guild.roles, name="Muted")
+        muted_role = await discord.utils.get(guild.roles, name="Muted")
 
         if not muted_role:
             muted_role = await guild.create_role(name="Muted", permissions=discord.Permissions(66560))
