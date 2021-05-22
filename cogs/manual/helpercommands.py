@@ -87,7 +87,7 @@ class HelperCommands(commands.Cog):
                            (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
             sql_server_connection.commit()
         guild = ctx.guild
-        muted_role = await discord.utils.get(guild.roles, name="Muted")
+        muted_role = discord.utils.get(guild.roles, name="Muted")
 
         if not muted_role:
             muted_role = await guild.create_role(name="Muted", permissions=discord.Permissions(66560))
