@@ -62,17 +62,20 @@ class TagSystem(commands.Cog):
                                                         database=os.getenv('SQLdatabase')
                                                         )
         db = sql_server_connection.cursor()
-        db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
-        db.execute(f'''SELECT serverid FROM tags WHERE serverid = %s AND tagname = %s''', (serverid, name))
-        if db.fetchone():
-            db.execute("""UPDATE tags SET tagcontent = %s WHERE serverid = %s AND tagname = %s""",
-                       (contents, serverid, name))
+        if len(contents) > 1900:
+            await ctx.send("That factoid is too long!")
         else:
-            db.execute("""INSERT INTO tags(serverid, tagname, tagcontent) VALUES (%s,%s,%s)""",
-                       (serverid, name, contents))
-        sql_server_connection.commit()
-        await ctx.send(f"Tag added with name `{name}` and contents `{contents}`", delete_after=10)
+            db.execute('''CREATE TABLE IF NOT EXISTS tags
+                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
+            db.execute(f'''SELECT serverid FROM tags WHERE serverid = %s AND tagname = %s''', (serverid, name))
+            if db.fetchone():
+                db.execute("""UPDATE tags SET tagcontent = %s WHERE serverid = %s AND tagname = %s""",
+                           (contents, serverid, name))
+            else:
+                db.execute("""INSERT INTO tags(serverid, tagname, tagcontent) VALUES (%s,%s,%s)""",
+                           (serverid, name, contents))
+            sql_server_connection.commit()
+            await ctx.send(f"Tag added with name `{name}` and contents `{contents}`", delete_after=10)
 
     @commands.command(aliases=["trm", "tagremove"])
     @commands.has_permissions(manage_messages=True)
