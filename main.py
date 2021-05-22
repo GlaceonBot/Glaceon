@@ -1,7 +1,7 @@
 #!/home/gxhut/Glaceon/venv/bin/python3
 import traceback
 import pathlib
-import aiosqlite
+import mysql.connector
 import discord
 import os
 from discord.ext import commands
@@ -24,16 +24,21 @@ async def prefixgetter(_, message):
     except AttributeError:
         return default_prefix
     # connect to the sqlite database for prefixes
-    db = await aiosqlite.connect(path / 'system/data.db')
+    sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                    user=os.getenv('SQLname'),
+                                                    password=os.getenv('SQLpassword'),
+                                                    database=os.getenv('SQLdatabase')
+                                                    )
+    db = sql_server_connection.cursor()
     # make sure everything is set up correctly
-    await db.execute('''CREATE TABLE IF NOT EXISTS prefixes
+    db.execute('''CREATE TABLE IF NOT EXISTS prefixes
                    (serverid BIGINT, prefix TEXT)''')
     # find which prefix matches this specific server id
-    cur = await db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {sid}''')
+    db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {sid}''')
     # fetch the prefix
-    custom_prefix = await cur.fetchone()
+    custom_prefix = db.fetchone()
     # close connection
-    await db.close()
+    db.close()
     # if the custom prefix exists, then send it back, otherwise return the default one
     if custom_prefix:
         return str(custom_prefix[0])

@@ -79,12 +79,12 @@ class HelperCommands(commands.Cog):
                                                        (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
             db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                 ctx.guild.id,))  # get the current prefix for that server, if it exists
-            if db.fetchone() is not None:  # actually check if it exists
+            if db.fetchone():  # actually check if it exists
                 db.execute("""UPDATE current_mutes SET mutefinish = %s WHERE serverid = %s AND userid = %s""",
-                                 (ban_ends_at, ctx.guild.id, member.id))  # update prefix
+                           (ban_ends_at, ctx.guild.id, member.id))  # update prefix
             else:
                 db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
-                                 (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
+                           (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
             sql_server_connection.commit()
         guild = ctx.guild
         muted_role = await discord.utils.get(guild.roles, name="Muted")

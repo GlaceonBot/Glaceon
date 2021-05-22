@@ -1,7 +1,7 @@
 import pathlib
-import aiofile
-import requests
+
 import discord
+import requests
 from discord.ext import commands
 
 embedcolor = 0xadd8e6
@@ -19,6 +19,7 @@ class Info(commands.Cog):
     @commands.command(aliases=['v', 'ver', '-v', '-ver', '-version'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def version(self, ctx):
+        """Current version of the bot"""
         version = requests.get('http://127.0.0.1/version.txt')
         await ctx.send(version.text)
 
@@ -34,7 +35,7 @@ class Info(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def credits(self, ctx):
-        """People who helped with bot <Panda_Love_Purple:832029566427856956>"""
+        """People who helped with bot <:panda_love_purple:845475547437989888>"""
         embed = discord.Embed(colour=embedcolor, title="Credits", description=botcredits)
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed)

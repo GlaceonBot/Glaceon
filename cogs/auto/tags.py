@@ -34,7 +34,7 @@ class TagSystem(commands.Cog):
                 db = sql_server_connection.cursor()
                 db.execute("""SELECT tagcontent FROM tags WHERE serverid = %s AND tagname = %s""", (sid, t))
                 factoid = db.fetchone()
-                if factoid is not None:
+                if factoid:
                     factoids.append(factoid[0])
                 else:
                     await ctx.send(f"tag `{t}` not found!", delete_after=15)
@@ -65,7 +65,7 @@ class TagSystem(commands.Cog):
         db.execute('''CREATE TABLE IF NOT EXISTS tags
                                 (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
         db.execute(f'''SELECT serverid FROM tags WHERE serverid = %s AND tagname = %s''', (serverid, name))
-        if db.fetchone() is not None:
+        if db.fetchone():
             db.execute("""UPDATE tags SET tagcontent = %s WHERE serverid = %s AND tagname = %s""",
                        (contents, serverid, name))
         else:

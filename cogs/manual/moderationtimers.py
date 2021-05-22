@@ -41,7 +41,7 @@ class UnCog(commands.Cog):
                 '''SELECT userid FROM current_bans WHERE serverid = %s AND banfinish >= %s AND banfinish != %s''',
                 (guild.id, current_time, -1))
             member_line = db.fetchone()
-            if member_line is not None:
+            if member_line:
                 member = self.glaceon.get_user(member_line[0])
                 try:
                     await guild.unban(member)
@@ -67,13 +67,13 @@ class UnCog(commands.Cog):
                 '''SELECT userid FROM current_mutes WHERE serverid = %s AND mutefinish >= %s AND mutefinish != %s''',
                 (guild.id, current_time, -1))
             member_line = db.fetchone()
-            if member_line is not None:
+            if member_line:
                 db.execute(
                     '''DELETE FROM current_mutes WHERE serverid = %s AND mutefinish >= %s AND mutefinish != %s''',
                     (guild.id, current_time, -1))
                 member = guild.get_member(member_line[0])
-                print(member)
                 muted_role = discord.utils.get(guild.roles, name="Muted")
+                sql_server_connection.close()
                 try:
                     await member.remove_roles(muted_role)
                 except discord.Forbidden:

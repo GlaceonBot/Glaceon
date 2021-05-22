@@ -37,7 +37,7 @@ class Logger(commands.Cog):  # Logger class
             except AttributeError:
                 return 1
             settings = db.fetchone()
-            if settings is not None:
+            if settings:
                 return settings[0]
             else:
                 return 1

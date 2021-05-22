@@ -33,7 +33,7 @@ class ModCommands(commands.Cog):
                 (serverid BIGINT, setto BIGINT)""")
         db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
         settings = await db.fetchone()
-        if settings is not None:
+        if settings:
             return settings[0]
         else:
             return 1
@@ -105,7 +105,7 @@ class ModCommands(commands.Cog):
                                                                    (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
                         db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                             ctx.guild.id,))  # get the current prefix for that server, if it exists
-                        if db.fetchone() is not None:  # actually check if it exists
+                        if db.fetchone():  # actually check if it exists
                             db.execute("""UPDATE current_bans SET banfinish = %s WHERE serverid = %s AND userid = %s""",
                                        (ban_ends_at, ctx.guild.id, member.id))  # update prefix
                         else:
