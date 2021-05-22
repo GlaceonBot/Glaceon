@@ -50,7 +50,7 @@ class UnCog(commands.Cog):
                 sql_server_connection.close()
                 try:
                     await guild.unban(member)
-                    await member.send(f"You have been unmuted in {guild}!")
+                    await member.send(f"You have been unbanned in {guild}!")
                 except discord.Forbidden:
                     pass
 
