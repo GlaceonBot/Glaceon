@@ -27,7 +27,7 @@ async def prefixgetter(_, message):
     db = await aiosqlite.connect(path / 'system/data.db')
     # make sure everything is set up correctly
     await db.execute('''CREATE TABLE IF NOT EXISTS prefixes
-                   (serverid INTEGER, prefix TEXT)''')
+                   (serverid BIGINT, prefix TEXT)''')
     # find which prefix matches this specific server id
     cur = await db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {sid}''')
     # fetch the prefix
@@ -173,7 +173,7 @@ async def on_command_error(ctx, error):
 
         # now we can send it to the user
         bug_channel = glaceon.get_channel(845453425722261515)
-        await bug_channel.send("```\n" + str(traceback_text) + "\n```")
+        await bug_channel.send("```\n" + str(traceback_text) + "\n```\n Command being invoked: " + ctx.command.name)
         await ctx.send("Error!\n```" + str(error) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
                        delete_after=30)
 

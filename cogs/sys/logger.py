@@ -31,7 +31,7 @@ class Logger(commands.Cog):  # Logger class
                                      ) as sql_server_connection:
             db = sql_server_connection.cursor()
             db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
-                (serverid INTEGER, setto INTEGER)""")
+                (serverid BIGINT, setto BIGINT)""")
             try:
                 db.execute(f'''SELECT setto FROM settingslogging WHERE serverid = {message.guild.id}''')
             except AttributeError:

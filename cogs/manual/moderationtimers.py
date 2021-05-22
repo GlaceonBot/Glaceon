@@ -35,7 +35,7 @@ class UnCog(commands.Cog):
             db = sql_server_connection.cursor()
             # make sure everything is set up correctly
             db.execute('''CREATE TABLE IF NOT EXISTS current_bans
-                                       (serverid INTEGER,  userid INTEGER, banfinish INTEGER)''')
+                                       (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
             # find which prefix matches this specific server id
             db.execute(
                 '''SELECT userid FROM current_bans WHERE serverid = %s AND banfinish >= %s AND banfinish != %s''',
@@ -61,7 +61,7 @@ class UnCog(commands.Cog):
             db = sql_server_connection.cursor()
             # make sure everything is set up correctly
             db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
-                                               (serverid INTEGER,  userid INTEGER, mutefinish INTEGER)''')
+                                               (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
             # find which prefix matches this specific server id
             db.execute(
                 '''SELECT userid FROM current_mutes WHERE serverid = %s AND mutefinish >= %s AND mutefinish != %s''',

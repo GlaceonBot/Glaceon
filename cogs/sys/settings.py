@@ -31,7 +31,7 @@ class Settings(discord.ext.commands.Cog):
             isenabled = 1
             async with mysql.connector.connect(path / "system/data.db") as db:
                 await db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
-                (serverid INTEGER, setto INTEGER)""")
+                (serverid BIGINT, setto BIGINT)""")
                 dataline = await db.execute(f'''SELECT serverid FROM settingslogging WHERE serverid = %s''',
                                             (ctx.guild.id,))  # get the current setting
                 if await dataline.fetchone() is not None:
@@ -46,7 +46,7 @@ class Settings(discord.ext.commands.Cog):
             isenabled = 0
             async with mysql.connector.connect(path / "system/data.db") as db:
                 await db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
-                (serverid INTEGER, setto INTEGER)""")
+                (serverid BIGINT, setto BIGINT)""")
                 dataline = await db.execute(f'''SELECT serverid FROM settingslogging WHERE serverid = %s''',
                                             (ctx.guild.id,))  # get the current setting
                 if await dataline.fetchone() is not None:
@@ -64,7 +64,7 @@ class Settings(discord.ext.commands.Cog):
             isenabled = 1
             async with mysql.connector.connect(path / "system/data.db") as db:
                 await db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
-                (serverid INTEGER, setto INTEGER)""")
+                (serverid BIGINT, setto BIGINT)""")
                 dataline = await db.execute(f'''SELECT serverid FROM settingsbanconfirm WHERE serverid = %s''',
                                             (ctx.guild.id,))  # get the current setting
                 if await dataline.fetchone() is not None:
@@ -79,7 +79,7 @@ class Settings(discord.ext.commands.Cog):
             isenabled = 0
             async with mysql.connector.connect(path / "system/data.db") as db:
                 await db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
-                (serverid INTEGER, setto INTEGER)""")
+                (serverid BIGINT, setto BIGINT)""")
                 dataline = await db.execute(f'''SELECT serverid FROM settingsbanconfirm WHERE serverid = %s''',
                                             (ctx.guild.id,))  # get the current setting
                 if await dataline.fetchone() is not None:

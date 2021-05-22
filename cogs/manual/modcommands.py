@@ -24,7 +24,7 @@ class ModCommands(commands.Cog):
     async def are_ban_confirms_enabled(self, message):
         async with mysql.connector.connect(path / "system/data.db") as db:
             await db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
-                (serverid INTEGER, setto INTEGER)""")
+                (serverid BIGINT, setto BIGINT)""")
             cur = await db.execute(f'''SELECT setto FROM settingsbanconfirm WHERE serverid = {message.guild.id}''')
             settings = await cur.fetchone()
             if settings is not None:
@@ -91,7 +91,7 @@ class ModCommands(commands.Cog):
                         ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
                         async with mysql.connector.connect(path / "system/moderation.db") as db:
                             await db.execute('''CREATE TABLE IF NOT EXISTS current_bans
-                                                                   (serverid INTEGER,  userid INTEGER, banfinish INTEGER)''')
+                                                                   (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
                             dataline = await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                             ctx.guild.id,))  # get the current prefix for that server, if it exists
                             if await dataline.fetchone() is not None:  # actually check if it exists

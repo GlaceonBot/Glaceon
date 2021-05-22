@@ -69,7 +69,7 @@ class HelperCommands(commands.Cog):
             ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
             async with mysql.connector.connect(path / "system/moderation.db") as db:
                 await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
-                                                       (serverid INTEGER,  userid INTEGER, mutefinish INTEGER)''')
+                                                       (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
                 dataline = await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                     ctx.guild.id,))  # get the current prefix for that server, if it exists
                 if await dataline.fetchone() is not None:  # actually check if it exists
