@@ -32,7 +32,7 @@ class ModCommands(commands.Cog):
         db.execute("""CREATE TABLE IF NOT EXISTS settings_ban_confirm 
                 (serverid BIGINT, setto BIGINT)""")
         db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
-        settings = await db.fetchone()
+        settings = db.fetchone()
         if settings:
             return settings[0]
         else:
