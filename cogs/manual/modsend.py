@@ -1,19 +1,16 @@
-import os
 import pathlib
 
 import discord
-import mysql.connector
 from discord.ext import commands
 
 path = pathlib.PurePath()
-embedcolor = 0xadd8e6
 
 
 class ModCommmunications(commands.Cog):
     """Communicate with the mods and for the mods"""
 
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, glaceon):
+        self.glaceon = glaceon
         self._last_member = None
 
     @commands.command(aliases=['staffsay', 'modsay', 'staffsend'])
@@ -26,7 +23,7 @@ class ModCommmunications(commands.Cog):
     @commands.command(aliases=['embed', 'embedsend'])
     @commands.has_permissions(manage_messages=True)
     async def sendembed(self, ctx, title, *, message):
-        embed = discord.Embed(colour=embedcolor, title=title, description=message)
+        embed = discord.Embed(colour=self.glaceon.embedcolor, title=title, description=message)
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed)
 
@@ -35,12 +32,7 @@ class ModCommmunications(commands.Cog):
     async def modmail(self, ctx, *, message):
         """Sends a message TO the moderators"""
         sid = ctx.guild.id
-        sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                        user=os.getenv('SQLname'),
-                                                        password=os.getenv('SQLpassword'),
-                                                        database=os.getenv('SQLdatabase')
-                                                        )
-        db = sql_server_connection.cursor()
+        db = self.glaceon.sql_server_connection.cursor()
         db.execute(f'''SELECT channelid FROM mailchannels WHERE serverid = {sid}''')
         channel = db.fetchone()
         db.close()

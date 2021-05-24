@@ -1,13 +1,10 @@
-import os
 import pathlib
 
 import discord
-import mysql.connector
 from discord.ext import commands
 
 # gets global path and embed color
 path = pathlib.PurePath()
-embedcolor = 0xadd8e6
 
 
 class Settings(discord.ext.commands.Cog):
@@ -30,12 +27,7 @@ class Settings(discord.ext.commands.Cog):
     async def enable_logging(self, ctx, isenabled: bool):
         if isenabled is True:
             isenabled = 1
-            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLname'),
-                                                            password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase')
-                                                            )
-            db = sql_server_connection.cursor()
+            db = self.glaceon.sql_server_connection.cursor()
             db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
                 (serverid BIGINT, setto BIGINT)""")
             db.execute(f'''SELECT serverid FROM settingslogging WHERE serverid = %s''',
@@ -46,16 +38,11 @@ class Settings(discord.ext.commands.Cog):
             else:
                 db.execute("INSERT INTO settingslogging VALUES (%s,%s)",
                            (ctx.guild.id, isenabled))  # set the new setting
-            sql_server_connection.commit()  # say "yes i want to do this for sure"
+            self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
             await ctx.send("Logging enabled!")
         else:
             isenabled = 0
-            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLname'),
-                                                            password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase')
-                                                            )
-            db = sql_server_connection.cursor()
+            db = self.glaceon.sql_server_connection.cursor()
             db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
                 (serverid BIGINT, setto BIGINT)""")
             db.execute(f'''SELECT serverid FROM settingslogging WHERE serverid = %s''',
@@ -73,43 +60,33 @@ class Settings(discord.ext.commands.Cog):
     async def confirm_bans(self, ctx, isenabled: bool):
         if isenabled is True:
             isenabled = 1
-            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLname'),
-                                                            password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase')
-                                                            )
-            db = sql_server_connection.cursor()
+            db = self.glaceon.sql_server_connection.cursor()
             db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
                 (serverid BIGINT, setto BIGINT)""")
             db.execute(f'''SELECT serverid FROM settingsbanconfirm WHERE serverid = %s''',
-                                            (ctx.guild.id,))  # get the current setting
+                       (ctx.guild.id,))  # get the current setting
             if db.fetchone():
                 db.execute("""UPDATE settingsbanconfirm SET setto = %s WHERE serverid = %s""",
-                                     (isenabled, ctx.guild.id))  # update the old setting
+                           (isenabled, ctx.guild.id))  # update the old setting
             else:
                 db.execute("INSERT INTO settingsbanconfirm VALUES (%s,%s)",
-                                     (ctx.guild.id, isenabled))  # set the new setting
-            sql_server_connection.commit()  # say "yes i want to do this for sure"
+                           (ctx.guild.id, isenabled))  # set the new setting
+            self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
             await ctx.send("Ban confirms enabled!")
         else:
             isenabled = 0
-            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLname'),
-                                                            password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase')
-                                                            )
-            db = sql_server_connection.cursor()
+            db = self.glaceon.sql_server_connection.cursor()
             db.execute("""CREATE TABLE IF NOT EXISTS settingsbanconfirm 
                 (serverid BIGINT, setto BIGINT)""")
             db.execute(f'''SELECT serverid FROM settingsbanconfirm WHERE serverid = %s''',
-                                            (ctx.guild.id,))  # get the current setting
+                       (ctx.guild.id,))  # get the current setting
             if db.fetchone():
                 db.execute("""UPDATE settingsbanconfirm SET setto = %s WHERE serverid = %s""",
-                                     (isenabled, ctx.guild.id))  # update the old setting
+                           (isenabled, ctx.guild.id))  # update the old setting
             else:
                 db.execute("INSERT INTO settingsbanconfirm VALUES (%s,%s)",
-                                     (ctx.guild.id, isenabled))  # set the setting newly
-            sql_server_connection.commit()  # say "yes i want to do this for sure"
+                           (ctx.guild.id, isenabled))  # set the setting newly
+            self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
             await ctx.send("Ban confirms disabled!")
 
 

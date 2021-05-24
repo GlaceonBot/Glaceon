@@ -1,9 +1,7 @@
-import os
 import pathlib
 from datetime import datetime
 
 import discord
-import mysql.connector
 from discord.ext import tasks, commands
 from dotenv import load_dotenv
 
@@ -26,13 +24,8 @@ class UnCog(commands.Cog):
     async def unbanner(self):
         current_time = int(datetime.utcnow().timestamp())
         for guild in self.glaceon.guilds:
-            # connect to the sqlite database for prefixes
-            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLname'),
-                                                            password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase')
-                                                            )
-            db = sql_server_connection.cursor()
+            # connect to the sqlite database for data
+            db = self.glaceon.sql_server_connection.cursor()
             # make sure everything is set up correctly
             db.execute('''CREATE TABLE IF NOT EXISTS current_bans
                                                        (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
@@ -46,8 +39,7 @@ class UnCog(commands.Cog):
                     '''DELETE FROM current_bans WHERE serverid = %s AND banfinish <= %s AND banfinish <> %s''',
                     (guild.id, current_time, -1))
                 member = self.glaceon.get_user(member_line[0])
-                sql_server_connection.commit()
-                sql_server_connection.close()
+                self.glaceon.sql_server_connection.commit()
                 try:
                     await guild.unban(member)
                     await member.send(f"You have been unmuted in {guild}!")
@@ -59,12 +51,7 @@ class UnCog(commands.Cog):
         current_time = int(datetime.utcnow().timestamp())
         for guild in self.glaceon.guilds:
             # connect to the sqlite database for prefixes
-            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLname'),
-                                                            password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase')
-                                                            )
-            db = sql_server_connection.cursor()
+            db = self.glaceon.sql_server_connection.cursor()
             # make sure everything is set up correctly
             db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
                                                (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
@@ -79,8 +66,7 @@ class UnCog(commands.Cog):
                     (guild.id, current_time, -1))
                 member = guild.get_member(member_line[0])
                 muted_role = discord.utils.get(guild.roles, name="Muted")
-                sql_server_connection.commit()
-                sql_server_connection.close()
+                self.glaceon.sql_server_connection.commit()
                 try:
                     await member.remove_roles(muted_role)
                     await member.send(f"You have been unmuted in {guild}!")

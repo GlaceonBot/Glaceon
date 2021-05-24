@@ -1,18 +1,17 @@
-import os
 import pathlib
 from datetime import datetime
 
 import discord
-import mysql.connector
 from discord.ext import commands
-
-embedcolor = 0xadd8e6
 
 path = pathlib.PurePath()
 
 
 class HelperCommands(commands.Cog):
     """Commands gated to Manage Messages"""
+
+    def __init__(self, glaceon):
+        self.glaceon = glaceon
 
     @commands.command(aliases=['clean', 'clear'])
     @commands.has_permissions(manage_messages=True)
@@ -27,7 +26,7 @@ class HelperCommands(commands.Cog):
         await ctx.message.delete()
         try:
             await ctx.channel.purge(limit=clear, check=check_func)
-            embed = discord.Embed(colour=embedcolor)
+            embed = discord.Embed(colour=self.glaceon.embedcolor)
             embed.add_field(name="Clear", value="cleared " + str(clear) + " messages")
             embed.set_footer(text=f"Request by {ctx.author}")
             await ctx.send(embed=embed, delete_after=10)
@@ -69,12 +68,7 @@ class HelperCommands(commands.Cog):
             else:
                 revoke_in_secs = -1
             ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
-            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLname'),
-                                                            password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase')
-                                                            )
-            db = sql_server_connection.cursor()
+            db = self.glaceon.sql_server_connection.cursor()
             db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
                                                        (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
             db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
@@ -85,7 +79,7 @@ class HelperCommands(commands.Cog):
             else:
                 db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
                            (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
-            sql_server_connection.commit()
+            self.glaceon.sql_server_connection.commit()
         guild = ctx.guild
         muted_role = discord.utils.get(guild.roles, name="Muted")
 

@@ -3,3 +3,4 @@ mysql-connector-python
 emoji
 python-dotenv
 requests
+python-i18n[YAML]
