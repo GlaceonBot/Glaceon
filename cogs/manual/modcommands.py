@@ -145,7 +145,7 @@ class ModCommands(commands.Cog):
         elif member.top_role >= ctx.me.top_role:
             await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
-            askmessage = await ctx.send(f"Are you sure you want to kick {member}%s")  # asks for confirmation
+            askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
             confirmation_no_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
@@ -176,7 +176,7 @@ class ModCommands(commands.Cog):
         elif member.top_role >= ctx.me.top_role:
             await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
-            askmessage = await ctx.send(f"Are you sure you want to ban {member}%s")  # asks for confirmation
+            askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
             no_check_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
