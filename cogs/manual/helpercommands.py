@@ -89,8 +89,7 @@ class HelperCommands(commands.Cog):
             for channel in guild.channels:
                 await channel.set_permissions(muted_role, speak=False, send_messages=False, read_message_history=True,
                                               read_messages=None)
-        embed = discord.Embed(title="muted", description=f"{member.mention} was muted ",
-                              colour=discord.Colour.light_gray())
+        embed = discord.Embed(color=self.glaceon.embedcolor, title="muted", description=f"{member.mention} was muted ")
         embed.add_field(name="reason:", value=reason, inline=False)
         await ctx.send(embed=embed, delete_after=10)
         try:
@@ -120,8 +119,7 @@ class HelperCommands(commands.Cog):
             await member.send(f" you have been unmuted in: - {ctx.guild.name}")
         except discord.Forbidden:
             pass
-        embed = discord.Embed(title="Unmute", description=f" Unmuted-{member.mention}",
-                              colour=discord.Colour.light_gray())
+        embed = discord.Embed(color=self.glaceon.embedcolor, title="Unmute", description=f" Unmuted-{member.mention}")
         await ctx.send(embed=embed, delete_after=10)
 
 

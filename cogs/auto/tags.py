@@ -70,7 +70,7 @@ class TagSystem(commands.Cog):
         """Remove a tag"""
         await ctx.message.delete()
         sid = ctx.guild.id
-        db = self.glaceon.sql_server_connectionsql_server_connection.cursor()
+        db = self.glaceon.sql_server_connection.cursor()
         db.execute("""DELETE FROM tags WHERE serverid = %s AND tagname = %s""", (sid, name))
         self.glaceon.sql_server_connection.commit()
         await ctx.send(f"tag `{name}` deleted", delete_after=10)

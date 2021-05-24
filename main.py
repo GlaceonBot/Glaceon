@@ -49,7 +49,7 @@ class Help(commands.MinimalHelpCommand):
     # actually sends the help
     async def send_bot_help(self, mapping):
         # creates embed
-        embed = discord.Embed(title="Help")
+        embed = discord.Embed(color=glaceon.embedcolor, title="Help")
         for cog, commands in mapping.items():
             # sorts commands
             filtered = await self.filter_commands(commands, sort=True)
@@ -64,7 +64,7 @@ class Help(commands.MinimalHelpCommand):
         # for when it breaks
 
     async def send_error_message(self, error):
-        embed = discord.Embed(title="Error", value=error)
+        embed = discord.Embed(color=glaceon.embedcolor, title="Error", value=error)
         channel = self.get_destination()
         await channel.send(embed=embed)
 
