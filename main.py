@@ -71,7 +71,7 @@ class Help(commands.MinimalHelpCommand):
 
 # Sets the discord intents to all
 intents = discord.Intents().all()
-# defines the glaceon class as an autoshardedbot with the prefixgetter prefix and case-insensitive commands
+# defines the glaceon class as a bot with the prefixgetter prefix and case-insensitive commands
 glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, intents=intents,
                        help_command=Help(),
                        activity=discord.Activity(type=discord.ActivityType.watching, name="glaceon.xyz"),
@@ -86,6 +86,7 @@ try:
 except mysql.connector.errors.Error:
     print("There was an unknown SQL error, the database or server does not exist!")
     exit(0)
+
 # global color for embeds
 glaceon.embedcolor = 0xadd8e6
 

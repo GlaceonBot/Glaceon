@@ -42,7 +42,7 @@ class UnCog(commands.Cog):
                 self.glaceon.sql_server_connection.commit()
                 try:
                     await guild.unban(member)
-                    await member.send(f"You have been unmuted in {guild}!")
+                    await member.send(f"You have been unbanned in {guild}!")
                 except discord.Forbidden:
                     pass
 

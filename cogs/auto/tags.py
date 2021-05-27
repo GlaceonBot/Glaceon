@@ -24,6 +24,9 @@ class TagSystem(commands.Cog):
             id = None
             if t != id:
                 db = self.glaceon.sql_server_connection.cursor()
+
+                db.execute('''CREATE TABLE IF NOT EXISTS tags
+                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
                 db.execute("""SELECT tagcontent FROM tags WHERE serverid = %s AND tagname = %s""", (sid, t))
                 factoid = db.fetchone()
                 if factoid:
@@ -71,6 +74,9 @@ class TagSystem(commands.Cog):
         await ctx.message.delete()
         sid = ctx.guild.id
         db = self.glaceon.sql_server_connection.cursor()
+
+        db.execute('''CREATE TABLE IF NOT EXISTS tags
+                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
         db.execute("""DELETE FROM tags WHERE serverid = %s AND tagname = %s""", (sid, name))
         self.glaceon.sql_server_connection.commit()
         await ctx.send(f"tag `{name}` deleted", delete_after=10)
@@ -81,6 +87,9 @@ class TagSystem(commands.Cog):
         await ctx.message.delete()
         sid = ctx.guild.id
         db = self.glaceon.sql_server_connection.cursor()
+
+        db.execute('''CREATE TABLE IF NOT EXISTS tags
+                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
         db.execute("""SELECT tagname FROM tags WHERE serverid = %s""", (sid,))
         factoids = db.fetchall()
         if factoids:
