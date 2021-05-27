@@ -2,6 +2,7 @@ import pathlib
 from datetime import datetime
 
 import discord
+import typing
 from discord.ext import commands
 
 path = pathlib.PurePath()
@@ -49,7 +50,7 @@ class HelperCommands(commands.Cog):
 
     @commands.command(description="Mutes the specified user.")
     @commands.has_permissions(manage_messages=True)
-    async def mute(self, ctx, member: discord.Member, time, *, reason="No reason specified"):
+    async def mute(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *, reason="No reason specified"):
         """Mute a user. Optionally has a reason."""
         await ctx.message.delete()
         if time is not None:

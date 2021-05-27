@@ -1,5 +1,6 @@
 import asyncio
 import pathlib
+import typing
 from datetime import datetime
 
 import discord
@@ -25,7 +26,7 @@ class ModCommands(commands.Cog):
         db.execute("""CREATE TABLE IF NOT EXISTS settings_ban_confirm 
                 (serverid BIGINT, setto BIGINT)""")
         db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
-        settings = await db.fetchone()
+        settings = db.fetchone()
         if settings:
             return settings[0]
         else:
@@ -133,7 +134,7 @@ class ModCommands(commands.Cog):
         elif member.top_role >= ctx.me.top_role:
             await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
-            askmessage = await ctx.send(f"Are you sure you want to kick {member}%s")  # asks for confirmation
+            askmessage = await ctx.send(f"Are you sure you want to kick {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
             confirmation_no_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
@@ -152,7 +153,8 @@ class ModCommands(commands.Cog):
     @commands.command(aliases=["b"])
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, time, *, reason="No reason specified."):
+    async def ban(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *,
+                  reason="No reason specified."):
         """Bans a user."""
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
@@ -164,7 +166,7 @@ class ModCommands(commands.Cog):
         elif member.top_role >= ctx.me.top_role:
             await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
-            askmessage = await ctx.send(f"Are you sure you want to ban {member}%s")  # asks for confirmation
+            askmessage = await ctx.send(f"Are you sure you want to ban {member}?")  # asks for confirmation
             await askmessage.add_reaction(yesmoji)  # add reaction for yes
             await askmessage.add_reaction(nomoji)  # add reaction for no
             no_check_task = asyncio.create_task(self.if_no_reacted(ctx, askmessage))  # creates async task for no
