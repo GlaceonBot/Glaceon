@@ -1,7 +1,7 @@
 #!/bin/bash
-pkill -f '/home/gxhut/Glaceon/venv/bin/python3 ./main.py'
 git pull
 ./venv/bin/python3 -m pip install -r requirements.txt
 chmod +x ./main.py
+pkill -f '/home/gxhut/Glaceon/venv/bin/python3 ./main.py'
 ./main.py &
 disown %1
