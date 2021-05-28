@@ -5,6 +5,7 @@ from discord.ext import commands
 
 class Antispam(commands.Cog):
     """Antispam coming soon :D"""
+
     def __init__(self, glaceon):
         self.glaceon = glaceon
 

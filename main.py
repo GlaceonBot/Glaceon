@@ -1,12 +1,12 @@
 #!/home/gxhut/Glaceon/venv/bin/python3
-import traceback
-import pathlib
-import mysql.connector
-import discord
 import os
+import pathlib
+import traceback
+
+import discord
+import mysql.connector
 from discord.ext import commands
 from dotenv import load_dotenv
-
 
 # load the token to its variable
 load_dotenv()
@@ -23,13 +23,7 @@ async def prefixgetter(_, message):
         sid = message.guild.id
     except AttributeError:
         return default_prefix
-    # connect to the sqlite database for prefixes
-    sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                    user=os.getenv('SQLname'),
-                                                    password=os.getenv('SQLpassword'),
-                                                    database=os.getenv('SQLdatabase')
-                                                    )
-    db = sql_server_connection.cursor()
+    db = glaceon.sql_server_connection.cursor()
     # make sure everything is set up correctly
     db.execute('''CREATE TABLE IF NOT EXISTS prefixes
                    (serverid BIGINT, prefix TEXT)''')
@@ -55,7 +49,7 @@ class Help(commands.MinimalHelpCommand):
     # actually sends the help
     async def send_bot_help(self, mapping):
         # creates embed
-        embed = discord.Embed(title="Help")
+        embed = discord.Embed(color=glaceon.embedcolor, title="Help")
         for cog, commands in mapping.items():
             # sorts commands
             filtered = await self.filter_commands(commands, sort=True)
@@ -68,18 +62,33 @@ class Help(commands.MinimalHelpCommand):
         await channel.send(embed=embed)
 
         # for when it breaks
+
     async def send_error_message(self, error):
-        embed = discord.Embed(title="Error", value=error)
+        embed = discord.Embed(color=glaceon.embedcolor, title="Error", value=error)
         channel = self.get_destination()
         await channel.send(embed=embed)
 
 
 # Sets the discord intents to all
 intents = discord.Intents().all()
-# defines the glaceon class as an autoshardedbot with the prefixgetter prefix and case-insensitive commands
-glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, intents=intents, help_command=Help(), activity=discord.Activity(type=discord.ActivityType.watching, name="glaceon.xyz"), status=discord.Status.do_not_disturb)
+# defines the glaceon class as a bot with the prefixgetter prefix and case-insensitive commands
+glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, intents=intents,
+                       help_command=Help(),
+                       activity=discord.Activity(type=discord.ActivityType.watching, name="glaceon.xyz"),
+                       status=discord.Status.do_not_disturb)
+# global sql connection
+try:
+    glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                                                            user=os.getenv('SQLname'),
+                                                            password=os.getenv('SQLpassword'),
+                                                            database=os.getenv('SQLdatabase')
+                                                            )
+except mysql.connector.errors.Error:
+    print("There was an unknown SQL error, the database or server does not exist!")
+    exit(0)
+
 # global color for embeds
-embedcolor = 0xadd8e6
+glaceon.embedcolor = 0xadd8e6
 
 
 @glaceon.event
@@ -179,7 +188,8 @@ async def on_command_error(ctx, error):
         # now we can send it to the user
         bug_channel = glaceon.get_channel(845453425722261515)
         await bug_channel.send("```\n" + str(traceback_text) + "\n```\n Command being invoked: " + ctx.command.name)
-        await ctx.send("Error!\n```" + str(error) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
+        await ctx.send("Error!\n```" + str(
+            error) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
                        delete_after=30)
 
 
@@ -194,6 +204,7 @@ async def reload(ctx):
         glaceon.unload_extension(ext)
         glaceon.load_extension(ext)
     await ctx.send("Reloaded cogs!")
+
 
 # runs the bot with a token.
 glaceon.run(TOKEN)

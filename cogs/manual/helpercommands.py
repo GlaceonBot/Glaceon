@@ -1,18 +1,18 @@
-import os
 import pathlib
 from datetime import datetime
 
 import discord
-import mysql.connector
+import typing
 from discord.ext import commands
-
-embedcolor = 0xadd8e6
 
 path = pathlib.PurePath()
 
 
 class HelperCommands(commands.Cog):
     """Commands gated to Manage Messages"""
+
+    def __init__(self, glaceon):
+        self.glaceon = glaceon
 
     @commands.command(aliases=['clean', 'clear'])
     @commands.has_permissions(manage_messages=True)
@@ -27,7 +27,7 @@ class HelperCommands(commands.Cog):
         await ctx.message.delete()
         try:
             await ctx.channel.purge(limit=clear, check=check_func)
-            embed = discord.Embed(colour=embedcolor)
+            embed = discord.Embed(colour=self.glaceon.embedcolor)
             embed.add_field(name="Clear", value="cleared " + str(clear) + " messages")
             embed.set_footer(text=f"Request by {ctx.author}")
             await ctx.send(embed=embed, delete_after=10)
@@ -50,7 +50,7 @@ class HelperCommands(commands.Cog):
 
     @commands.command(description="Mutes the specified user.")
     @commands.has_permissions(manage_messages=True)
-    async def mute(self, ctx, member: discord.Member, time, *, reason="No reason specified"):
+    async def mute(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *, reason="No reason specified"):
         """Mute a user. Optionally has a reason."""
         await ctx.message.delete()
         if time is not None:
@@ -69,12 +69,7 @@ class HelperCommands(commands.Cog):
             else:
                 revoke_in_secs = -1
             ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
-            sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLname'),
-                                                            password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase')
-                                                            )
-            db = sql_server_connection.cursor()
+            db = self.glaceon.sql_server_connection.cursor()
             db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
                                                        (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
             db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
@@ -85,7 +80,7 @@ class HelperCommands(commands.Cog):
             else:
                 db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
                            (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
-            sql_server_connection.commit()
+            self.glaceon.sql_server_connection.commit()
         guild = ctx.guild
         muted_role = discord.utils.get(guild.roles, name="Muted")
 
@@ -95,8 +90,7 @@ class HelperCommands(commands.Cog):
             for channel in guild.channels:
                 await channel.set_permissions(muted_role, speak=False, send_messages=False, read_message_history=True,
                                               read_messages=None)
-        embed = discord.Embed(title="muted", description=f"{member.mention} was muted ",
-                              colour=discord.Colour.light_gray())
+        embed = discord.Embed(color=self.glaceon.embedcolor, title="muted", description=f"{member.mention} was muted ")
         embed.add_field(name="reason:", value=reason, inline=False)
         await ctx.send(embed=embed, delete_after=10)
         try:
@@ -106,7 +100,7 @@ class HelperCommands(commands.Cog):
         if time is None:
             time = "when it is manually revoked."
         else:
-            time = "in" + time
+            time = "in " + time
         try:
             await member.send(f"You have been muted in: {guild.name} for: {reason}. Your mute will expire {time}")
         except discord.Forbidden:
@@ -126,8 +120,7 @@ class HelperCommands(commands.Cog):
             await member.send(f" you have been unmuted in: - {ctx.guild.name}")
         except discord.Forbidden:
             pass
-        embed = discord.Embed(title="Unmute", description=f" Unmuted-{member.mention}",
-                              colour=discord.Colour.light_gray())
+        embed = discord.Embed(color=self.glaceon.embedcolor, title="Unmute", description=f" Unmuted-{member.mention}")
         await ctx.send(embed=embed, delete_after=10)
 
 

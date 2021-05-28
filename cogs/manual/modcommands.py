@@ -1,10 +1,9 @@
 import asyncio
-import os
 import pathlib
+import typing
 from datetime import datetime
 
 import discord
-import mysql.connector
 from discord.ext import commands
 
 path = pathlib.PurePath()
@@ -14,8 +13,8 @@ path = pathlib.PurePath()
 class ModCommands(commands.Cog):
     """Commands gated behind kick members, ban members, and manage channels."""
 
-    def __init__(self, bot):
-        self.bot = bot  # set self.bot
+    def __init__(self, glaceon):
+        self.glaceon = glaceon  # set self.bot
         self._last_member = None
         global nomoji
         global yesmoji
@@ -23,12 +22,7 @@ class ModCommands(commands.Cog):
         yesmoji = '<:allow:843248140551192606>'
 
     async def are_ban_confirms_enabled(self, message):
-        sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                        user=os.getenv('SQLname'),
-                                                        password=os.getenv('SQLpassword'),
-                                                        database=os.getenv('SQLdatabase')
-                                                        )
-        db = sql_server_connection.cursor()
+        db = self.glaceon.sql_server_connection.cursor()
         db.execute("""CREATE TABLE IF NOT EXISTS settings_ban_confirm 
                 (serverid BIGINT, setto BIGINT)""")
         db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
@@ -43,7 +37,7 @@ class ModCommands(commands.Cog):
             return user == ctx.message.author and str(reaction.emoji) == nomoji
 
         try:  # checks to see if this happens
-            reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=added_no_emoji_check)
+            reaction, user = await self.glaceon.wait_for('reaction_add', timeout=30.0, check=added_no_emoji_check)
         except asyncio.TimeoutError:  # if command times out then do nothing
             try:
                 await askmessage.delete()
@@ -63,7 +57,7 @@ class ModCommands(commands.Cog):
             return user == ctx.message.author and str(reaction.emoji) == yesmoji
 
         try:  # checks to see if this happens
-            reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=added_yes_emoji_check)
+            reaction, user = await self.glaceon.wait_for('reaction_add', timeout=30.0, check=added_yes_emoji_check)
         except asyncio.TimeoutError:  # if the timeout is reached do nothing
             pass
         else:
@@ -95,12 +89,7 @@ class ModCommands(commands.Cog):
                         else:
                             revoke_in_secs = -1
                         ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
-                        sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                                        user=os.getenv('SQLname'),
-                                                                        password=os.getenv('SQLpassword'),
-                                                                        database=os.getenv('SQLdatabase')
-                                                                        )
-                        db = sql_server_connection.cursor()
+                        db = self.glaceon.sql_server_connection.cursor()
                         db.execute('''CREATE TABLE IF NOT EXISTS current_bans
                                                                    (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
                         db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
@@ -111,7 +100,7 @@ class ModCommands(commands.Cog):
                         else:
                             db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (%s,%s,%s)",
                                        (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
-                        sql_server_connection.commit()
+                        self.glaceon.sql_server_connection.commit()
                     await ctx.send(f"User {member} Has Been banned!",
                                    delete_after=5)  # says in chat that the user was banned successfully, deletes
                     # after 5s
@@ -164,7 +153,8 @@ class ModCommands(commands.Cog):
     @commands.command(aliases=["b"])
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, time, *, reason="No reason specified."):
+    async def ban(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *,
+                  reason="No reason specified."):
         """Bans a user."""
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
@@ -212,7 +202,7 @@ class ModCommands(commands.Cog):
     async def unban(self, ctx, member: discord.User):
         """Unbans user."""
         await ctx.message.delete()  # deletes invocation
-        user = await self.bot.fetch_user(member.id)  # gets the user id so the unban method can be invoked
+        user = await self.glaceon.fetch_user(member.id)  # gets the user id so the unban method can be invoked
         try:
             await ctx.guild.unban(user)  # unbans
         except discord.Forbidden:

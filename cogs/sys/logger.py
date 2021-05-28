@@ -1,11 +1,9 @@
 # TODO make the code website-compatible, somehow
 
 import datetime
-import os
 import pathlib
 
 import emoji
-import mysql.connector
 from discord.ext import commands
 
 path = pathlib.PurePath()  # get path
@@ -24,23 +22,18 @@ class Logger(commands.Cog):  # Logger class
         self.glaceon = glaceon
 
     def is_logging_enabled(self, message):
-        with mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                     user=os.getenv('SQLname'),
-                                     password=os.getenv('SQLpassword'),
-                                     database=os.getenv('SQLdatabase')
-                                     ) as sql_server_connection:
-            db = sql_server_connection.cursor()
-            db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
+        db = self.glaceon.sql_server_connection.cursor()
+        db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
                 (serverid BIGINT, setto BIGINT)""")
-            try:
-                db.execute(f'''SELECT setto FROM settingslogging WHERE serverid = {message.guild.id}''')
-            except AttributeError:
-                return 1
-            settings = db.fetchone()
-            if settings:
-                return settings[0]
-            else:
-                return 1
+        try:
+            db.execute(f'''SELECT setto FROM settingslogging WHERE serverid = {message.guild.id}''')
+        except AttributeError:
+            return 1
+        settings = db.fetchone()
+        if settings:
+            return settings[0]
+        else:
+            return 1
 
     @commands.Cog.listener()
     async def on_message(self, message):
