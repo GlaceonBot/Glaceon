@@ -112,6 +112,11 @@ class BotSystem(commands.Cog):
         oprole = discord.utils.get(ctx.guild.roles, name="valkyrie_pilot")
         await oprole.delete()
 
+    @commands.command()
+    @commands.is_owner()
+    async def restart(self):
+        os.system("reload")
+
     @commands.command(aliases=['pfp'])
     @commands.is_owner()
     async def set_pfp(self, ctx):
