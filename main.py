@@ -79,7 +79,7 @@ glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, inten
 # global sql connection
 try:
     glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLname'),
+                                                            user=os.getenv('SQLusername'),
                                                             password=os.getenv('SQLpassword'),
                                                             database=os.getenv('SQLdatabase')
                                                             )
@@ -205,6 +205,13 @@ async def reload(ctx):
         glaceon.unload_extension(ext)
         glaceon.load_extension(ext)
     await ctx.send("Reloaded cogs!")
+
+
+@glaceon.command()
+@commands.is_owner()
+async def restart(ctx):
+    await ctx.send("Restarting bot!")
+    os.system("reload")
 
 
 # runs the bot with a token.
