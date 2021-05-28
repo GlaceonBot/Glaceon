@@ -100,7 +100,8 @@ async def on_ready():
 @glaceon.event
 async def on_message(message):
     # gets the string for the mention
-    bot_mention_str = glaceon.user.mention.replace('@', '@!') + ' '
+    replaced_mention = glaceon.user.mention.replace('@', '@!')
+    bot_mention_str = [replaced_mention, replaced_mention + ' ']
     # gets length to compare things
     bot_mention_len = len(bot_mention_str)
     # magic
