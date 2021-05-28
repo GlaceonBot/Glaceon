@@ -79,7 +79,7 @@ glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, inten
 # global sql connection
 try:
     glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLname'),
+                                                            user=os.getenv('SQLusername'),
                                                             password=os.getenv('SQLpassword'),
                                                             database=os.getenv('SQLdatabase')
                                                             )
