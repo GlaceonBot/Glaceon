@@ -207,5 +207,12 @@ async def reload(ctx):
     await ctx.send("Reloaded cogs!")
 
 
+@glaceon.command()
+@commands.is_owner()
+async def restart(ctx):
+    await ctx.send("Restarting bot!")
+    os.system("reload")
+
+
 # runs the bot with a token.
 glaceon.run(TOKEN)
