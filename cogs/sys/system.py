@@ -114,7 +114,8 @@ class BotSystem(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def restart(self):
+    async def restart(self, ctx):
+        await ctx.send("Restarting bot!")
         os.system("reload")
 
     @commands.command(aliases=['pfp'])
