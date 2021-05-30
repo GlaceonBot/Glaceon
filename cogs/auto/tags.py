@@ -16,34 +16,37 @@ class TagSystem(commands.Cog):
     async def tag(self, ctx, *tags):
         """Call a tag. (or two, or ten)"""
         await ctx.message.delete()
-        errors = False
-        factoids = []
-        pings = []
-        sid = ctx.guild.id
-        for t in tags:
-            id = None
-            if t != id:
-                db = self.glaceon.sql_server_connection.cursor()
+        if ["@everyone", "@here"] in tags:
+            await ctx.send("Mass ping detected, no actions taken")
+        else:
+            errors = False
+            factoids = []
+            pings = []
+            sid = ctx.guild.id
+            for t in tags:
+                id = None
+                if t != id:
+                    db = self.glaceon.sql_server_connection.cursor()
 
-                db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
-                db.execute("""SELECT tagcontent FROM tags WHERE serverid = %s AND tagname = %s""", (sid, t))
-                factoid = db.fetchone()
-                if factoid:
-                    factoids.append(factoid[0])
+                    db.execute('''CREATE TABLE IF NOT EXISTS tags
+                                        (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
+                    db.execute("""SELECT tagcontent FROM tags WHERE serverid = %s AND tagname = %s""", (sid, t))
+                    factoid = db.fetchone()
+                    if factoid:
+                        factoids.append(factoid[0])
+                    else:
+                        await ctx.send(f"tag `{t}` not found!", delete_after=15)
+                        errors = True
+                        break
                 else:
-                    await ctx.send(f"tag `{t}` not found!", delete_after=15)
-                    errors = True
-                    break
-            else:
-                pings.append(t.mention)
-        if errors is False:
-            if factoids is not []:
-                embed = discord.Embed(colour=self.glaceon.embedcolor, description="\n\n".join(factoids))
-                embed.set_footer(text=f"I am a bot, i will not respond to you | Request by {ctx.author}")
-                await ctx.send("Please refer to the below information:" + " ".join(pings), embed=embed)
-            else:
-                await ctx.send("You need to specify a tag!", delete_after=5)
+                    pings.append(t.mention)
+            if errors is False:
+                if factoids is not []:
+                    embed = discord.Embed(colour=self.glaceon.embedcolor, description="\n\n".join(factoids))
+                    embed.set_footer(text=f"I am a bot, i will not respond to you | Request by {ctx.author}")
+                    await ctx.send("Please refer to the below information:" + " ".join(pings), embed=embed)
+                else:
+                    await ctx.send("You need to specify a tag!", delete_after=5)
 
     @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tm", "ta"])
     @commands.has_permissions(manage_messages=True)
