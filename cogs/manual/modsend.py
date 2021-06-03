@@ -33,11 +33,13 @@ class ModCommmunications(commands.Cog):
         """Sends a message TO the moderators"""
         sid = ctx.guild.id
         db = self.glaceon.sql_server_connection.cursor()
+        db.execute('''CREATE TABLE IF NOT EXISTS mailchannels
+                                   (serverid BIGINT, channelid BIGINT)''')
         db.execute(f'''SELECT channelid FROM mailchannels WHERE serverid = {sid}''')
         channel = db.fetchone()
         db.close()
         if channel:
-            sendchannel = self.bot.get_channel(channel[0])
+            sendchannel = self.glaceon.get_channel(channel[0])
             await sendchannel.send(message)
         else:
             await ctx.send(
