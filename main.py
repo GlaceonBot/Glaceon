@@ -7,6 +7,7 @@ import discord
 import mysql.connector
 from discord.ext import commands
 from dotenv import load_dotenv
+from disputils import BotEmbedPaginator
 
 # load the token to its variable
 load_dotenv()
@@ -49,7 +50,7 @@ class Help(commands.MinimalHelpCommand):
     # actually sends the help
     async def send_bot_help(self, mapping):
         # creates embed
-        embed = discord.Embed(color=glaceon.embedcolor, title="Help")
+        embeds:list[discord.Embed] = []
         for cog, commands in mapping.items():
             # sorts commands
             filtered = await self.filter_commands(commands, sort=True)
@@ -57,9 +58,8 @@ class Help(commands.MinimalHelpCommand):
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "System")
                 # adds the needed categories for the commands
-                embeds.append(discord.Embed(title=f"Help - {cog_name}", description="\n".join(command_signatures)))
-        raise NameError("I don't have a context")#FIXME: This would work, but I need a way to get a context or message object.
-        ctx = None 
+                embeds.append(discord.Embed(color=glaceon.embedcolor,title=f"Help - {cog_name}", description="\n".join(command_signatures)))
+        ctx = self.context 
         paginator = BotEmbedPaginator(ctx, embeds)
         await paginator.run()
 
