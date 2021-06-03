@@ -7,6 +7,7 @@ import discord
 import mysql.connector
 from discord.ext import commands
 from dotenv import load_dotenv
+from disputils import BotEmbedPaginator
 
 # load the token to its variable
 load_dotenv()
@@ -40,7 +41,7 @@ async def prefixgetter(_, message):
         return default_prefix
 
 
-# help command class, mostly stolen so i don't fully understand it
+# help command class, mostly stolen so I don't fully understand it
 class Help(commands.MinimalHelpCommand):
     def get_command_signature(self, command):
         # gets what the command should look like
@@ -49,17 +50,18 @@ class Help(commands.MinimalHelpCommand):
     # actually sends the help
     async def send_bot_help(self, mapping):
         # creates embed
-        embed = discord.Embed(color=glaceon.embedcolor, title="Help")
+        embeds:list[discord.Embed] = []
         for cog, commands in mapping.items():
             # sorts commands
             filtered = await self.filter_commands(commands, sort=True)
             command_signatures = [self.get_command_signature(c) for c in filtered]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "System")
-                # adds the needed categorys for the commands
-                embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
-        channel = self.get_destination()
-        await channel.send(embed=embed)
+                # adds the needed categories for the commands
+                embeds.append(discord.Embed(color=glaceon.embedcolor,title=f"Help - {cog_name}", description="\n".join(command_signatures)))
+        ctx = self.context 
+        paginator = BotEmbedPaginator(ctx, embeds)
+        await paginator.run()
 
         # for when it breaks
 
@@ -79,7 +81,7 @@ glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, inten
 # global sql connection
 try:
     glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLname'),
+                                                            user=os.getenv('SQLusername'),
                                                             password=os.getenv('SQLpassword'),
                                                             database=os.getenv('SQLdatabase')
                                                             )
@@ -204,6 +206,13 @@ async def reload(ctx):
         glaceon.unload_extension(ext)
         glaceon.load_extension(ext)
     await ctx.send("Reloaded cogs!")
+
+
+@glaceon.command()
+@commands.is_owner()
+async def restart(ctx):
+    await ctx.send("Restarting bot!")
+    os.system("reload")
 
 
 # runs the bot with a token.
