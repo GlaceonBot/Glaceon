@@ -1,18 +1,16 @@
 import pathlib
 
-import aiosqlite
 import discord
 from discord.ext import commands
 
 path = pathlib.PurePath()
-embedcolor = 0xadd8e6
 
 
 class ModCommmunications(commands.Cog):
     """Communicate with the mods and for the mods"""
 
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, glaceon):
+        self.glaceon = glaceon
         self._last_member = None
 
     @commands.command(aliases=['staffsay', 'modsay', 'staffsend'])
@@ -24,8 +22,8 @@ class ModCommmunications(commands.Cog):
 
     @commands.command(aliases=['embed', 'embedsend'])
     @commands.has_permissions(manage_messages=True)
-    async def sendembed(self, ctx, title, *,    message):
-        embed = discord.Embed(colour=embedcolor, title=title, description=message)
+    async def sendembed(self, ctx, title, *, message):
+        embed = discord.Embed(colour=self.glaceon.embedcolor, title=title, description=message)
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed)
 
@@ -34,10 +32,10 @@ class ModCommmunications(commands.Cog):
     async def modmail(self, ctx, *, message):
         """Sends a message TO the moderators"""
         sid = ctx.guild.id
-        db = await aiosqlite.connect(path / 'system/data.db')
-        cur = await db.execute(f'''SELECT channelid FROM mailchannels WHERE serverid = {sid}''')
-        channel = await cur.fetchone()
-        await db.close()
+        db = self.glaceon.sql_server_connection.cursor()
+        db.execute(f'''SELECT channelid FROM mailchannels WHERE serverid = {sid}''')
+        channel = db.fetchone()
+        db.close()
         if channel:
             sendchannel = self.bot.get_channel(channel[0])
             await sendchannel.send(message)

@@ -3,7 +3,6 @@
 import datetime
 import pathlib
 
-import aiosqlite
 import emoji
 from discord.ext import commands
 
@@ -22,20 +21,23 @@ class Logger(commands.Cog):  # Logger class
     def __init__(self, glaceon):  # initializes Glaceon
         self.glaceon = glaceon
 
-    async def is_logging_enabled(self, message):
-        async with aiosqlite.connect(path / "system/data.db") as db:
-            await db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
-                (serverid INTEGER, setto INTEGER)""")
-            cur = await db.execute(f'''SELECT setto FROM settingslogging WHERE serverid = {message.guild.id}''')
-            settings = await cur.fetchone()
-            if settings is not None:
-                return settings[0]
-            else:
-                return 1
+    def is_logging_enabled(self, message):
+        db = self.glaceon.sql_server_connection.cursor()
+        db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
+                (serverid BIGINT, setto BIGINT)""")
+        try:
+            db.execute(f'''SELECT setto FROM settingslogging WHERE serverid = {message.guild.id}''')
+        except AttributeError:
+            return 1
+        settings = db.fetchone()
+        if settings:
+            return settings[0]
+        else:
+            return 1
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if await self.is_logging_enabled(message) == 1:
+        if self.is_logging_enabled(message) == 1:
             # logs
             if message.guild is None:  # For DMs set the guild ID to one
                 guildid = -1
@@ -54,7 +56,7 @@ class Logger(commands.Cog):  # Logger class
 
     @commands.Cog.listener()
     async def on_message_edit(self, message_before, message):
-        if await self.is_logging_enabled(message) == 1:
+        if self.is_logging_enabled(message) == 1:
             # logs
             if message.guild is None:  # For DMs set the guild ID to one
                 guildid = -1
