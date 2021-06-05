@@ -20,11 +20,13 @@ class Settings(discord.ext.commands.Cog):
     @commands.group()
     @commands.has_permissions(administrator=True)
     async def settings(self, ctx):
+        """all the settings for Glaceon"""
         if ctx.invoked_subcommand is None:
             await ctx.send("You must specify a setting to change!")
 
     @settings.command()
     async def enable_logging(self, ctx, isenabled: bool):
+        """Enable Glaceon logging messages on your server."""
         if isenabled is True:
             isenabled = 1
             db = self.glaceon.sql_server_connection.cursor()
@@ -53,11 +55,12 @@ class Settings(discord.ext.commands.Cog):
             else:
                 db.execute("INSERT INTO settingslogging VALUES (%s,%s)",
                            (ctx.guild.id, isenabled))  # set the setting newly
-            sql_server_connection.commit()  # say "yes i want to do this for sure"
+            self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
             await ctx.send("Logging disabled!")
 
     @settings.command()
     async def confirm_bans(self, ctx, isenabled: bool):
+        """Enable the confirmation of ban messages via reactions"""
         if isenabled is True:
             isenabled = 1
             db = self.glaceon.sql_server_connection.cursor()

@@ -1,29 +1,35 @@
-#!/home/gxhut/Glaceon/venv/bin/python3
+#!/usr/bin/env python3
 import os
 import pathlib
 import traceback
+import logging
 
 import discord
 import mysql.connector
 from discord.ext import commands
 from dotenv import load_dotenv
+from disputils import BotEmbedPaginator
 
 # load the token to its variable
 load_dotenv()
 path = pathlib.PurePath()
 TOKEN = os.getenv('TOKEN')
 
+# Basic logging
+logging.basicConfig(level=logging.INFO)
 
 # function to return the prefix based on a message and a bot instance
-async def prefixgetter(_, message):
+async def prefixgetter(bot, message):
     # set default prefix
     default_prefix = "%"
+    # list of pings so that they can be used as prefixes
+    ping_prefixes = [bot.user.mention, bot.user.mention.replace('@', '@!')]
     # try to get the guild id. if there isn't one, then it's a DM and uses the default prefix.
     try:
         sid = message.guild.id
     except AttributeError:
         return default_prefix
-    db = glaceon.sql_server_connection.cursor()
+    db = bot.sql_server_connection.cursor()
     # make sure everything is set up correctly
     db.execute('''CREATE TABLE IF NOT EXISTS prefixes
                    (serverid BIGINT, prefix TEXT)''')
@@ -35,12 +41,12 @@ async def prefixgetter(_, message):
     db.close()
     # if the custom prefix exists, then send it back, otherwise return the default one
     if custom_prefix:
-        return str(custom_prefix[0])
+        return *ping_prefixes, str(custom_prefix[0])
     else:
-        return default_prefix
+        return *ping_prefixes, default_prefix
 
 
-# help command class, mostly stolen so i don't fully understand it
+# help command class, mostly stolen so I don't fully understand it
 class Help(commands.MinimalHelpCommand):
     def get_command_signature(self, command):
         # gets what the command should look like
@@ -49,17 +55,18 @@ class Help(commands.MinimalHelpCommand):
     # actually sends the help
     async def send_bot_help(self, mapping):
         # creates embed
-        embed = discord.Embed(color=glaceon.embedcolor, title="Help")
+        embeds:list[discord.Embed] = []
         for cog, commands in mapping.items():
             # sorts commands
             filtered = await self.filter_commands(commands, sort=True)
             command_signatures = [self.get_command_signature(c) for c in filtered]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "System")
-                # adds the needed categorys for the commands
-                embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
-        channel = self.get_destination()
-        await channel.send(embed=embed)
+                # adds the needed categories for the commands
+                embeds.append(discord.Embed(color=glaceon.embedcolor,title=f"Help - {cog_name}", description="\n".join(command_signatures)))
+        ctx = self.context 
+        paginator = BotEmbedPaginator(ctx, embeds)
+        await paginator.run()
 
         # for when it breaks
 
@@ -75,14 +82,15 @@ intents = discord.Intents().all()
 glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, intents=intents,
                        help_command=Help(),
                        activity=discord.Activity(type=discord.ActivityType.watching, name="glaceon.xyz"),
-                       status=discord.Status.do_not_disturb)
+                       status=discord.Status.do_not_disturb,
+                       strip_after_prefix=True)
+
 # global sql connection
 try:
     glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
                                                             user=os.getenv('SQLusername'),
                                                             password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase')
-                                                            )
+                                                            database=os.getenv('SQLdatabase'))
 except mysql.connector.errors.Error:
     print("There was an unknown SQL error, the database or server does not exist!")
     exit(0)
@@ -94,23 +102,6 @@ glaceon.embedcolor = 0xadd8e6
 @glaceon.event
 async def on_ready():
     print(f'Logged on as {glaceon.user.name}')  # Tells me if I'm running Glaceon or Eevee
-
-
-# this function changes the message so that the pings will also work as a prefix
-@glaceon.event
-async def on_message(message):
-    # gets the string for the mention
-    replaced_mention = glaceon.user.mention.replace('@', '@!')
-    bot_mention_str = [replaced_mention, replaced_mention + ' ']
-    # gets length to compare things
-    bot_mention_len = len(bot_mention_str)
-    # magic
-    if message.content[:bot_mention_len] == bot_mention_str:
-        # gets the prefix and checks what it is, then subs in the prefix for the ping
-        message.content = await prefixgetter(glaceon, message) + message.content[bot_mention_len:]
-        await glaceon.process_commands(message)
-    else:
-        await glaceon.process_commands(message)
 
 
 # bot's list of cogs that need to be loaded up, they are all in different files and all do something different.
@@ -216,3 +207,4 @@ async def restart(ctx):
 
 # runs the bot with a token.
 glaceon.run(TOKEN)
+
