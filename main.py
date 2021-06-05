@@ -3,7 +3,7 @@ import os
 import pathlib
 import traceback
 import logging
-
+import textwrap
 import discord
 import mysql.connector
 from discord.ext import commands
@@ -182,8 +182,13 @@ async def on_command_error(ctx, error):
         traceback_text = ''.join(lines)
 
         # now we can send it to the user
+        sendable_tracebacks = []
         bug_channel = glaceon.get_channel(845453425722261515)
-        await bug_channel.send("```\n" + str(traceback_text) + "\n```\n Command being invoked: " + ctx.command.name)
+        for line in textwrap.wrap(str(traceback_text), 1999):
+            sendable_tracebacks.append(line)
+        for traceback_part in sendable_tracebacks:
+            await bug_channel.send("```\n" + traceback_part + "\n```")
+        await bug_channel.send(" Command being invoked: " + ctx.command.name)
         await ctx.send("Error!\n```" + str(
             error) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
                        delete_after=30)

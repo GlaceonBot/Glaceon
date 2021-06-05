@@ -30,7 +30,7 @@ class ModCommmunications(commands.Cog):
 
     @commands.command()
     @commands.bot_has_permissions(manage_channels=True)
-    async def modmail(self, ctx, *, message):
+    async def modmail(self, ctx, *, message=None):
         """Sends a message TO the moderators"""
         global modmail_category
         await ctx.message.delete()
@@ -40,6 +40,8 @@ class ModCommmunications(commands.Cog):
             if category.name == 'modmail' or category.name == 'mail':
                 modmail_category = category
         modmail_channel = await ctx.guild.create_text_channel(ctx.author, category=modmail_category)
+        if message:
+            await modmail_dm.send("You: " + message)
         await modmail_dm.send("Thank you for reporting this, we should respond shortly!")
 
 
