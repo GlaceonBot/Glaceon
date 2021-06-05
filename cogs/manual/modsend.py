@@ -29,24 +29,18 @@ class ModCommmunications(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.bot_has_permissions(manage_channels=True)
     async def modmail(self, ctx, *, message):
         """Sends a message TO the moderators"""
-        sid = ctx.guild.id
-        db = self.glaceon.sql_server_connection.cursor()
-        db.execute('''CREATE TABLE IF NOT EXISTS mailchannels
-                                   (serverid BIGINT, channelid BIGINT)''')
-        db.execute(f'''SELECT channelid FROM mailchannels WHERE serverid = {sid}''')
-        channel = db.fetchone()
-        db.close()
-        if channel:
-            sendchannel = self.glaceon.get_channel(channel[0])
-            await sendchannel.send(message)
-        else:
-            await ctx.send(
-                "The moderators need to set up a modmail channel first, they can do so with the `modmailsetup` command!"
-            )
-        pass
+        global modmail_category
+        await ctx.message.delete()
+        modmail_dm = await ctx.message.author.create_dm()
+        for category in ctx.guild.categories:
+            print(category.name)
+            if category.name == 'modmail' or category.name == 'mail':
+                modmail_category = category
+        modmail_channel = await ctx.guild.create_text_channel(ctx.author, category=modmail_category)
+        await modmail_dm.send("Thank you for reporting this, we should respond shortly!")
 
 
 def setup(glaceon):
