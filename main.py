@@ -184,7 +184,7 @@ async def on_command_error(ctx, error):
         # now we can send it to the user
         sendable_tracebacks = []
         bug_channel = glaceon.get_channel(845453425722261515)
-        for line in textwrap.wrap(str(traceback_text), 1999):
+        for line in textwrap.wrap(str(traceback_text), 1900):
             sendable_tracebacks.append(line)
         for traceback_part in sendable_tracebacks:
             await bug_channel.send("```\n" + traceback_part + "\n```")
