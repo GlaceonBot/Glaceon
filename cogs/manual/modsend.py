@@ -23,6 +23,7 @@ class ModCommmunications(commands.Cog):
     @commands.command(aliases=['embed', 'embedsend'])
     @commands.has_permissions(manage_messages=True)
     async def sendembed(self, ctx, title, *, message):
+        await ctx.message.delete()
         embed = discord.Embed(colour=self.glaceon.embedcolor, title=title, description=message)
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed)

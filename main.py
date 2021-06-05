@@ -11,12 +11,15 @@ from dotenv import load_dotenv
 from disputils import BotEmbedPaginator
 
 # load the token to its variable
+from typing import List
+
 load_dotenv()
 path = pathlib.PurePath()
 TOKEN = os.getenv('TOKEN')
 
 # Basic logging
 logging.basicConfig(level=logging.INFO)
+
 
 # function to return the prefix based on a message and a bot instance
 async def prefixgetter(bot, message):
@@ -55,7 +58,7 @@ class Help(commands.MinimalHelpCommand):
     # actually sends the help
     async def send_bot_help(self, mapping):
         # creates embed
-        embeds:list[discord.Embed] = []
+        embeds: List[discord.Embed] = []
         for cog, commands in mapping.items():
             # sorts commands
             filtered = await self.filter_commands(commands, sort=True)
@@ -63,8 +66,9 @@ class Help(commands.MinimalHelpCommand):
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "System")
                 # adds the needed categories for the commands
-                embeds.append(discord.Embed(color=glaceon.embedcolor,title=f"Help - {cog_name}", description="\n".join(command_signatures)))
-        ctx = self.context 
+                embeds.append(discord.Embed(color=glaceon.embedcolor, title=f"Help - {cog_name}",
+                                            description="\n".join(command_signatures)))
+        ctx = self.context
         paginator = BotEmbedPaginator(ctx, embeds)
         await paginator.run()
 
@@ -207,4 +211,3 @@ async def restart(ctx):
 
 # runs the bot with a token.
 glaceon.run(TOKEN)
-
