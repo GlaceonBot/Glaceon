@@ -31,7 +31,7 @@ async def prefixgetter(bot, message):
         sid = message.guild.id
     except AttributeError:
         return default_prefix
-    db = bot.sql_server_connection.cursor()
+    db = glaceon.sql_server_connection.cursor()
     # make sure everything is set up correctly
     db.execute('''CREATE TABLE IF NOT EXISTS prefixes
                    (serverid BIGINT, prefix TEXT)''')
@@ -113,10 +113,8 @@ for x in pathlib.Path(path / 'cogs').rglob('*.py'):
     glaceon.coglist.append(str(x).replace('\\', '.').replace('/', '.').replace('.py', ''))
 # makes sure this file is the main file, and then loads extentions
 if __name__ == '__main__':
-    for extension in glaceon.coglist:x
-        print(extension)
+    for extension in glaceon.coglist:
         glaceon.load_extension(extension)
-        print("extension " + extension + " loaded")
 
 
 # error handling is the same as SachiBotPy by @SmallPepperZ.
