@@ -40,13 +40,17 @@ class Logger(commands.Cog):  # Logger class
         if self.is_logging_enabled(message) == 1:
             # logs
             if message.guild is None:  # For DMs set the guild ID to one
-                guildid = -1
+                guildid = "DirectMessages"
             else:
                 guildid = message.guild.id  # otherwise use the guild ID
-            pathlib.Path(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}').mkdir(parents=True,
-                                                                                                exist_ok=True)  # Make the server folder
+            if message.channel is None:
+                channelid = message.author.id
+            else:
+                channelid = message.channel.id
+            pathlib.Path(path / f'logs/{guildid}/{channelid}').mkdir(parents=True,
+                                                                     exist_ok=True)  # Make the server folder
             day = datetime.datetime.today().strftime('%Y-%m-%d')  # get current date for logging
-            logfile = open(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}/{day}.txt', 'a+',
+            logfile = open(path / f'logs/{guildid}/{channelid}/{day}.txt', 'a+',
                            encoding='utf-16')  # set the system to log to a specific file in a specific place
             logfile.write(
                 f"{message.author} said: {emoji.demojize(message.content)} {await getattachments(message)}\n"
@@ -59,14 +63,17 @@ class Logger(commands.Cog):  # Logger class
         if self.is_logging_enabled(message) == 1:
             # logs
             if message.guild is None:  # For DMs set the guild ID to one
-                guildid = -1
+                guildid = "DirectMessages"
             else:
                 guildid = message.guild.id  # otherwise use the guild ID
-            pathlib.Path(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}').mkdir(parents=True,
-                                                                                                exist_ok=True)  # make
-            # the folder for that server
+            if message.channel is None:
+                channelid = message.author.id
+            else:
+                channelid = message.channel.id
+            pathlib.Path(path / f'logs/{guildid}/{channelid}').mkdir(parents=True,
+                                                                     exist_ok=True)  # make the folder for that server
             day = datetime.datetime.today().strftime('%Y-%m-%d')  # get current date for logging
-            logfile = open(path / f'logs/{guildid}/{emoji.demojize(str(message.channel))}/{day}.txt', 'a+',
+            logfile = open(path / f'logs/{guildid}/{channelid}/{day}.txt', 'a+',
                            encoding='utf-16')  # set the system to log to a specific file in a specific place
             logfile.write(
                 f"{message.author} edited their message from: {emoji.demojize(message_before.content)}"

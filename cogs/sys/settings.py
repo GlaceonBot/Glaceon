@@ -24,7 +24,7 @@ class Settings(discord.ext.commands.Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send("You must specify a setting to change!")
 
-    @settings.command()
+    @settings.command(aliases=['logging', 'logging_enabled'])
     async def enable_logging(self, ctx, isenabled: bool):
         """Enable Glaceon logging messages on your server."""
         if isenabled is True:
