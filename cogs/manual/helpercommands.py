@@ -51,7 +51,9 @@ class HelperCommands(commands.Cog):
     @commands.command(description="Mutes the specified user.")
     @commands.has_permissions(manage_messages=True)
     async def mute(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *, reason="No reason specified"):
-        """Mute a user. Optionally has a reason."""
+        """Mute a user. Optionally has a time and a reason.
+        Times should be of the form `[number](letter).
+        valid letters: s(econds), m(inutes), h(ours), d(ays), w(eeks), y(ears)"""
         await ctx.message.delete()
         if time is not None:
             if time.lower().endswith("y"):
