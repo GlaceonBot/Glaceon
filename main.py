@@ -95,8 +95,8 @@ try:
                                                             password=os.getenv('SQLpassword'),
                                                             database=os.getenv('SQLdatabase'))
 except mysql.connector.errors.Error:
-    print("There was an unknown SQL error, the database or server does not exist!")
-    exit(0)
+    logging.error("There was an unknown SQL error, the database or server does not exist!")
+
 
 # global color for embeds
 glaceon.embedcolor = 0xadd8e6
@@ -111,11 +111,12 @@ async def on_ready():
 glaceon.coglist = []
 for x in pathlib.Path(path / 'cogs').rglob('*.py'):
     glaceon.coglist.append(str(x).replace('\\', '.').replace('/', '.').replace('.py', ''))
-
 # makes sure this file is the main file, and then loads extentions
 if __name__ == '__main__':
-    for extension in glaceon.coglist:
+    for extension in glaceon.coglist:x
+        print(extension)
         glaceon.load_extension(extension)
+        print("extension " + extension + " loaded")
 
 
 # error handling is the same as SachiBotPy by @SmallPepperZ.
