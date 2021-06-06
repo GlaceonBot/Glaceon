@@ -85,7 +85,7 @@ intents = discord.Intents().all()
 # defines the glaceon class as a bot with the prefixgetter prefix and case-insensitive commands
 glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, intents=intents,
                        help_command=Help(),
-                       activity=discord.Activity(type=discord.ActivityType.watching, name="glaceon.xyz"),
+                       activity=discord.Activity(type=discord.ActivityType.watching, name="out for you"),
                        status=discord.Status.do_not_disturb,
                        strip_after_prefix=True)
 
@@ -172,6 +172,7 @@ async def on_command_error(ctx, error):
     else:
         # Send user a message
         # get data from exception
+
         etype = type(error)
         trace = error.__traceback__
 
@@ -180,7 +181,6 @@ async def on_command_error(ctx, error):
 
         # format_exception returns a list with line breaks embedded in the lines, so let's just stitch the elements together
         traceback_text = ''.join(lines)
-
         # now we can send it to the user
         sendable_tracebacks = []
         bug_channel = glaceon.get_channel(845453425722261515)

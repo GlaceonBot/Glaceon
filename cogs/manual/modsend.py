@@ -1,5 +1,7 @@
+import asyncio
 import pathlib
 
+from main import prefixgetter
 import discord
 from discord.ext import commands
 
@@ -12,6 +14,30 @@ class ModCommmunications(commands.Cog):
     def __init__(self, glaceon):
         self.glaceon = glaceon
         self._last_member = None
+
+    async def wait_for_DM(self, ctx, dm_channel, mod_channel):
+        content = ctx.message.content
+
+        def dm_check(message):
+            return message.channel == dm_channel
+
+        while content != str(prefixgetter(self.glaceon, ctx.guild)) + "close":
+            await self.glaceon.wait_for('message', timeout=None, check=dm_check)
+            if ctx.message.author != self.glaceon.user:
+                await mod_channel.send(content)
+
+    async def wait_for_moderator_message(self, ctx, dm_channel, mod_channel):
+        content = ctx.message.content
+
+        def moderator_send_check(message):
+            return message.channel == mod_channel
+
+        while content != str(prefixgetter(self.glaceon, ctx.guild)) + "close":
+            await self.glaceon.wait_for('message', timeout=None, check=moderator_send_check)
+            if ctx.message.author != self.glaceon.user:
+                await dm_channel.send(content)
+        await mod_channel.delete()
+        await dm_channel.send("Closed report!")
 
     @commands.command(aliases=['staffsay', 'modsay', 'staffsend'])
     @commands.has_permissions(manage_messages=True)
@@ -36,13 +62,18 @@ class ModCommmunications(commands.Cog):
         await ctx.message.delete()
         modmail_dm = await ctx.message.author.create_dm()
         for category in ctx.guild.categories:
-            print(category.name)
             if category.name == 'modmail' or category.name == 'mail':
                 modmail_category = category
-        modmail_channel = await ctx.guild.create_text_channel(ctx.author, category=modmail_category)
+        modmail_channel = await ctx.guild.create_text_channel(f"{ctx.author.name}-{ctx.author.discriminator}",
+                                                              category=modmail_category)
+        print(modmail_channel)
         if message:
             await modmail_dm.send("You: " + message)
         await modmail_dm.send("Thank you for reporting this, we should respond shortly!")
+        from_dm_task = asyncio.create_task(self.wait_for_DM(ctx, modmail_dm, modmail_channel))
+        from_channel_task = asyncio.create_task(self.wait_for_moderator_message(ctx, modmail_dm, modmail_channel))
+        await from_dm_task
+        await from_channel_task
 
 
 def setup(glaceon):
