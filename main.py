@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from disputils import BotEmbedPaginator
 
 # load the token to its variable
+from typing import List
 
 load_dotenv()
 path = pathlib.PurePath()
@@ -57,7 +58,7 @@ class Help(commands.MinimalHelpCommand):
     # actually sends the help
     async def send_bot_help(self, mapping):
         # creates embed
-        embeds: list[discord.Embed] = []
+        embeds: List[discord.Embed] = []
         for cog, commands in mapping.items():
             # sorts commands
             filtered = await self.filter_commands(commands, sort=True)
@@ -112,9 +113,8 @@ glaceon.coglist = []
 for x in pathlib.Path(path / 'cogs').rglob('*.py'):
     glaceon.coglist.append(str(x).replace('\\', '.').replace('/', '.').replace('.py', ''))
 # makes sure this file is the main file, and then loads extentions
-if __name__ == '__main__':
-    for extension in glaceon.coglist:
-        glaceon.load_extension(extension)
+for extension in glaceon.coglist:
+    glaceon.load_extension(extension)
 
 
 # error handling is the same as SachiBotPy by @SmallPepperZ.
