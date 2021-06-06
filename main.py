@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/home/gxhut/Glaceon/venv/bin/python3
 import os
 import pathlib
 import traceback
