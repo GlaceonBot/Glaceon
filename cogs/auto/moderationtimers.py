@@ -3,10 +3,8 @@ from datetime import datetime
 
 import discord
 from discord.ext import tasks, commands
-from dotenv import load_dotenv
 
 path = pathlib.PurePath()
-load_dotenv()
 
 
 class UnCog(commands.Cog):

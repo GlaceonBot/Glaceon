@@ -21,11 +21,11 @@ logging.basicConfig(level=logging.INFO)
 
 
 # function to return the prefix based on a message and a bot instance
-async def prefixgetter(bot, message):
+async def prefixgetter(glaceon, message):
     # set default prefix
     default_prefix = "%"
     # list of pings so that they can be used as prefixes
-    ping_prefixes = [bot.user.mention, bot.user.mention.replace('@', '@!')]
+    ping_prefixes = [glaceon.user.mention, glaceon.user.mention.replace('@', '@!')]
     # try to get the guild id. if there isn't one, then it's a DM and uses the default prefix.
     try:
         sid = message.guild.id
