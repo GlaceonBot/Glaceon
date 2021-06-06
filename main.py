@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 from disputils import BotEmbedPaginator
 
 # load the token to its variable
-from typing import List
 
 load_dotenv()
 path = pathlib.PurePath()
@@ -58,7 +57,7 @@ class Help(commands.MinimalHelpCommand):
     # actually sends the help
     async def send_bot_help(self, mapping):
         # creates embed
-        embeds: List[discord.Embed] = []
+        embeds: list[discord.Embed] = []
         for cog, commands in mapping.items():
             # sorts commands
             filtered = await self.filter_commands(commands, sort=True)
