@@ -2,7 +2,8 @@
 import os
 import pathlib
 import traceback
-
+import logging
+import textwrap
 import discord
 import mysql.connector
 from discord.ext import commands
@@ -10,15 +11,22 @@ from dotenv import load_dotenv
 from disputils import BotEmbedPaginator
 
 # load the token to its variable
+from typing import List
+
 load_dotenv()
 path = pathlib.PurePath()
 TOKEN = os.getenv('TOKEN')
 
+# Basic logging
+logging.basicConfig(level=logging.INFO)
+
 
 # function to return the prefix based on a message and a bot instance
-async def prefixgetter(_, message):
+async def prefixgetter(glaceon, message):
     # set default prefix
     default_prefix = "%"
+    # list of pings so that they can be used as prefixes
+    ping_prefixes = [glaceon.user.mention, glaceon.user.mention.replace('@', '@!')]
     # try to get the guild id. if there isn't one, then it's a DM and uses the default prefix.
     try:
         sid = message.guild.id
@@ -36,9 +44,9 @@ async def prefixgetter(_, message):
     db.close()
     # if the custom prefix exists, then send it back, otherwise return the default one
     if custom_prefix:
-        return str(custom_prefix[0])
+        return *ping_prefixes, str(custom_prefix[0])
     else:
-        return default_prefix
+        return *ping_prefixes, default_prefix
 
 
 # help command class, mostly stolen so I don't fully understand it
@@ -50,7 +58,7 @@ class Help(commands.MinimalHelpCommand):
     # actually sends the help
     async def send_bot_help(self, mapping):
         # creates embed
-        embeds:list[discord.Embed] = []
+        embeds: List[discord.Embed] = []
         for cog, commands in mapping.items():
             # sorts commands
             filtered = await self.filter_commands(commands, sort=True)
@@ -58,8 +66,9 @@ class Help(commands.MinimalHelpCommand):
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "System")
                 # adds the needed categories for the commands
-                embeds.append(discord.Embed(color=glaceon.embedcolor,title=f"Help - {cog_name}", description="\n".join(command_signatures)))
-        ctx = self.context 
+                embeds.append(discord.Embed(color=glaceon.embedcolor, title=f"Help - {cog_name}",
+                                            description="\n".join(command_signatures)))
+        ctx = self.context
         paginator = BotEmbedPaginator(ctx, embeds)
         await paginator.run()
 
@@ -76,18 +85,19 @@ intents = discord.Intents().all()
 # defines the glaceon class as a bot with the prefixgetter prefix and case-insensitive commands
 glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, intents=intents,
                        help_command=Help(),
-                       activity=discord.Activity(type=discord.ActivityType.watching, name="glaceon.xyz"),
-                       status=discord.Status.do_not_disturb)
+                       activity=discord.Activity(type=discord.ActivityType.watching, name="out for you"),
+                       status=discord.Status.do_not_disturb,
+                       strip_after_prefix=True)
+
 # global sql connection
 try:
     glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
                                                             user=os.getenv('SQLusername'),
                                                             password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase')
-                                                            )
+                                                            database=os.getenv('SQLdatabase'))
 except mysql.connector.errors.Error:
-    print("There was an unknown SQL error, the database or server does not exist!")
-    exit(0)
+    logging.error("There was an unknown SQL error, the database or server does not exist!")
+
 
 # global color for embeds
 glaceon.embedcolor = 0xadd8e6
@@ -98,31 +108,13 @@ async def on_ready():
     print(f'Logged on as {glaceon.user.name}')  # Tells me if I'm running Glaceon or Eevee
 
 
-# this function changes the message so that the pings will also work as a prefix
-@glaceon.event
-async def on_message(message):
-    # gets the string for the mention
-    bot_mention_str = glaceon.user.mention.replace('@', '@!') + ' '
-    # gets length to compare things
-    bot_mention_len = len(bot_mention_str)
-    # magic
-    if message.content[:bot_mention_len] == bot_mention_str:
-        # gets the prefix and checks what it is, then subs in the prefix for the ping
-        message.content = await prefixgetter(glaceon, message) + message.content[bot_mention_len:]
-        await glaceon.process_commands(message)
-    else:
-        await glaceon.process_commands(message)
-
-
 # bot's list of cogs that need to be loaded up, they are all in different files and all do something different.
 glaceon.coglist = []
 for x in pathlib.Path(path / 'cogs').rglob('*.py'):
     glaceon.coglist.append(str(x).replace('\\', '.').replace('/', '.').replace('.py', ''))
-
 # makes sure this file is the main file, and then loads extentions
-if __name__ == '__main__':
-    for extension in glaceon.coglist:
-        glaceon.load_extension(extension)
+for extension in glaceon.coglist:
+    glaceon.load_extension(extension)
 
 
 # error handling is the same as SachiBotPy by @SmallPepperZ.
@@ -178,6 +170,7 @@ async def on_command_error(ctx, error):
     else:
         # Send user a message
         # get data from exception
+
         etype = type(error)
         trace = error.__traceback__
 
@@ -186,10 +179,14 @@ async def on_command_error(ctx, error):
 
         # format_exception returns a list with line breaks embedded in the lines, so let's just stitch the elements together
         traceback_text = ''.join(lines)
-
         # now we can send it to the user
+        sendable_tracebacks = []
         bug_channel = glaceon.get_channel(845453425722261515)
-        await bug_channel.send("```\n" + str(traceback_text) + "\n```\n Command being invoked: " + ctx.command.name)
+        for line in textwrap.wrap(str(traceback_text), 1900):
+            sendable_tracebacks.append(line)
+        for traceback_part in sendable_tracebacks:
+            await bug_channel.send("```\n" + traceback_part + "\n```")
+        await bug_channel.send(" Command being invoked: " + ctx.command.name)
         await ctx.send("Error!\n```" + str(
             error) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
                        delete_after=30)

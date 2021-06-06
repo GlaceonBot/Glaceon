@@ -1,4 +1,5 @@
 discord
+pynacl
 mysql-connector-python
 emoji
 python-dotenv
