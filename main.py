@@ -3,7 +3,7 @@ import os
 import pathlib
 import traceback
 import logging
-
+import textwrap
 import discord
 import mysql.connector
 from discord.ext import commands
@@ -11,12 +11,15 @@ from dotenv import load_dotenv
 from disputils import BotEmbedPaginator
 
 # load the token to its variable
+from typing import List
+
 load_dotenv()
 path = pathlib.PurePath()
 TOKEN = os.getenv('TOKEN')
 
 # Basic logging
 logging.basicConfig(level=logging.INFO)
+
 
 # function to return the prefix based on a message and a bot instance
 async def prefixgetter(bot, message):
@@ -55,7 +58,7 @@ class Help(commands.MinimalHelpCommand):
     # actually sends the help
     async def send_bot_help(self, mapping):
         # creates embed
-        embeds:list[discord.Embed] = []
+        embeds: List[discord.Embed] = []
         for cog, commands in mapping.items():
             # sorts commands
             filtered = await self.filter_commands(commands, sort=True)
@@ -63,8 +66,9 @@ class Help(commands.MinimalHelpCommand):
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "System")
                 # adds the needed categories for the commands
-                embeds.append(discord.Embed(color=glaceon.embedcolor,title=f"Help - {cog_name}", description="\n".join(command_signatures)))
-        ctx = self.context 
+                embeds.append(discord.Embed(color=glaceon.embedcolor, title=f"Help - {cog_name}",
+                                            description="\n".join(command_signatures)))
+        ctx = self.context
         paginator = BotEmbedPaginator(ctx, embeds)
         await paginator.run()
 
@@ -81,7 +85,7 @@ intents = discord.Intents().all()
 # defines the glaceon class as a bot with the prefixgetter prefix and case-insensitive commands
 glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, intents=intents,
                        help_command=Help(),
-                       activity=discord.Activity(type=discord.ActivityType.watching, name="glaceon.xyz"),
+                       activity=discord.Activity(type=discord.ActivityType.watching, name="out for you"),
                        status=discord.Status.do_not_disturb,
                        strip_after_prefix=True)
 
@@ -168,6 +172,7 @@ async def on_command_error(ctx, error):
     else:
         # Send user a message
         # get data from exception
+
         etype = type(error)
         trace = error.__traceback__
 
@@ -176,10 +181,14 @@ async def on_command_error(ctx, error):
 
         # format_exception returns a list with line breaks embedded in the lines, so let's just stitch the elements together
         traceback_text = ''.join(lines)
-
         # now we can send it to the user
+        sendable_tracebacks = []
         bug_channel = glaceon.get_channel(845453425722261515)
-        await bug_channel.send("```\n" + str(traceback_text) + "\n```\n Command being invoked: " + ctx.command.name)
+        for line in textwrap.wrap(str(traceback_text), 1900):
+            sendable_tracebacks.append(line)
+        for traceback_part in sendable_tracebacks:
+            await bug_channel.send("```\n" + traceback_part + "\n```")
+        await bug_channel.send(" Command being invoked: " + ctx.command.name)
         await ctx.send("Error!\n```" + str(
             error) + "```\nvalkyrie_pilot will be informed.  Most likely this is a bug, but check your syntax.",
                        delete_after=30)
@@ -207,4 +216,3 @@ async def restart(ctx):
 
 # runs the bot with a token.
 glaceon.run(TOKEN)
-
