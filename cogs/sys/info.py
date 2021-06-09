@@ -27,7 +27,7 @@ class Info(commands.Cog):
         """Shows bot ping. 5s cooldown to prevent spam."""
         await ctx.message.delete()
         embed = discord.Embed(colour=self.glaceon.embedcolor, title="Pong!",
-                              description=str(round(self.bot.latency * 1000)) + " MS")
+                              description=str(round(self.glaceon.latency * 1000)) + " MS")
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed)
 
