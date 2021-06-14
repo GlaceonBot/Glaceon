@@ -1,17 +1,16 @@
 #!/home/gxhut/Glaceon/venv/bin/python3
+import logging
 import os
 import pathlib
 import traceback
-import logging
-import textwrap
+# load the token to its variable
+from typing import List
+
 import discord
 import mysql.connector
 from discord.ext import commands
-from dotenv import load_dotenv
 from disputils import BotEmbedPaginator
-
-# load the token to its variable
-from typing import List
+from dotenv import load_dotenv
 
 load_dotenv()
 path = pathlib.PurePath()

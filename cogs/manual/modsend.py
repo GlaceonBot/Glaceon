@@ -17,27 +17,31 @@ class ModCommmunications(commands.Cog):
 
     async def wait_for_DM(self, ctx, dm_channel, mod_channel):
         last_message = ctx.message
+        prefixes = await prefixgetter(self.glaceon, ctx.message)
 
         def dm_check(message):
             return message.channel == dm_channel
 
-        while last_message.content != str(await prefixgetter(self.glaceon, ctx.guild)) + "close":
+        while last_message.content.lower() != prefixes[-1] + "close":
             last_message = await self.glaceon.wait_for('message', timeout=None, check=dm_check)
-            if last_message.author != ctx.me:
-                await mod_channel.send(last_message.content)
+            if last_message.author != ctx.me and not last_message.lower().startswith(prefixes[-1] + "close"):
+                await mod_channel.send(
+                    last_message.content.replace("@everyone", "@ everyone").replace("@here", "@ here"))
 
     async def wait_for_moderator_message(self, ctx, dm_channel, mod_channel):
         last_message = ctx.message
+        prefixes = await prefixgetter(self.glaceon, ctx.message)
 
         def moderator_send_check(message):
             return message.channel == mod_channel
 
-        while last_message.content != str(await prefixgetter(self.glaceon, ctx.guild)) + "close":
+        while last_message.content.lower != prefixes[-1] + "close":
             last_message = await self.glaceon.wait_for('message', timeout=None, check=moderator_send_check)
-            if last_message.author != ctx.me:
-                await dm_channel.send(last_message.content)
+            if last_message.author != ctx.me and not last_message.lower().startswith(prefixes[-1] + "close"):
+                await dm_channel.send(
+                    last_message.content.replace("@everyone", "@ everyone").replace("@here", "@ here"))
         await mod_channel.delete()
-        await dm_channel.send("Closed report!")
+        await dm_channel.send("Report closed!")
 
     @commands.command(aliases=['staffsay', 'modsay', 'staffsend'])
     @commands.has_permissions(manage_messages=True)
@@ -64,11 +68,15 @@ class ModCommmunications(commands.Cog):
         for category in ctx.guild.categories:
             if category.name == 'modmail' or category.name == 'mail':
                 modmail_category = category
-            else:
-                modmail_category = await ctx.guild.create_category("modmail")
+        if modmail_category is None:
+            modmail_category_overwrites = {
+                ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True,
+                                                          read_message_history=True),
+                ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False)
+            }
+            modmail_category = await ctx.guild.create_category("modmail", overwrites=modmail_category_overwrites)
         modmail_channel = await ctx.guild.create_text_channel(f"{ctx.author.name}-{ctx.author.discriminator}",
                                                               category=modmail_category)
-        print(modmail_channel)
         if message:
             await modmail_dm.send("You: " + message)
         await modmail_dm.send("Thank you for reporting this, we should respond shortly!")
