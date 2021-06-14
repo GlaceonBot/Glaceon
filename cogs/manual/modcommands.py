@@ -183,6 +183,7 @@ class ModCommands(commands.Cog):
 
     @commands.command(aliases=['lockdown', 'archive'])
     @commands.has_permissions(manage_channels=True)
+    @commands.bot_has_permissions(manage_channels=True)
     async def lock(self, ctx):
         """Locks a channel"""
         await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=False)  # disallows default role
@@ -191,6 +192,7 @@ class ModCommands(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(manage_channels=True)
+    @commands.bot_has_permissions(manage_channels=True)
     async def unlock(self, ctx):
         """Unlocks a channel"""
         await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)  # allows default role chatting
@@ -199,6 +201,7 @@ class ModCommands(commands.Cog):
 
     @commands.command(aliases=['ub', 'pardon'])
     @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(ban_members=True)
     async def unban(self, ctx, member: discord.User):
         """Unbans user."""
         await ctx.message.delete()  # deletes invocation

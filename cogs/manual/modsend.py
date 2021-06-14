@@ -63,6 +63,7 @@ class ModCommmunications(commands.Cog):
     async def modmail(self, ctx, *, message=None):
         """Sends a message TO the moderators"""
         global modmail_category
+        modmail_category = None
         await ctx.message.delete()
         modmail_dm = await ctx.message.author.create_dm()
         for category in ctx.guild.categories:

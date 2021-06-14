@@ -16,6 +16,7 @@ class HelperCommands(commands.Cog):
 
     @commands.command(aliases=['clean', 'clear'])
     @commands.has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(mangage_messages=True)
     async def purge(self, ctx, clear: int = 10, user: discord.Member = None):
         """Clear channel of messages, optionally from a specific user.
         Add their ping/ID to the end of the comamnd to set it to only delete messages from that user."""
@@ -25,14 +26,11 @@ class HelperCommands(commands.Cog):
             check_func = lambda msg: not msg.pinned
 
         await ctx.message.delete()
-        try:
-            await ctx.channel.purge(limit=clear, check=check_func)
-            embed = discord.Embed(colour=self.glaceon.embedcolor)
-            embed.add_field(name="Clear", value="cleared " + str(clear) + " messages")
-            embed.set_footer(text=f"Request by {ctx.author}")
-            await ctx.send(embed=embed, delete_after=10)
-        except discord.Forbidden:
-            await ctx.send("Whoops! I don't have the `manage messages` permission!")
+        await ctx.channel.purge(limit=clear, check=check_func)
+        embed = discord.Embed(colour=self.glaceon.embedcolor)
+        embed.add_field(name="Clear", value="cleared " + str(clear) + " messages")
+        embed.set_footer(text=f"Request by {ctx.author}")
+        await ctx.send(embed=embed, delete_after=10)
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
@@ -50,6 +48,7 @@ class HelperCommands(commands.Cog):
 
     @commands.command(description="Mutes the specified user.")
     @commands.has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_roles=True)
     async def mute(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *, reason="No reason specified"):
         """Mute a user. Optionally has a time and a reason.
         Times should be of the form `[number](letter).
@@ -110,6 +109,7 @@ class HelperCommands(commands.Cog):
 
     @commands.command(description="Unmutes a specified user.")
     @commands.has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_roles=True)
     async def unmute(self, ctx, member: discord.Member):
         """Unmutes a member."""
         await ctx.message.delete()

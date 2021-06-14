@@ -47,26 +47,6 @@ class BotSystem(commands.Cog):
         self.glaceon.sql_server_connection.commit()  # close connection
         await ctx.send(f"Prefix set to {newprefix}")  # tell admin what happened
 
-    @commands.command(
-        aliases=['modmailchannel'])  # aliases allow someone to use two different names to say the same thing
-    @commands.has_permissions(
-        administrator=True)  # requires that the person issuing the command has administrator perms
-    async def modmailsetup(self, ctx, channel: discord.TextChannel):  # there's the textchannel constructor again
-        serverid = ctx.guild.id  # get serverid for convience
-        db = self.glaceon.sql_server_connection.cursor()  # connect to the sqlite db
-        db.execute('''CREATE TABLE IF NOT EXISTS mailchannels
-                           (serverid BIGINT, channelid BIGINT)''')  # set up mailchannel system
-        db.execute(f'''SELECT serverid FROM mailchannels WHERE serverid = %s''',
-                   (serverid,))  # get the mailchannels
-        if db.fetchone():
-            db.execute("""UPDATE mailchannels SET channelid = %s WHERE serverid = %s""",
-                       (channel.id, serverid))  # update the old mailchannel
-        else:
-            db.execute("INSERT INTO mailchannels(serverid, channelid) VALUES (%s,%s)",
-                       (serverid, channel.id))  # set the new mailchannel
-        self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
-        await ctx.send(f"ModMail channel is now {channel}")
-
     @commands.Cog.listener()
     # send a message when the bot is added to a guild
     async def on_guild_join(self, ctx):
