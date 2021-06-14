@@ -1,6 +1,5 @@
 import pathlib
 from datetime import datetime
-
 import discord
 import typing
 from discord.ext import commands
@@ -16,7 +15,7 @@ class HelperCommands(commands.Cog):
 
     @commands.command(aliases=['clean', 'clear'])
     @commands.has_permissions(manage_messages=True)
-    @commands.bot_has_permissions(mangage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True)
     async def purge(self, ctx, clear: int = 10, user: discord.Member = None):
         """Clear channel of messages, optionally from a specific user.
         Add their ping/ID to the end of the comamnd to set it to only delete messages from that user."""
