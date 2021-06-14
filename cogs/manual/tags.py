@@ -28,6 +28,7 @@ class TagSystem(commands.Cog):
             sid = ctx.guild.id
             tags = [tag for tag in inputs if not re.match(r'<@(!?)([0-9]*)>', tag)]
             for t in tags:
+                t = t.lower()
                 db = self.glaceon.sql_server_connection.cursor()
 
                 db.execute('''CREATE TABLE IF NOT EXISTS tags
@@ -60,15 +61,15 @@ class TagSystem(commands.Cog):
         else:
             db.execute('''CREATE TABLE IF NOT EXISTS tags
                                     (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
-            db.execute(f'''SELECT serverid FROM tags WHERE serverid = %s AND tagname = %s''', (serverid, name))
+            db.execute(f'''SELECT serverid FROM tags WHERE serverid = %s AND tagname = %s''', (serverid, name.lower()))
             if db.fetchone():
                 db.execute("""UPDATE tags SET tagcontent = %s WHERE serverid = %s AND tagname = %s""",
-                           (contents, serverid, name))
+                           (contents, serverid, name.lower()))
             else:
                 db.execute("""INSERT INTO tags(serverid, tagname, tagcontent) VALUES (%s,%s,%s)""",
-                           (serverid, name, contents))
+                           (serverid, name.lower(), contents))
             self.glaceon.sql_server_connection.commit()
-            await ctx.send(f"Tag added with name `{name}` and contents `{contents}`", delete_after=10)
+            await ctx.send(f"Tag added with name `{name.lower()}` and contents `{contents}`", delete_after=10)
 
     @commands.command(aliases=["trm", "tagremove"])
     @commands.has_permissions(manage_messages=True)
@@ -80,9 +81,9 @@ class TagSystem(commands.Cog):
 
         db.execute('''CREATE TABLE IF NOT EXISTS tags
                                     (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
-        db.execute("""DELETE FROM tags WHERE serverid = %s AND tagname = %s""", (sid, name))
+        db.execute("""DELETE FROM tags WHERE serverid = %s AND tagname = %s""", (sid, name.lower()))
         self.glaceon.sql_server_connection.commit()
-        await ctx.send(f"tag `{name}` deleted", delete_after=10)
+        await ctx.send(f"tag `{name.lower()}` deleted", delete_after=10)
 
     @commands.command(aliases=["tlist", "tl", "taglist"])
     async def tagslist(self, ctx):
