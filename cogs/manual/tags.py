@@ -17,9 +17,11 @@ class TagSystem(commands.Cog):
     async def tag(self, ctx, *inputs):
         """Call a tag. (or two, or ten)"""
         await ctx.message.delete()
-        if "@everyone" in inputs or "@here" in inputs:
-            await ctx.send("Mass ping detected, no actions taken")
-        elif ctx.message.role_mentions:
+        for each_input in inputs:
+            if "@everyone" in each_input or "@here" in each_input:
+                await ctx.send("Mass ping attempt detected, no actions taken.")
+                return
+        if ctx.message.role_mentions:
             await ctx.send("Role mention attempt detected, no actions taken")
         else:
             errors = False
