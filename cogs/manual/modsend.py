@@ -16,26 +16,26 @@ class ModCommmunications(commands.Cog):
         self._last_member = None
 
     async def wait_for_DM(self, ctx, dm_channel, mod_channel):
-        content = ctx.message.content
+        last_message = ctx.message
 
         def dm_check(message):
             return message.channel == dm_channel
 
-        while content != str(prefixgetter(self.glaceon, ctx.guild)) + "close":
-            await self.glaceon.wait_for('message', timeout=None, check=dm_check)
-            if ctx.message.author != self.glaceon.user:
-                await mod_channel.send(content)
+        while last_message.content != str(await prefixgetter(self.glaceon, ctx.guild)) + "close":
+            last_message = await self.glaceon.wait_for('message', timeout=None, check=dm_check)
+            if last_message.author != ctx.me:
+                await mod_channel.send(last_message.content)
 
     async def wait_for_moderator_message(self, ctx, dm_channel, mod_channel):
-        content = ctx.message.content
+        last_message = ctx.message
 
         def moderator_send_check(message):
             return message.channel == mod_channel
 
-        while content != str(prefixgetter(self.glaceon, ctx.guild)) + "close":
-            await self.glaceon.wait_for('message', timeout=None, check=moderator_send_check)
-            if ctx.message.author != self.glaceon.user:
-                await dm_channel.send(content)
+        while last_message.content != str(await prefixgetter(self.glaceon, ctx.guild)) + "close":
+            last_message = await self.glaceon.wait_for('message', timeout=None, check=moderator_send_check)
+            if last_message.author != ctx.me:
+                await dm_channel.send(last_message.content)
         await mod_channel.delete()
         await dm_channel.send("Closed report!")
 
@@ -54,7 +54,7 @@ class ModCommmunications(commands.Cog):
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(aliases=['report'])
     @commands.bot_has_permissions(manage_channels=True)
     async def modmail(self, ctx, *, message=None):
         """Sends a message TO the moderators"""
@@ -64,6 +64,8 @@ class ModCommmunications(commands.Cog):
         for category in ctx.guild.categories:
             if category.name == 'modmail' or category.name == 'mail':
                 modmail_category = category
+            else:
+                modmail_category = await ctx.guild.create_category("modmail")
         modmail_channel = await ctx.guild.create_text_channel(f"{ctx.author.name}-{ctx.author.discriminator}",
                                                               category=modmail_category)
         print(modmail_channel)

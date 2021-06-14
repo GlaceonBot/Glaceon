@@ -98,7 +98,6 @@ try:
 except mysql.connector.errors.Error:
     logging.error("There was an unknown SQL error, the database or server does not exist!")
 
-
 # global color for embeds
 glaceon.embedcolor = 0xadd8e6
 
@@ -177,14 +176,12 @@ async def on_command_error(ctx, error):
         # 'traceback' is the stdlib module, `import traceback`.
         lines = traceback.format_exception(etype, error, trace)
 
-        # format_exception returns a list with line breaks embedded in the lines, so let's just stitch the elements together
         traceback_text = ''.join(lines)
-        # now we can send it to the user
-        sendable_tracebacks = []
+        n = 1988
+        chunks = [traceback_text[i:i + n] for i in range(0, len(traceback_text), n)]
+        # now we can send it to the us
         bug_channel = glaceon.get_channel(845453425722261515)
-        for line in textwrap.wrap(str(traceback_text), 1900):
-            sendable_tracebacks.append(line)
-        for traceback_part in sendable_tracebacks:
+        for traceback_part in chunks:
             await bug_channel.send("```\n" + traceback_part + "\n```")
         await bug_channel.send(" Command being invoked: " + ctx.command.name)
         await ctx.send("Error!\n```" + str(
