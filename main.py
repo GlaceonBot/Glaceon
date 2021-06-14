@@ -1,4 +1,4 @@
-#!/home/gxhut/Glaceon/venv/bin/python3
+#!/home/Glaceon/Glaceon/venv/bin/python3
 import logging
 import os
 import pathlib
