@@ -5,4 +5,4 @@ Thanks to <@103714384802480128>, and <@198233322080567296> for telling me to use
 Thanks to <@541491300545855499> for help with the on_guild_join message
 Thank you to <@155863164544614402> for teaching me about the right way to add a help command, because fuck google
 Thanks to <@677252870722027549> for fixing some mistakes (Like massping glitch)(Writen by alfie)
-If you would like to invite this bot to your server, check out https://randomairborne.dev/glaceon
+If you would like to invite this bot to your server, check out https://glaceon.xyz/invite
