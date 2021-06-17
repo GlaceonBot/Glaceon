@@ -5,15 +5,18 @@ import re
 
 from discord.ext import commands
 
-defaultre = [
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    ''
+lax_regex = [
+
 ]
+
+normal_regex = [
+
+]
+
+tough_regex = [
+
+]
+
 path = pathlib.PurePath()
 embed_color = 0xadd8e6
 
