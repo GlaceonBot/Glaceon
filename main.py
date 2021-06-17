@@ -1,17 +1,16 @@
-#!/home/gxhut/Glaceon/venv/bin/python3
+#!/home/Glaceon/Glaceon/venv/bin/python3
+import logging
 import os
 import pathlib
 import traceback
-import logging
-import textwrap
+# load the token to its variable
+from typing import List
+
 import discord
 import mysql.connector
 from discord.ext import commands
-from dotenv import load_dotenv
 from disputils import BotEmbedPaginator
-
-# load the token to its variable
-from typing import List
+from dotenv import load_dotenv
 
 load_dotenv()
 path = pathlib.PurePath()
@@ -44,15 +43,16 @@ async def prefixgetter(glaceon, message):
     db.close()
     # if the custom prefix exists, then send it back, otherwise return the default one
     if custom_prefix:
-        return *ping_prefixes, str(custom_prefix[0])
+        return str(custom_prefix[0]), *ping_prefixes
     else:
-        return *ping_prefixes, default_prefix
+        return default_prefix, *ping_prefixes
 
 
 # help command class, mostly stolen so I don't fully understand it
 class Help(commands.MinimalHelpCommand):
     def get_command_signature(self, command):
         # gets what the command should look like
+
         return '%s%s %s' % (self.clean_prefix, command.qualified_name, command.signature)
 
     # actually sends the help
@@ -90,15 +90,11 @@ glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, inten
                        strip_after_prefix=True)
 
 # global sql connection
-try:
-    glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+
+glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
                                                             user=os.getenv('SQLusername'),
                                                             password=os.getenv('SQLpassword'),
                                                             database=os.getenv('SQLdatabase'))
-except mysql.connector.errors.Error:
-    logging.error("There was an unknown SQL error, the database or server does not exist!")
-
-
 # global color for embeds
 glaceon.embedcolor = 0xadd8e6
 
@@ -177,14 +173,12 @@ async def on_command_error(ctx, error):
         # 'traceback' is the stdlib module, `import traceback`.
         lines = traceback.format_exception(etype, error, trace)
 
-        # format_exception returns a list with line breaks embedded in the lines, so let's just stitch the elements together
         traceback_text = ''.join(lines)
-        # now we can send it to the user
-        sendable_tracebacks = []
+        n = 1988
+        chunks = [traceback_text[i:i + n] for i in range(0, len(traceback_text), n)]
+        # now we can send it to the us
         bug_channel = glaceon.get_channel(845453425722261515)
-        for line in textwrap.wrap(str(traceback_text), 1900):
-            sendable_tracebacks.append(line)
-        for traceback_part in sendable_tracebacks:
+        for traceback_part in chunks:
             await bug_channel.send("```\n" + traceback_part + "\n```")
         await bug_channel.send(" Command being invoked: " + ctx.command.name)
         await ctx.send("Error!\n```" + str(

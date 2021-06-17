@@ -18,7 +18,7 @@ class Settings(discord.ext.commands.Cog):
         self.glaceon = glaceon  # making local global
 
     @commands.group()
-    @commands.has_permissions(administrator=True)
+    @commands.has_guild_permissions(administrator=True)
     async def settings(self, ctx):
         """all the settings for Glaceon"""
         if ctx.invoked_subcommand is None:
