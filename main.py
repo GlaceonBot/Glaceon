@@ -89,14 +89,11 @@ glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, inten
                        strip_after_prefix=True)
 
 # global sql connection
-try:
-    glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+
+glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
                                                             user=os.getenv('SQLusername'),
                                                             password=os.getenv('SQLpassword'),
                                                             database=os.getenv('SQLdatabase'))
-except mysql.connector.errors.Error:
-    logging.error("There was an unknown SQL error, the database or server does not exist!")
-
 # global color for embeds
 glaceon.embedcolor = 0xadd8e6
 
