@@ -30,7 +30,7 @@ class BotSystem(commands.Cog):
         self.glaceon = glaceon  # making local global
 
     @commands.command()
-    @commands.has_permissions(
+    @commands.has_guild_permissions(
         administrator=True)  # requires that the person issuing the command has administrator perms
     async def prefix(self, ctx, newprefix):  # context and what we should set the new prefix to
         """Sets the bot prefix for this server"""

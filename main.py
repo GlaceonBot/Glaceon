@@ -43,15 +43,16 @@ async def prefixgetter(glaceon, message):
     db.close()
     # if the custom prefix exists, then send it back, otherwise return the default one
     if custom_prefix:
-        return *ping_prefixes, str(custom_prefix[0])
+        return str(custom_prefix[0]), *ping_prefixes
     else:
-        return *ping_prefixes, default_prefix
+        return default_prefix, *ping_prefixes
 
 
 # help command class, mostly stolen so I don't fully understand it
 class Help(commands.MinimalHelpCommand):
     def get_command_signature(self, command):
         # gets what the command should look like
+
         return '%s%s %s' % (self.clean_prefix, command.qualified_name, command.signature)
 
     # actually sends the help

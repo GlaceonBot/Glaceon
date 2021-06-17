@@ -22,7 +22,7 @@ class ModCommmunications(commands.Cog):
         def dm_check(message):
             return message.channel == dm_channel
 
-        while last_message.content.lower() != prefixes[-1] + "close":
+        while last_message.content.lower() != prefixes[0] + "close":
             last_message = await self.glaceon.wait_for('message', timeout=None, check=dm_check)
             if last_message.author != ctx.me and not last_message.lower().startswith(prefixes[-1] + "close"):
                 await mod_channel.send(
@@ -35,7 +35,7 @@ class ModCommmunications(commands.Cog):
         def moderator_send_check(message):
             return message.channel == mod_channel
 
-        while last_message.content.lower != prefixes[-1] + "close":
+        while last_message.content.lower != prefixes[0] + "close":
             last_message = await self.glaceon.wait_for('message', timeout=None, check=moderator_send_check)
             if last_message.author != ctx.me and not last_message.lower().startswith(prefixes[-1] + "close"):
                 await dm_channel.send(
@@ -44,14 +44,14 @@ class ModCommmunications(commands.Cog):
         await dm_channel.send("Report closed!")
 
     @commands.command(aliases=['staffsay', 'modsay', 'staffsend'])
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_guild_permissions(manage_messages=True)
     async def modsend(self, ctx, *, message):
         """Sends a message for the moderators"""
         await ctx.message.delete()
         await ctx.send(message)
 
     @commands.command(aliases=['embed', 'embedsend'])
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_guild_permissions(manage_messages=True)
     async def sendembed(self, ctx, title, *, message):
         await ctx.message.delete()
         embed = discord.Embed(colour=self.glaceon.embedcolor, title=title, description=message)

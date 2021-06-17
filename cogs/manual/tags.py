@@ -54,7 +54,7 @@ class TagSystem(commands.Cog):
                     await ctx.send("You need to specify a tag!", delete_after=15)
 
     @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tm", "ta"])
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_guild_permissions(manage_messages=True)
     async def tagadd(self, ctx, name, *, contents):
         """add or edit tags"""
         await ctx.message.delete()
@@ -76,7 +76,7 @@ class TagSystem(commands.Cog):
             await ctx.send(f"Tag added with name `{name.lower()}` and contents `{contents}`", delete_after=10)
 
     @commands.command(aliases=["trm", "tagremove"])
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_guild_permissions(manage_messages=True)
     async def tagdelete(self, ctx, name):
         """Remove a tag"""
         await ctx.message.delete()

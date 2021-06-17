@@ -32,7 +32,7 @@ class HelperCommands(commands.Cog):
         await ctx.send(embed=embed, delete_after=10)
 
     @commands.command()
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_guild_permissions(manage_messages=True)
     async def warn(self, ctx, member: discord.Member, *, reason):
         """Warn a member."""
         await ctx.message.delete()
@@ -46,7 +46,7 @@ class HelperCommands(commands.Cog):
         await ctx.send(f"User {member} Has Been Warned! Reason sent in DMs.", delete_after=10)
 
     @commands.command(description="Mutes the specified user.")
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_guild_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_roles=True)
     async def mute(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *, reason="No reason specified"):
         """Mute a user. Optionally has a time and a reason.
@@ -107,7 +107,7 @@ class HelperCommands(commands.Cog):
             await ctx.send("Unable to DM, muting anyway!", delete_after=10)
 
     @commands.command(description="Unmutes a specified user.")
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_guild_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_roles=True)
     async def unmute(self, ctx, member: discord.Member):
         """Unmutes a member."""

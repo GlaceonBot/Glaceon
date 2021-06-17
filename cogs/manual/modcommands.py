@@ -120,7 +120,7 @@ class ModCommands(commands.Cog):
                     await ctx.send("I do not have the requisite permissions to do this!")
 
     @commands.command(aliases=["k"])
-    @commands.has_permissions(kick_members=True)
+    @commands.has_guild_permissions(kick_members=True)
     @commands.bot_has_guild_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason="No reason specified."):
         """Kicks a user."""
@@ -151,7 +151,7 @@ class ModCommands(commands.Cog):
 
     # ban
     @commands.command(aliases=["b"])
-    @commands.has_permissions(ban_members=True)
+    @commands.has_guild_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *,
                   reason="No reason specified."):
@@ -182,7 +182,7 @@ class ModCommands(commands.Cog):
             await member.ban(reason=reason, delete_message_days=0)
 
     @commands.command(aliases=['lockdown', 'archive'])
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
     async def lock(self, ctx):
         """Locks a channel"""
@@ -191,7 +191,7 @@ class ModCommands(commands.Cog):
         await ctx.send(ctx.channel.mention + " **has been locked.**")  # notifies users the channel is locked
 
     @commands.command()
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
     async def unlock(self, ctx):
         """Unlocks a channel"""
@@ -200,7 +200,7 @@ class ModCommands(commands.Cog):
         await ctx.send(ctx.channel.mention + " **has been unlocked.**")  # notifies users it has been unlocked
 
     @commands.command(aliases=['ub', 'pardon'])
-    @commands.has_permissions(ban_members=True)
+    @commands.has_guild_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     async def unban(self, ctx, member: discord.User):
         """Unbans user."""
