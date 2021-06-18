@@ -4,11 +4,12 @@ import re
 import discord
 from discord.ext import commands
 
+
 path = pathlib.PurePath()
 
 
 class TagSystem(commands.Cog):
-    """Glaceon tag system"""
+    """tag system"""
 
     def __init__(self, glaceon):
         self.glaceon = glaceon

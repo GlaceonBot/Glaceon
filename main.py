@@ -92,9 +92,9 @@ glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, inten
 # global sql connection
 
 glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLusername'),
-                                                            password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase'))
+                                                        user=os.getenv('SQLusername'),
+                                                        password=os.getenv('SQLpassword'),
+                                                        database=os.getenv('SQLdatabase'))
 # global color for embeds
 glaceon.embedcolor = 0xadd8e6
 
@@ -207,6 +207,23 @@ async def reload(ctx):
 async def restart(ctx):
     await ctx.send("Restarting bot!")
     os.system("reload")
+
+
+@glaceon.check
+async def is_enabled(ctx):
+    def is_logging_enabled(self, message):
+        db = self.glaceon.sql_server_connection.cursor()
+        db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
+                (serverid BIGINT, setto BIGINT)""")
+        try:
+            db.execute(f'''SELECT setto FROM settingslogging WHERE serverid = {message.guild.id}''')
+        except AttributeError:
+            return 1
+        settings = db.fetchone()
+        if settings:
+            return settings[0]
+        else:
+            return 1
 
 
 # runs the bot with a token.
