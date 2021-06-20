@@ -92,6 +92,29 @@ class Settings(discord.ext.commands.Cog):
             self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
             await ctx.send("Ban confirms disabled!")
 
+    @settings.command()
+    async def auto_dehoist(self, ctx, isenabled: bool):
+        """Enable the system to remove hoisted users on join"""
+        if isenabled is True:
+            isenabled = 1
+            enabledtext = "enabled"
+        else:
+            isenabled = 0
+            enabledtext = "disabled"
+        db = self.glaceon.sql_server_connection.cursor()
+        db.execute("""CREATE TABLE IF NOT EXISTS settings 
+                (serverid BIGINT, setto BIGINT, setting TEXT)""")
+        db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+                   (ctx.guild.id, "auto_dehoist"))  # get the current setting
+        if db.fetchone():
+            db.execute("""UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s""",
+                       (isenabled, ctx.guild.id, "auto_dehoist"))  # update the old setting
+        else:
+            db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
+                       (ctx.guild.id, isenabled, "auto_dehoist"))  # set the new setting
+        self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
+        await ctx.send(f"Dehoisting {enabledtext}!")
+
 
 def setup(glaceon):
     glaceon.add_cog(Settings(glaceon))
