@@ -1,4 +1,7 @@
-#!/home/Glaceon/Glaceon/venv/bin/python3
+#/bin/bash
+"true" '''\'
+exec "$(dirname "$(readlink -f "$0")")"/venv/bin/python "$0" "$@"
+'''
 import logging
 import os
 import pathlib
@@ -132,7 +135,10 @@ async def on_command_error(ctx, error):
         return
 
     elif isinstance(error, discord.ext.commands.errors.BotMissingPermissions):
-        await ctx.reply("I do not have the requisite permissions to do that!")
+        try:
+            await ctx.reply("I do not have the requisite permissions to do that!")
+        except discord.Forbidden:
+            pass
         return
 
     elif isinstance(error, discord.ext.commands.errors.MissingRole):
