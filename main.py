@@ -2,6 +2,7 @@
 "true" '''\'
 exec "$(dirname "$(readlink -f "$0")")"/venv/bin/python "$0" "$@"
 '''
+print("webhook test")
 import logging
 import os
 import pathlib
