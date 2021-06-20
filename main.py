@@ -2,6 +2,7 @@
 "true" '''\'
 exec "$(dirname "$(readlink -f "$0")")"/venv/bin/python "$0" "$@"
 '''
+print("test MORE")
 import logging
 import os
 import pathlib
