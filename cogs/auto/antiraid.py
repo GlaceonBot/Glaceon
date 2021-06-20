@@ -9,41 +9,61 @@ class Antiraid(commands.Cog):
     def __init__(self, glaceon):
         self.glaceon = glaceon
 
-    @commands.Cog.listener()
-    async def on_member_join(self, ctx):
-        try:
-            if ctx.display_name.startswith("!"):
-                await ctx.edit(nick="Dehoisted")
-            elif ctx.display_name.startswith("."):
-                await ctx.edit(nick="Dehoisted")
-            elif ctx.display_name.startswith(")"):
-                await ctx.edit(nick="Dehoisted")
-            elif ctx.display_name.startswith("("):
-                await ctx.edit(nick="Dehoisted")
-            elif ctx.display_name.startswith("*"):
-                await ctx.edit(nick="Dehoisted")
-            elif ctx.display_name.startswith("."):
-                await ctx.edit(nick="Dehoisted")
-        except discord.Forbidden:
-            pass
+    async def is_dehoisting_enabled(self, ctx):
+        db = self.glaceon.sql_server_connection.cursor()
+        db.execute("""CREATE TABLE IF NOT EXISTS settings 
+                                (serverid BIGINT, setto BIGINT, setting TEXT)""")
+        db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+                   (ctx.guild.id, "auto_dehoist"))  # get the current setting
+        if db.fetchone():
+            try:
+                db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+                           (ctx.guild.id, "auto_dehoist"))
+            except AttributeError:
+                return 0
+            settings = db.fetchone()
+            if settings:
+                return settings[0]
+            else:
+                return 0
 
     @commands.Cog.listener()
-    async def on_member_update(self, before, ctx):
-        try:
-            if ctx.display_name.startswith("!"):
-                await ctx.edit(nick="Dehoisted")
-            elif ctx.display_name.startswith("."):
-                await ctx.edit(nick="Dehoisted")
-            elif ctx.display_name.startswith(")"):
-                await ctx.edit(nick="Dehoisted")
-            elif ctx.display_name.startswith("("):
-                await ctx.edit(nick="Dehoisted")
-            elif ctx.display_name.startswith("*"):
-                await ctx.edit(nick="Dehoisted")
-            elif ctx.display_name.startswith("."):
-                await ctx.edit(nick="Dehoisted")
-        except discord.Forbidden:
-            pass
+    async def on_member_join(self, ctx):
+        if await self.is_dehoisting_enabled(ctx) == 1:
+            try:
+                if ctx.display_name.startswith("!"):
+                    await ctx.edit(nick="Dehoisted")
+                elif ctx.display_name.startswith("."):
+                    await ctx.edit(nick="Dehoisted")
+                elif ctx.display_name.startswith(")"):
+                    await ctx.edit(nick="Dehoisted")
+                elif ctx.display_name.startswith("("):
+                    await ctx.edit(nick="Dehoisted")
+                elif ctx.display_name.startswith("*"):
+                    await ctx.edit(nick="Dehoisted")
+                elif ctx.display_name.startswith("."):
+                    await ctx.edit(nick="Dehoisted")
+            except discord.Forbidden:
+                pass
+
+    @commands.Cog.listener()
+    async def on_member_update(self, _, ctx):
+        if await self.is_dehoisting_enabled(ctx) == 1:
+            try:
+                if ctx.display_name.startswith("!"):
+                    await ctx.edit(nick="Dehoisted")
+                elif ctx.display_name.startswith("."):
+                    await ctx.edit(nick="Dehoisted")
+                elif ctx.display_name.startswith(")"):
+                    await ctx.edit(nick="Dehoisted")
+                elif ctx.display_name.startswith("("):
+                    await ctx.edit(nick="Dehoisted")
+                elif ctx.display_name.startswith("*"):
+                    await ctx.edit(nick="Dehoisted")
+                elif ctx.display_name.startswith("."):
+                    await ctx.edit(nick="Dehoisted")
+            except discord.Forbidden:
+                pass
 
 
 def setup(glaceon):
