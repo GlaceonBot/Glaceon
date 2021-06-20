@@ -184,20 +184,24 @@ class ModCommands(commands.Cog):
     @commands.command(aliases=['lockdown', 'archive'])
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
-    async def lock(self, ctx):
+    async def lock(self, ctx, channel=None):
         """Locks a channel"""
-        await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=False)  # disallows default role
+        if channel is None:
+            channel = ctx.channel
+        await channel.set_permissions(ctx.guild.default_role, send_messages=False)  # disallows default role
         # chatting perms in that channel
-        await ctx.send(ctx.channel.mention + " **has been locked.**")  # notifies users the channel is locked
+        await ctx.send(channel.mention + " **has been locked.**")  # notifies users the channel is locked
 
     @commands.command()
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
-    async def unlock(self, ctx):
+    async def unlock(self, ctx, channel=None):
         """Unlocks a channel"""
-        await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)  # allows default role chatting
+        if channel is None:
+            channel = ctx.channel
+        await channel.set_permissions(ctx.guild.default_role, send_messages=True)  # allows default role chatting
         # perms in that channel
-        await ctx.send(ctx.channel.mention + " **has been unlocked.**")  # notifies users it has been unlocked
+        await ctx.send(channel.mention + " **has been unlocked.**")  # notifies users it has been unlocked
 
     @commands.command(aliases=['ub', 'pardon'])
     @commands.has_guild_permissions(ban_members=True)
