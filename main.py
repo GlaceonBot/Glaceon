@@ -132,7 +132,10 @@ async def on_command_error(ctx, error):
         return
 
     elif isinstance(error, discord.ext.commands.errors.BotMissingPermissions):
-        await ctx.reply("I do not have the requisite permissions to do that!")
+        try:
+            await ctx.reply("I do not have the requisite permissions to do that!")
+        except discord.Forbidden:
+            pass
         return
 
     elif isinstance(error, discord.ext.commands.errors.MissingRole):
