@@ -1,4 +1,7 @@
-#!/home/Glaceon/Glaceon/venv/bin/python3
+#/bin/bash
+"true" '''\'
+exec "$(dirname "$(readlink -f "$0")")"/venv/bin/python "$0" "$@"
+'''
 import logging
 import os
 import pathlib
