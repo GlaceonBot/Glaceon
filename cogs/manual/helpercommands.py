@@ -68,6 +68,7 @@ class HelperCommands(commands.Cog):
                 revoke_in_secs = int(time[:-1])
             else:
                 revoke_in_secs = -1
+                reason = time + reason
             ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
             db = self.glaceon.sql_server_connection.cursor()
             db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
