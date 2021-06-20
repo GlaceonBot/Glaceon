@@ -104,7 +104,7 @@ class HelperCommands(commands.Cog):
             time = "in " + time
         try:
             await member.send(f"You have been muted in: {guild.name} for: {reason}. Your mute will expire {time}")
-        except discord.Forbidden:
+        except discord.HTTPException:
             await ctx.send("Unable to DM, muting anyway!", delete_after=10)
 
     @commands.command(description="Unmutes a specified user.")

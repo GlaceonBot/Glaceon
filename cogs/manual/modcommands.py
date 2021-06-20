@@ -127,10 +127,10 @@ class ModCommands(commands.Cog):
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
-        elif member.top_role >= ctx.me.top_role:
-            await ctx.send("This user has a role above mine in the role hierarchy!")
         elif member == ctx.me:
             await ctx.send("I can't kick myself!")
+        elif member.top_role >= ctx.me.top_role:
+            await ctx.send("This user has a role above mine in the role hierarchy!")
         elif member.top_role >= ctx.me.top_role:
             await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
@@ -159,10 +159,10 @@ class ModCommands(commands.Cog):
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
-        elif member.top_role >= ctx.me.top_role:
-            await ctx.send("This user has a role above mine in the role hierarchy!")
         elif member == ctx.me:
             await ctx.send("I can't ban myself!")
+        elif member.top_role >= ctx.me.top_role:
+            await ctx.send("This user has a role above mine in the role hierarchy!")
         elif member.top_role >= ctx.me.top_role:
             await ctx.send("This user has a role above or equal to yours in the role hierarchy!")
         elif not member.bot and await self.are_ban_confirms_enabled(ctx) == 1:  # bots can't be DMd by other bots
