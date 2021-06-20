@@ -44,14 +44,14 @@ class ModCommmunications(commands.Cog):
         await dm_channel.send("Report closed!")
 
     @commands.command(aliases=['staffsay', 'modsay', 'staffsend'])
-    @commands.has_guild_permissions(manage_messages=True)
+    @commands.has_permissions(manage_messages=True)
     async def modsend(self, ctx, *, message):
         """Sends a message for the moderators"""
         await ctx.message.delete()
         await ctx.send(message)
 
     @commands.command(aliases=['embed', 'embedsend'])
-    @commands.has_guild_permissions(manage_messages=True)
+    @commands.has_permissions(manage_messages=True)
     async def sendembed(self, ctx, title, *, message):
         await ctx.message.delete()
         embed = discord.Embed(colour=self.glaceon.embedcolor, title=title, description=message)
