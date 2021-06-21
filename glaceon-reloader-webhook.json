@@ -1,7 +1,0 @@
-[
-  {
-    "id": "glaceon-redeploy-webhook",
-    "execute-command": "/home/Glaceon/Glaceon/update.sh",
-    "command-working-directory": "/home/Glaceon/Glaceon"
-  }
-]
