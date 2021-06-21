@@ -1,5 +1,4 @@
 import pathlib
-import pythonping
 import discord
 import requests
 from discord.ext import commands
