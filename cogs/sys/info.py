@@ -14,13 +14,6 @@ class Info(commands.Cog):
     def __init__(self, glaceon):
         self.glaceon = glaceon
 
-    @commands.command(aliases=['v', 'ver', '-v', '-ver', '-version'])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def version(self, ctx):
-        """Current version of the bot"""
-        version = requests.get('http://127.0.0.1/version.txt')
-        await ctx.send(version.text)
-
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def ping(self, ctx):
