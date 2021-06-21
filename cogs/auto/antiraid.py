@@ -32,7 +32,7 @@ class Antiraid(commands.Cog):
     async def on_member_join(self, ctx):
         if await self.is_dehoisting_enabled(ctx) == 1:
             hoisters = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '.', ',', '/', '>', '<', '\'', '"',
-                        '?', '`', '[', ']', '{', '}', ':', ';', '+', '=']
+                        '?', '`', '[', ']', '{', '}', ':', ';', '+', '=', '\\']
             for hoisting_char in hoisters:
                 if ctx.display_name.startswith(hoisting_char):
                     try:
@@ -44,7 +44,7 @@ class Antiraid(commands.Cog):
     async def on_member_update(self, _, ctx):
         if await self.is_dehoisting_enabled(ctx) == 1:
             hoisters = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '.', ',', '/', '>', '<', '\'', '"',
-                        '?', '`', '[', ']', '{', '}', ':', ';', '+', '=']
+                        '?', '`', '[', ']', '{', '}', ':', ';', '+', '=', '\\']
             for hoisting_char in hoisters:
                 if ctx.display_name.startswith(hoisting_char):
                     try:
