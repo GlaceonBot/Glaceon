@@ -31,40 +31,26 @@ class Antiraid(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, ctx):
         if await self.is_dehoisting_enabled(ctx) == 1:
-            try:
-                if ctx.display_name.startswith("!"):
-                    await ctx.edit(nick="Dehoisted")
-                elif ctx.display_name.startswith("."):
-                    await ctx.edit(nick="Dehoisted")
-                elif ctx.display_name.startswith(")"):
-                    await ctx.edit(nick="Dehoisted")
-                elif ctx.display_name.startswith("("):
-                    await ctx.edit(nick="Dehoisted")
-                elif ctx.display_name.startswith("*"):
-                    await ctx.edit(nick="Dehoisted")
-                elif ctx.display_name.startswith("."):
-                    await ctx.edit(nick="Dehoisted")
-            except discord.Forbidden:
-                pass
+            hoisters = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '.', ',', '/', '>', '<', '\'', '"',
+                        '?', '`', '[', ']', '{', '}', ':', ';', '+', '=']
+            for hoisting_char in hoisters:
+                if ctx.display_name.startswith(hoisting_char):
+                    try:
+                        await ctx.edit(nick="Dehoisted")
+                    except discord.Forbidden:
+                        pass
 
     @commands.Cog.listener()
     async def on_member_update(self, _, ctx):
         if await self.is_dehoisting_enabled(ctx) == 1:
-            try:
-                if ctx.display_name.startswith("!"):
-                    await ctx.edit(nick="Dehoisted")
-                elif ctx.display_name.startswith("."):
-                    await ctx.edit(nick="Dehoisted")
-                elif ctx.display_name.startswith(")"):
-                    await ctx.edit(nick="Dehoisted")
-                elif ctx.display_name.startswith("("):
-                    await ctx.edit(nick="Dehoisted")
-                elif ctx.display_name.startswith("*"):
-                    await ctx.edit(nick="Dehoisted")
-                elif ctx.display_name.startswith("."):
-                    await ctx.edit(nick="Dehoisted")
-            except discord.Forbidden:
-                pass
+            hoisters = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '.', ',', '/', '>', '<', '\'', '"',
+                        '?', '`', '[', ']', '{', '}', ':', ';', '+', '=']
+            for hoisting_char in hoisters:
+                if ctx.display_name.startswith(hoisting_char):
+                    try:
+                        await ctx.edit(nick="Dehoisted")
+                    except discord.Forbidden:
+                        pass
 
 
 def setup(glaceon):
