@@ -13,16 +13,17 @@ class Antiraid(commands.Cog):
         db = self.glaceon.sql_server_connection.cursor()
         db.execute("""CREATE TABLE IF NOT EXISTS settings 
                                 (serverid BIGINT, setto BIGINT, setting TEXT)""")
-        db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+        db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "auto_dehoist"))  # get the current setting
         if db.fetchone():
             try:
-                db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+                db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
                            (ctx.guild.id, "auto_dehoist"))
             except AttributeError:
                 return 0
             settings = db.fetchone()
             if settings:
+                print(settings[0])
                 return settings[0]
             else:
                 return 0
