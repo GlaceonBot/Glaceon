@@ -223,6 +223,9 @@ class ModCommands(commands.Cog):
     @commands.bot_has_permissions(manage_nicknames=True)
     @commands.cooldown(1, 3600, commands.BucketType.guild)
     async def cleanhoists(self, ctx):
+        await ctx.reply("This command has had to be disabled until the bot is verified or a better way to find the top users is found.")
+        return
+        await ctx.send("Dehoisting in progress (THIS WILL TAKE WHILE)")
         permissions = discord.Permissions(manage_nicknames=True)
         can_set_nick_to_username = True
         hoisting_chars = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '.', ',', '/', '>', '<', '\'',
