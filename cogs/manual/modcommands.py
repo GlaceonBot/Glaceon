@@ -218,6 +218,40 @@ class ModCommands(commands.Cog):
             await ctx.send("User is not banned!")
         await ctx.send(f"Unbanned {user}!", delete_after=10)  # Notifies mods
 
+    @commands.command(aliases=['hoists', 'dehoist'])
+    @commands.has_guild_permissions(manage_nicknames=True)
+    @commands.bot_has_permissions(manage_nicknames=True)
+    @commands.cooldown(1, 3600, commands.BucketType.guild)
+    async def cleanhoists(self, ctx):
+        permissions = discord.Permissions(manage_nicknames=True)
+        can_set_nick_to_username = True
+        hoisting_chars = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '.', ',', '/', '>', '<', '\'',
+                          '"', '?', '`', '[', ']', '{', '}', ':', ';', '+', '=', '\\']
+        while True:
+            member = None
+            for hoisting_char in hoisting_chars:
+                member = discord.utils.find(lambda m: m.permissions_in(ctx.channel) != permissions and m.display_name.startswith(hoisting_char), ctx.guild.members)
+                if member:
+                    break
+            if member is None:
+                await ctx.send("Hoisted members cleaned!")
+                return
+            for hoisting_char in hoisting_chars:
+                if member.display_name.startswith(hoisting_char):
+                    for hoisting_char in hoisting_chars:
+                        if member.name.startswith(hoisting_char):
+                            can_set_nick_to_username = False
+                        if can_set_nick_to_username:
+                            try:
+                                await member.edit(nick=member.name)
+                            except discord.Forbidden:
+                                pass
+                        else:
+                            try:
+                                await member.edit(nick="Dehoisted")
+                            except discord.Forbidden:
+                                pass
+
 
 def setup(glaceon):  # dpy setup cog
     glaceon.add_cog(ModCommands(glaceon))
