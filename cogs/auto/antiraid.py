@@ -23,7 +23,6 @@ class Antiraid(commands.Cog):
                 return 0
             settings = db.fetchone()
             if settings:
-                print(settings[0])
                 return settings[0]
             else:
                 return 0
@@ -43,14 +42,24 @@ class Antiraid(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, _, ctx):
         if await self.is_dehoisting_enabled(ctx) == 1:
+            can_set_nick_to_username = True
             hoisters = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '.', ',', '/', '>', '<', '\'', '"',
                         '?', '`', '[', ']', '{', '}', ':', ';', '+', '=', '\\']
             for hoisting_char in hoisters:
                 if ctx.display_name.startswith(hoisting_char):
-                    try:
-                        await ctx.edit(nick="Dehoisted")
-                    except discord.Forbidden:
-                        pass
+                    for hoisting_char in hoisters:
+                        if ctx.name.startswith(hoisting_char):
+                            can_set_nick_to_username = False
+                        if can_set_nick_to_username:
+                            try:
+                                await ctx.edit(nick=ctx.name)
+                            except discord.Forbidden:
+                                pass
+                        else:
+                            try:
+                                await ctx.edit(nick="Dehoisted")
+                            except discord.Forbidden:
+                                pass
 
 
 def setup(glaceon):
