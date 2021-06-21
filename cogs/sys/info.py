@@ -1,5 +1,5 @@
 import pathlib
-
+import pythonping
 import discord
 import requests
 from discord.ext import commands
@@ -39,7 +39,7 @@ class Info(commands.Cog):
         embed = discord.Embed(color=self.glaceon.embedcolor)
         embed.add_field(
             name="**__You can invite Glaceon to your server with the link below__**",
-            value=f"**[Invite](https://discord.com/oauth2/authorize?client_id={self.glaceon.user.id}&permissions=3100503255&scope=bot)**",
+            value=f"**[Invite](https://glaceon.xyz/invite)**",
             inline=True)
         await ctx.send(embed=embed)
 

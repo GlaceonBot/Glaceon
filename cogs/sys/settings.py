@@ -47,7 +47,7 @@ class Settings(discord.ext.commands.Cog):
         self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
         await ctx.send(f"Message logging {enabledtext}!")
 
-    @settings.command(aliases=['banconfirms', 'confirmbans'])
+    @settings.command(aliases=['banconfirms', 'confirmbans', 'banconfirm'])
     async def confirm_bans(self, ctx, isenabled: bool):
         """Enable the confirmation of ban messages via reactions"""
         if isenabled is True:
