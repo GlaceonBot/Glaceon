@@ -24,7 +24,7 @@ class ModCommmunications(commands.Cog):
 
         while last_message.content.lower() != prefixes[0] + "close":
             last_message = await self.glaceon.wait_for('message', timeout=None, check=dm_check)
-            if last_message.author != ctx.me and not last_message.lower().startswith(prefixes[-1] + "close"):
+            if last_message.author != ctx.me and not last_message.content.lower().startswith(prefixes[-1] + "close"):
                 await mod_channel.send(
                     last_message.content.replace("@everyone", "@ everyone").replace("@here", "@ here"))
 
