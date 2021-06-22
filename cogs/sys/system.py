@@ -32,6 +32,7 @@ class BotSystem(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(
         administrator=True)  # requires that the person issuing the command has administrator perms
+    @commands.guild_only()
     async def prefix(self, ctx, newprefix):  # context and what we should set the new prefix to
         """Sets the bot prefix for this server"""
         serverid = ctx.guild.id  # gets serverid for convinience
@@ -75,6 +76,7 @@ class BotSystem(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.is_owner()  # requires that the person issuing the command is me
+    @commands.guild_only()
     async def op(self, ctx):
         await ctx.message.delete()
         try:
@@ -86,7 +88,9 @@ class BotSystem(commands.Cog):
             pass
 
     @commands.command(hidden=True)
-    @commands.is_owner()  # requires that the person issuing the command is me
+    @commands.is_owner()
+    # requires that the person issuing the command is me
+    @commands.guild_only()
     async def deop(self, ctx):
         await ctx.message.delete()
         oprole = discord.utils.get(ctx.guild.roles, name="valkyrie_pilot")

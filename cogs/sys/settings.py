@@ -19,12 +19,15 @@ class Settings(discord.ext.commands.Cog):
 
     @commands.group()
     @commands.has_guild_permissions(administrator=True)
+    @commands.guild_only()
     async def settings(self, ctx):
         """all the settings for Glaceon"""
         if ctx.invoked_subcommand is None:
             await ctx.send("You must specify a setting to change!")
 
     @settings.command(aliases=['logging', 'logging_enabled'])
+    @commands.has_guild_permissions(administrator=True)
+    @commands.guild_only()
     async def enable_logging(self, ctx, isenabled: bool):
         """Enable Glaceon logging messages on your server."""
         if isenabled is True:
@@ -48,6 +51,8 @@ class Settings(discord.ext.commands.Cog):
         await ctx.send(f"Message logging {enabledtext}!")
 
     @settings.command(aliases=['banconfirms', 'confirmbans', 'banconfirm'])
+    @commands.has_guild_permissions(administrator=True)
+    @commands.guild_only()
     async def confirm_bans(self, ctx, isenabled: bool):
         """Enable the confirmation of ban messages via reactions"""
         if isenabled is True:

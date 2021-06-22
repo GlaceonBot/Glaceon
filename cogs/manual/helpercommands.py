@@ -16,6 +16,7 @@ class HelperCommands(commands.Cog):
     @commands.command(aliases=['clean', 'clear'])
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
+    @commands.guild_only()
     async def purge(self, ctx, clear: int = 10, user: discord.Member = None):
         """Clear channel of messages, optionally from a specific user.
         Add their ping/ID to the end of the comamnd to set it to only delete messages from that user."""
@@ -33,6 +34,7 @@ class HelperCommands(commands.Cog):
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
+    @commands.guild_only()
     async def warn(self, ctx, member: discord.Member, *, reason):
         """Warn a member."""
         await ctx.message.delete()
@@ -48,6 +50,7 @@ class HelperCommands(commands.Cog):
     @commands.command(description="Mutes the specified user.")
     @commands.has_guild_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_roles=True)
+    @commands.guild_only()
     async def mute(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *, reason="No reason specified"):
         """Mute a user. Optionally has a time and a reason.
         Times should be of the form `[number](letter).
@@ -110,6 +113,7 @@ class HelperCommands(commands.Cog):
     @commands.command(description="Unmutes a specified user.")
     @commands.has_guild_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_roles=True)
+    @commands.guild_only()
     async def unmute(self, ctx, member: discord.Member):
         """Unmutes a member."""
         await ctx.message.delete()

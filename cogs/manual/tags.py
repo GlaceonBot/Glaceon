@@ -14,6 +14,7 @@ class TagSystem(commands.Cog):
         self.glaceon = glaceon
 
     @commands.command(aliases=["t"])
+    @commands.guild_only()
     async def tag(self, ctx, *inputs):
         """Call a tag. (or two, or ten)"""
         await ctx.message.delete()
@@ -55,6 +56,7 @@ class TagSystem(commands.Cog):
 
     @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tm", "ta"])
     @commands.has_guild_permissions(manage_messages=True)
+    @commands.guild_only()
     async def tagadd(self, ctx, name, *, contents):
         """add or edit tags"""
         await ctx.message.delete()
@@ -77,6 +79,7 @@ class TagSystem(commands.Cog):
 
     @commands.command(aliases=["trm", "tagremove"])
     @commands.has_guild_permissions(manage_messages=True)
+    @commands.guild_only()
     async def tagdelete(self, ctx, name):
         """Remove a tag"""
         await ctx.message.delete()
@@ -90,6 +93,7 @@ class TagSystem(commands.Cog):
         await ctx.send(f"tag `{name.lower()}` deleted", delete_after=10)
 
     @commands.command(aliases=["tlist", "tl", "taglist"])
+    @commands.guild_only()
     async def tagslist(self, ctx):
         """list the tags on this server"""
         await ctx.message.delete()

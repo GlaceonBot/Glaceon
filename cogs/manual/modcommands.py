@@ -122,6 +122,7 @@ class ModCommands(commands.Cog):
     @commands.command(aliases=["k"])
     @commands.has_guild_permissions(kick_members=True)
     @commands.bot_has_guild_permissions(kick_members=True)
+    @commands.guild_only()
     async def kick(self, ctx, member: discord.Member, *, reason="No reason specified."):
         """Kicks a user."""
         await ctx.message.delete()  # deletes command invocation
@@ -153,6 +154,7 @@ class ModCommands(commands.Cog):
     @commands.command(aliases=["b"])
     @commands.has_guild_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
+    @commands.guild_only()
     async def ban(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *,
                   reason="No reason specified."):
         """Bans a user."""
@@ -184,6 +186,7 @@ class ModCommands(commands.Cog):
     @commands.command(aliases=['lockdown', 'archive'])
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
+    @commands.guild_only()
     async def lock(self, ctx, channel=None):
         """Locks a channel"""
         if channel is None:
@@ -195,6 +198,7 @@ class ModCommands(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
+    @commands.guild_only()
     async def unlock(self, ctx, channel=None):
         """Unlocks a channel"""
         if channel is None:
@@ -206,6 +210,7 @@ class ModCommands(commands.Cog):
     @commands.command(aliases=['ub', 'pardon'])
     @commands.has_guild_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
+    @commands.guild_only()
     async def unban(self, ctx, member: discord.User):
         """Unbans user."""
         await ctx.message.delete()  # deletes invocation
@@ -222,6 +227,7 @@ class ModCommands(commands.Cog):
     @commands.has_guild_permissions(manage_nicknames=True)
     @commands.bot_has_permissions(manage_nicknames=True)
     @commands.cooldown(1, 3600, commands.BucketType.guild)
+    @commands.guild_only()
     async def cleanhoists(self, ctx):
         await ctx.reply("This command has had to be disabled until the bot is verified or a better way to find the top users is found.")
         return
