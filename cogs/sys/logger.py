@@ -23,8 +23,8 @@ class Logger(commands.Cog):  # Logger class
 
     def is_logging_enabled(self, message):
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute("""CREATE TABLE IF NOT EXISTS settingslogging 
-                (serverid BIGINT, setto BIGINT)""")
+        db.execute('''CREATE TABLE IF NOT EXISTS settingslogging 
+                (serverid BIGINT, setto BIGINT)''')
         try:
             db.execute(f'''SELECT setto FROM settingslogging WHERE serverid = {message.guild.id}''')
         except AttributeError:

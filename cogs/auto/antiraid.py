@@ -4,15 +4,15 @@ from discord.ext import commands
 
 
 class Antiraid(commands.Cog):
-    """Antiraid coming soon :D"""
+    '''Antiraid coming soon :D'''
 
     def __init__(self, glaceon):
         self.glaceon = glaceon
 
     async def is_dehoisting_enabled(self, ctx):
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute("""CREATE TABLE IF NOT EXISTS settings 
-                                (serverid BIGINT, setto BIGINT, setting TEXT)""")
+        db.execute('''CREATE TABLE IF NOT EXISTS settings 
+                                (serverid BIGINT, setto BIGINT, setting TEXT)''')
         db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "auto_dehoist"))  # get the current setting
         if db.fetchone():

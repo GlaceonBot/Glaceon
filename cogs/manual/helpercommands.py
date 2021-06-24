@@ -8,7 +8,7 @@ path = pathlib.PurePath()
 
 
 class HelperCommands(commands.Cog):
-    """Commands gated to Manage Messages"""
+    '''Commands gated to Manage Messages'''
 
     def __init__(self, glaceon):
         self.glaceon = glaceon
@@ -18,8 +18,8 @@ class HelperCommands(commands.Cog):
     @commands.bot_has_permissions(manage_messages=True)
     @commands.guild_only()
     async def purge(self, ctx, clear: int = 10, user: discord.Member = None):
-        """Clear channel of messages, optionally from a specific user.
-        Add their ping/ID to the end of the comamnd to set it to only delete messages from that user."""
+        '''Clear channel of messages, optionally from a specific user.
+        Add their ping/ID to the end of the comamnd to set it to only delete messages from that user.'''
         if user:
             check_func = lambda msg: msg.author == user and not msg.pinned
         else:
@@ -36,7 +36,7 @@ class HelperCommands(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.guild_only()
     async def warn(self, ctx, member: discord.Member, *, reason):
-        """Warn a member."""
+        '''Warn a member.'''
         await ctx.message.delete()
         if member is None:
             await ctx.send("No member specified!")
@@ -52,9 +52,9 @@ class HelperCommands(commands.Cog):
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def mute(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *, reason="No reason specified"):
-        """Mute a user. Optionally has a time and a reason.
+        '''Mute a user. Optionally has a time and a reason.
         Times should be of the form `[number](letter).
-        valid letters: s(econds), m(inutes), h(ours), d(ays), w(eeks), y(ears)"""
+        valid letters: s(econds), m(inutes), h(ours), d(ays), w(eeks), y(ears)'''
         await ctx.message.delete()
         if time is not None:
             if time.lower().endswith("y"):
@@ -79,7 +79,7 @@ class HelperCommands(commands.Cog):
             db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                 ctx.guild.id,))  # get the current prefix for that server, if it exists
             if db.fetchone():  # actually check if it exists
-                db.execute("""UPDATE current_mutes SET mutefinish = %s WHERE serverid = %s AND userid = %s""",
+                db.execute('''UPDATE current_mutes SET mutefinish = %s WHERE serverid = %s AND userid = %s''',
                            (ban_ends_at, ctx.guild.id, member.id))  # update prefix
             else:
                 db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
@@ -115,7 +115,7 @@ class HelperCommands(commands.Cog):
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def unmute(self, ctx, member: discord.Member):
-        """Unmutes a member."""
+        '''Unmutes a member.'''
         await ctx.message.delete()
         muted_role = discord.utils.get(ctx.guild.roles, name="Muted")
         try:

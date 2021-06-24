@@ -8,7 +8,7 @@ path = pathlib.PurePath()
 
 
 class Settings(discord.ext.commands.Cog):
-    """Commands for your server's settings. """  # This is a docstring, used by the auto-help command to
+    '''Commands for your server's settings. '''  # This is a docstring, used by the auto-help command to
 
     # describe this class.
 
@@ -21,13 +21,13 @@ class Settings(discord.ext.commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     @commands.guild_only()
     async def settings(self, ctx):
-        """All the settings for Glaceon"""
+        '''All the settings for Glaceon'''
         if ctx.invoked_subcommand is None:
             await ctx.send("You must specify a setting to change!")
 
     @settings.command(aliases=['logging', 'logging_enabled'])
     async def enable_logging(self, ctx, isenabled: bool):
-        """Enable Glaceon logging messages on your server."""
+        '''Enable Glaceon logging messages on your server.'''
         if isenabled is True:
             isenabled = 1
             enabledtext = "enabled"
@@ -35,12 +35,12 @@ class Settings(discord.ext.commands.Cog):
             isenabled = 0
             enabledtext = "disabled"
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute("""CREATE TABLE IF NOT EXISTS settings 
-                (serverid BIGINT, setto BIGINT, setting TEXT)""")
+        db.execute('''CREATE TABLE IF NOT EXISTS settings 
+                (serverid BIGINT, setto BIGINT, setting TEXT)''')
         db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "message_logging"))  # get the current setting
         if db.fetchone():
-            db.execute("""UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s""",
+            db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
                        (isenabled, ctx.guild.id, "message_logging"))  # update the old setting
         else:
             db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
@@ -50,7 +50,7 @@ class Settings(discord.ext.commands.Cog):
 
     @settings.command(aliases=['banconfirms', 'confirmbans', 'banconfirm'])
     async def confirm_bans(self, ctx, isenabled: bool):
-        """Enable the confirmation of ban messages via reactions"""
+        '''Enable the confirmation of ban messages via reactions'''
         if isenabled is True:
             isenabled = 1
             enabledtext = "enabled"
@@ -58,12 +58,12 @@ class Settings(discord.ext.commands.Cog):
             isenabled = 0
             enabledtext = "disabled"
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute("""CREATE TABLE IF NOT EXISTS settings 
-                (serverid BIGINT, setto BIGINT, setting TEXT)""")
+        db.execute('''CREATE TABLE IF NOT EXISTS settings 
+                (serverid BIGINT, setto BIGINT, setting TEXT)''')
         db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "ban_confirms"))  # get the current setting
         if db.fetchone():
-            db.execute("""UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s""",
+            db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
                        (isenabled, ctx.guild.id, "ban_confirms"))  # update the old setting
         else:
             db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
@@ -73,7 +73,7 @@ class Settings(discord.ext.commands.Cog):
 
     @settings.command(aliases=['dehoist', 'dehoister', 'autodehoist'])
     async def auto_dehoist(self, ctx, isenabled: bool):
-        """Enable the system to remove hoisted users on join"""
+        '''Enable the system to remove hoisted users on join'''
         if isenabled is True:
             isenabled = 1
             enabledtext = "enabled"
@@ -87,12 +87,12 @@ class Settings(discord.ext.commands.Cog):
             await ctx.send("Dehoisting will not work unless the bot has the Manage Nicknames permission!")
             return
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute("""CREATE TABLE IF NOT EXISTS settings 
-                (serverid BIGINT, setto BIGINT, setting TEXT)""")
+        db.execute('''CREATE TABLE IF NOT EXISTS settings 
+                (serverid BIGINT, setto BIGINT, setting TEXT)''')
         db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "auto_dehoist"))  # get the current setting
         if db.fetchone():
-            db.execute("""UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s""",
+            db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
                        (isenabled, ctx.guild.id, "auto_dehoist"))  # update the old setting
         else:
             db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
@@ -102,7 +102,7 @@ class Settings(discord.ext.commands.Cog):
 
     @settings.command()
     async def whitelisted_invites(self, ctx, isenabled: bool):
-        """Enable the system to autodelete whitelisted invites"""
+        '''Enable the system to autodelete whitelisted invites'''
         if isenabled is True:
             isenabled = 1
             enabledtext = "enabled"
@@ -110,12 +110,12 @@ class Settings(discord.ext.commands.Cog):
             isenabled = 0
             enabledtext = "disabled"
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute("""CREATE TABLE IF NOT EXISTS settings 
-                    (serverid BIGINT, setto BIGINT, setting TEXT)""")
+        db.execute('''CREATE TABLE IF NOT EXISTS settings 
+                    (serverid BIGINT, setto BIGINT, setting TEXT)''')
         db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "whitelisted_invites"))  # get the current setting
         if db.fetchone():
-            db.execute("""UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s""",
+            db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
                        (isenabled, ctx.guild.id, "whitelisted_invites"))  # update the old setting
         else:
             db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
@@ -125,21 +125,21 @@ class Settings(discord.ext.commands.Cog):
 
     @settings.command()
     async def add_whitelisted_invite(self, ctx, whitelist_guild_id: int):
-        """Add an invite to the invite whitelist"""
+        '''Add an invite to the invite whitelist'''
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute("""CREATE TABLE IF NOT EXISTS whitelisted_invites 
-                                (hostguild BIGINT, inviteguild BIGINT)""")
-        db.execute("""INSERT INTO whitelisted_invites VALUES (%s, %s)""", (ctx.guild.id, whitelist_guild_id))
+        db.execute('''CREATE TABLE IF NOT EXISTS whitelisted_invites 
+                                (hostguild BIGINT, inviteguild BIGINT)''')
+        db.execute('''INSERT INTO whitelisted_invites VALUES (%s, %s)''', (ctx.guild.id, whitelist_guild_id))
         self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
         await ctx.send(f"Added whitelisted invite for guild {whitelist_guild_id}!")
 
     @settings.command()
     async def remove_whitelisted_invite(self, ctx, whitelist_guild_id: int):
-        """Remove an invite from the invite whitelist"""
+        '''Remove an invite from the invite whitelist'''
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute("""CREATE TABLE IF NOT EXISTS whitelisted_invites 
-                        (hostguild BIGINT, inviteguild BIGINT""")
-        db.execute("""DELETE FROM whitelisted_invites WHERE serverid = %s AND inviteguild = %s""",
+        db.execute('''CREATE TABLE IF NOT EXISTS whitelisted_invites 
+                        (hostguild BIGINT, inviteguild BIGINT''')
+        db.execute('''DELETE FROM whitelisted_invites WHERE serverid = %s AND inviteguild = %s''',
                    (ctx.guild.id, whitelist_guild_id))
         self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
         await ctx.send(f"Removed whitelisted invite for guild {whitelist_guild_id}!")

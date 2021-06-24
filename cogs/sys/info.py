@@ -20,7 +20,7 @@ class Info(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def ping(self, ctx):
-        """Shows bot ping. 5s cooldown to prevent spam."""
+        '''Shows bot ping. 5s cooldown to prevent spam.'''
         await ctx.message.delete()
         embed = discord.Embed(colour=self.glaceon.embedcolor, title="Pong!",
                               description=str(round(self.glaceon.latency * 1000)) + " MS")
