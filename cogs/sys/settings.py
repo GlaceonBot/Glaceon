@@ -127,7 +127,7 @@ class Settings(discord.ext.commands.Cog):
     async def remove_whitelisted_invite(self, ctx, whitelist_guild_id: int):
         '''Remove an invite from the invite whitelist'''
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute('''DELETE FROM whitelisted_invites WHERE serverid = %s AND inviteguild = %s''',
+        db.execute('''DELETE FROM whitelisted_invites WHERE hostguild = %s AND inviteguild = %s''',
                    (ctx.guild.id, whitelist_guild_id))
         self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
         await ctx.reply(f"Removed whitelisted invite for guild {whitelist_guild_id}!")

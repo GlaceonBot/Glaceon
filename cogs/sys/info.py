@@ -51,11 +51,13 @@ class Info(commands.Cog):
         db = self.glaceon.sql_server_connection.cursor()
         db.execute(f'''SELECT inviteguild FROM whitelisted_invites WHERE hostguild = {ctx.guild.id}''')
         guilds = db.fetchall()
-        print(guilds)
-        for guild in guilds:
-            for guildid in guild:
-                guilds_list.append(str(guildid))
-        await ctx.send("`" + "`, `".join(guilds_list) + "`")
+        if guilds:
+            for guild in guilds:
+                for guildid in guild:
+                    guilds_list.append(str(guildid))
+            await ctx.send("`" + "`, `".join(guilds_list) + "`")
+        else:
+            await ctx.send("No invites are whitelisted in this guild!")
 
 
 
