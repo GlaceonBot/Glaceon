@@ -52,14 +52,25 @@ async def prefixgetter(glaceon, message):
 # help command class :D
 class Help(commands.MinimalHelpCommand):
     # actually sends the help
+    # noinspection PyTypeChecker
     async def send_bot_help(self, mapping):
-        embed = discord.Embed(colour=glaceon.embedcolor, title="Help")
-        embed.add_field(name="Commands",
-                        value="You can see a list of my commands at [glaceon.xyz/help](https://glaceon.xyz/help/)!",
-                        inline=False)
-        prefix = await prefixgetter(glaceon, self.context.message)
-        embed.add_field(name="Prefix", value=f"`{prefix[0]}` or <@{self.context.me.id}>", inline=False)
-        await self.get_destination().send(embed=embed)
+        permissions = self.context.channel.permissions_for(self.context.author)
+        if not getattr(permissions, "manage_messages"):
+            embed = discord.Embed(colour=glaceon.embedcolor, title="Help")
+            embed.add_field(name="Commands",
+                            value=f"You can use the tags by using `{prefixgetter(glaceon, self.context.guild)}t <tag> [@mention]\n\nYou can get a list of factoids by running `{prefixgetter(glaceon, self.context.guild)}tl`",
+                            inline=False)
+            prefix = await prefixgetter(glaceon, self.context.message)
+            embed.add_field(name="Prefix", value=f"`{prefix[0]}` or <@{self.context.me.id}>", inline=False)
+            await self.get_destination().send(embed=embed)
+        else:
+            embed = discord.Embed(colour=glaceon.embedcolor, title="Help")
+            embed.add_field(name="Commands",
+                            value="You can see a list of my commands at [glaceon.xyz/help](https://glaceon.xyz/help/)!",
+                            inline=False)
+            prefix = await prefixgetter(glaceon, self.context.message)
+            embed.add_field(name="Prefix", value=f"`{prefix[0]}` or <@{self.context.me.id}>", inline=False)
+            await self.get_destination().send(embed=embed)
 
 
 # Sets the discord intents to all

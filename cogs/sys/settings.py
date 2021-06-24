@@ -26,8 +26,6 @@ class Settings(discord.ext.commands.Cog):
             await ctx.send("You must specify a setting to change!")
 
     @settings.command(aliases=['logging', 'logging_enabled'])
-    @commands.has_guild_permissions(administrator=True)
-    @commands.guild_only()
     async def enable_logging(self, ctx, isenabled: bool):
         """Enable Glaceon logging messages on your server."""
         if isenabled is True:
@@ -51,8 +49,6 @@ class Settings(discord.ext.commands.Cog):
         await ctx.send(f"Message logging {enabledtext}!")
 
     @settings.command(aliases=['banconfirms', 'confirmbans', 'banconfirm'])
-    @commands.has_guild_permissions(administrator=True)
-    @commands.guild_only()
     async def confirm_bans(self, ctx, isenabled: bool):
         """Enable the confirmation of ban messages via reactions"""
         if isenabled is True:
@@ -103,6 +99,55 @@ class Settings(discord.ext.commands.Cog):
                        (ctx.guild.id, isenabled, "auto_dehoist"))  # set the new setting
         self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
         await ctx.send(f"Auto-dehoisting {enabledtext}!")
+
+    @settings.command()
+    async def whitelisted_invites(self, ctx, isenabled: bool):
+        """Enable the system to remove hoisted users on join"""
+        if isenabled is True:
+            isenabled = 1
+            enabledtext = "enabled"
+        else:
+            isenabled = 0
+            enabledtext = "disabled"
+        # check bot's permissions
+        permissions = ctx.channel.permissions_for(ctx.guild.me)
+        # check if the bot is allowed to manage nicknames, and, if it isn't, let the user know
+        if not getattr(permissions, "manage_nicknames") and isenabled == 1:
+            await ctx.send("Dehoisting will not work unless the bot has the Manage Nicknames permission!")
+            return
+        db = self.glaceon.sql_server_connection.cursor()
+        db.execute("""CREATE TABLE IF NOT EXISTS settings 
+                    (serverid BIGINT, setto BIGINT, setting TEXT)""")
+        db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+                   (ctx.guild.id, "auto_dehoist"))  # get the current setting
+        if db.fetchone():
+            db.execute("""UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s""",
+                       (isenabled, ctx.guild.id, "auto_dehoist"))  # update the old setting
+        else:
+            db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
+                       (ctx.guild.id, isenabled, "auto_dehoist"))  # set the new setting
+        self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
+        await ctx.send(f"Auto-dehoisting {enabledtext}!")
+
+    @settings.command()
+    async def add_whitelisted_invite(self, ctx, whitelist_guild_id: int):
+        db = self.glaceon.sql_server_connection.cursor()
+        db.execute("""CREATE TABLE IF NOT EXISTS whitelisted_invites 
+                                (hostguild BIGINT, inviteguild BIGINT)""")
+        db.execute("""INSERT INTO whitelisted_invites VALUES (%s, %s)""", (ctx.guild.id, whitelist_guild_id))
+        self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
+        await ctx.send(f"Added whitelisted invite for guild {whitelist_guild_id}!")
+
+    @settings.command()
+    async def remove_whitelisted_invite(self, ctx, whitelist_guild_id: int):
+        """Enable the system to remove hoisted users on join"""
+        db = self.glaceon.sql_server_connection.cursor()
+        db.execute("""CREATE TABLE IF NOT EXISTS whitelisted_invites 
+                        (hostguild BIGINT, inviteguild BIGINT""")
+        db.execute("""DELETE FROM whitelisted_invites WHERE serverid = %s AND inviteguild = %s""",
+                   (ctx.guild.id, whitelist_guild_id))
+        self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
+        await ctx.send(f"Removed whitelisted invite for guild {whitelist_guild_id}!")
 
 
 def setup(glaceon):
