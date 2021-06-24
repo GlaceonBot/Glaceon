@@ -28,6 +28,8 @@ class Antispam(commands.Cog):
                 return settings[0]
             else:
                 return 0
+        else:
+            return 0
 
     @commands.Cog.listener()
     async def on_message(self, message):
