@@ -44,6 +44,20 @@ class Info(commands.Cog):
         embed.add_field(name="Disk usage", value=f"{int(shutil.disk_usage('.').total / 1073741824)}GiB total, {int(shutil.disk_usage('.').used / 1048576)} MiB used, {int(shutil.disk_usage('.').free / 1048576)} MiB free", inline=True)
         await ctx.send(embed=embed)
 
+    @commands.command(aliases=['listwhitelistedinvites', 'lswhitelisted'])
+    @commands.has_guild_permissions(administrator=True)
+    async def list_whitelisted_invites(self, ctx):
+        guilds_list = []
+        db = self.glaceon.sql_server_connection.cursor()
+        db.execute(f'''SELECT inviteguild FROM whitelisted_invites WHERE hostguild = {ctx.guild.id}''')
+        guilds = db.fetchall()
+        print(guilds)
+        for guild in guilds:
+            for guildid in guild:
+                guilds_list.append(str(guildid))
+        await ctx.send("`" + "`, `".join(guilds_list) + "`")
+
+
 
 def setup(glaceon):
     glaceon.add_cog(Info(glaceon))

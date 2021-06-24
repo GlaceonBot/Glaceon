@@ -94,7 +94,7 @@ class Settings(discord.ext.commands.Cog):
         self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
         await ctx.reply(f"Auto-dehoisting {enabledtext}!")
 
-    @settings.command()
+    @settings.command(aliases=['whitelist_invites', 'whitelist_enable'])
     async def whitelisted_invites(self, ctx, isenabled: bool):
         '''Enable the system to autodelete whitelisted invites'''
         if isenabled is True:
@@ -115,7 +115,7 @@ class Settings(discord.ext.commands.Cog):
         self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
         await ctx.reply(f"Invite moderation {enabledtext}!")
 
-    @settings.command()
+    @settings.command(aliases=['whitelist_invite', 'whitelist_add', 'add_whitelist_invite'])
     async def add_whitelisted_invite(self, ctx, whitelist_guild_id: int):
         '''Add an invite to the invite whitelist'''
         db = self.glaceon.sql_server_connection.cursor()
@@ -123,7 +123,7 @@ class Settings(discord.ext.commands.Cog):
         self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
         await ctx.reply(f"Added whitelisted invite for guild {whitelist_guild_id}!")
 
-    @settings.command()
+    @settings.command(aliases=['dewhitelist_invite', 'whitelist_del', 'whitelist_rem', 'whitelist_remove'])
     async def remove_whitelisted_invite(self, ctx, whitelist_guild_id: int):
         '''Remove an invite from the invite whitelist'''
         db = self.glaceon.sql_server_connection.cursor()
