@@ -31,7 +31,7 @@ class Antispam(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if self.is_invite_link_filtering_enabled(message):
+        if await self.is_invite_link_filtering_enabled(message):
             invite_links = re.findall("(?:https?://)?discord(?:app)?\.(?:com/invite|gg)/[a-zA-Z0-9]+/?", message.content)
             for invite_link in invite_links:
                 try:
