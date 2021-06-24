@@ -35,8 +35,6 @@ class Settings(discord.ext.commands.Cog):
             isenabled = 0
             enabledtext = "disabled"
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute('''CREATE TABLE IF NOT EXISTS settings 
-                (serverid BIGINT, setto BIGINT, setting TEXT)''')
         db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "message_logging"))  # get the current setting
         if db.fetchone():
@@ -58,8 +56,6 @@ class Settings(discord.ext.commands.Cog):
             isenabled = 0
             enabledtext = "disabled"
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute('''CREATE TABLE IF NOT EXISTS settings 
-                (serverid BIGINT, setto BIGINT, setting TEXT)''')
         db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "ban_confirms"))  # get the current setting
         if db.fetchone():
@@ -87,8 +83,6 @@ class Settings(discord.ext.commands.Cog):
             await ctx.send("Dehoisting will not work unless the bot has the Manage Nicknames permission!")
             return
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute('''CREATE TABLE IF NOT EXISTS settings 
-                (serverid BIGINT, setto BIGINT, setting TEXT)''')
         db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "auto_dehoist"))  # get the current setting
         if db.fetchone():
@@ -110,8 +104,6 @@ class Settings(discord.ext.commands.Cog):
             isenabled = 0
             enabledtext = "disabled"
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute('''CREATE TABLE IF NOT EXISTS settings 
-                    (serverid BIGINT, setto BIGINT, setting TEXT)''')
         db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "whitelisted_invites"))  # get the current setting
         if db.fetchone():
@@ -127,8 +119,6 @@ class Settings(discord.ext.commands.Cog):
     async def add_whitelisted_invite(self, ctx, whitelist_guild_id: int):
         '''Add an invite to the invite whitelist'''
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute('''CREATE TABLE IF NOT EXISTS whitelisted_invites 
-                                (hostguild BIGINT, inviteguild BIGINT)''')
         db.execute('''INSERT INTO whitelisted_invites VALUES (%s, %s)''', (ctx.guild.id, whitelist_guild_id))
         self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"
         await ctx.send(f"Added whitelisted invite for guild {whitelist_guild_id}!")
@@ -137,8 +127,6 @@ class Settings(discord.ext.commands.Cog):
     async def remove_whitelisted_invite(self, ctx, whitelist_guild_id: int):
         '''Remove an invite from the invite whitelist'''
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute('''CREATE TABLE IF NOT EXISTS whitelisted_invites 
-                        (hostguild BIGINT, inviteguild BIGINT''')
         db.execute('''DELETE FROM whitelisted_invites WHERE serverid = %s AND inviteguild = %s''',
                    (ctx.guild.id, whitelist_guild_id))
         self.glaceon.sql_server_connection.commit()  # say "yes i want to do this for sure"

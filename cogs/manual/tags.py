@@ -35,9 +35,6 @@ class TagSystem(commands.Cog):
             for t in tags:
                 t = t.lower()
                 db = self.glaceon.sql_server_connection.cursor()
-
-                db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                        (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
                 db.execute('''SELECT tagcontent FROM tags WHERE serverid = %s AND tagname = %s''', (sid, t))
                 factoid = db.fetchone()
                 if factoid:
@@ -65,8 +62,6 @@ class TagSystem(commands.Cog):
         if len(contents) > 1900:
             await ctx.send("That factoid is too long!")
         else:
-            db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
             db.execute(f'''SELECT serverid FROM tags WHERE serverid = %s AND tagname = %s''', (serverid, name.lower()))
             if db.fetchone():
                 db.execute('''UPDATE tags SET tagcontent = %s WHERE serverid = %s AND tagname = %s''',
@@ -85,9 +80,6 @@ class TagSystem(commands.Cog):
         await ctx.message.delete()
         sid = ctx.guild.id
         db = self.glaceon.sql_server_connection.cursor()
-
-        db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
         db.execute('''DELETE FROM tags WHERE serverid = %s AND tagname = %s''', (sid, name.lower()))
         self.glaceon.sql_server_connection.commit()
         await ctx.send(f"tag `{name.lower()}` deleted", delete_after=10)
@@ -99,9 +91,6 @@ class TagSystem(commands.Cog):
         await ctx.message.delete()
         sid = ctx.guild.id
         db = self.glaceon.sql_server_connection.cursor()
-
-        db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
         db.execute('''SELECT tagname FROM tags WHERE serverid = %s''', (sid,))
         factoids = db.fetchall()
         if factoids:

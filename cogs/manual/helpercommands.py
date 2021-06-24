@@ -74,8 +74,6 @@ class HelperCommands(commands.Cog):
                 reason = time + reason
             ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
             db = self.glaceon.sql_server_connection.cursor()
-            db.execute('''CREATE TABLE IF NOT EXISTS current_mutes
-                                                       (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
             db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                 ctx.guild.id,))  # get the current prefix for that server, if it exists
             if db.fetchone():  # actually check if it exists

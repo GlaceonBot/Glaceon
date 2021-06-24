@@ -91,7 +91,15 @@ glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserve
                                                         password=os.getenv('SQLpassword'),
                                                         database=os.getenv('SQLdatabase'))
 
-
+# create the database structure
+db = glaceon.sql_server_connection.cursor()
+db.execute('''CREATE TABLE IF NOT EXISTS settings (serverid BIGINT, setto BIGINT, setting TEXT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS whitelisted_invites (hostguild BIGINT, inviteguild BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_bans (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_mutes (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_mutes (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_bans (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS tags (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
 @glaceon.event
 async def on_ready():
     print(f'Logged on as {glaceon.user.name}')  # Tells me if I'm running Glaceon or Eevee

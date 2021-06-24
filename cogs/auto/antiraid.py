@@ -11,8 +11,6 @@ class Antiraid(commands.Cog):
 
     async def is_dehoisting_enabled(self, ctx):
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute('''CREATE TABLE IF NOT EXISTS settings 
-                                (serverid BIGINT, setto BIGINT, setting TEXT)''')
         db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "auto_dehoist"))  # get the current setting
         if db.fetchone():

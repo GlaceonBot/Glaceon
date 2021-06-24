@@ -13,8 +13,6 @@ class Antispam(commands.Cog):
 
     async def is_invite_link_filtering_enabled(self, ctx):
         db = self.glaceon.sql_server_connection.cursor()
-        db.execute('''CREATE TABLE IF NOT EXISTS settings 
-                                        (serverid BIGINT, setto BIGINT, setting TEXT)''')
         db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
                    (ctx.guild.id, "whitelisted_invites"))  # get the current setting
         if db.fetchone():
