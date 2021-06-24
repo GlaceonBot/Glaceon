@@ -27,6 +27,7 @@ os.system("apt install python3 python3-venv python3-pip mysql-server webhook -y"
 token = input("Input bot token for .env: ")
 path = pathlib.PurePath("Glaceon")
 os.system(f"mysql -u root -h localhost -e \"CREATE USER 'glaceon'@'localhost' IDENTIFIED BY '{sql_password}'\"")
+os.system(f"mysql -u root -h localhost -e \"GRANT ALL PRIVILEGES ON database_name.* TO 'username'@'localhost'\"")
 os.system("git clone https://github.com/GlaceonBot/Glaceon")
 os.system(f"python3 -m venv {path}/venv")
 with open("env", 'w+') as dotenv:
