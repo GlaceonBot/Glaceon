@@ -10,7 +10,7 @@ class Tools(commands.Cog):
   @commands.is_owner()
   async def shell(self, ctx, *args):
     process = subprocess.run(args, capture_output=True)
-    await ctx.send(f"stdout: ```{process.stdout.encode('utf8')}```\n stderr: ```{process.stderr.encode('utf8')}```\n exitcode: `{process.returncode}`\n command: `{' '.join(process.args)}` ")
+    await ctx.send(f"stdout: ```{process.stdout.decode('utf8')}```\n stderr: ```{process.stderr.decode('utf8')}```\n exitcode: `{process.returncode}`\n command: `{' '.join(process.args)}` ")
     
 
 def setup(glaceon):
