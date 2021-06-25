@@ -59,7 +59,7 @@ class Help(commands.MinimalHelpCommand):
             embed = discord.Embed(colour=glaceon.embedcolor, title="Help")
             prefix = await prefixgetter(glaceon, self.context.message)
             embed.add_field(name="Commands",
-                            value=f"You can use the tags by using `{prefix[0}t <tag> [@mention]`\n\nYou can get a list of factoids by running `{prefix[0}tl`",
+                            value=f"You can use the tags by using `{prefix[0}t <tag> [@mention]`\n\nYou can get a list of factoids by running `{prefix[0]}tl`",
                             inline=False)
             prefix = await prefixgetter(glaceon, self.context.message)
             embed.add_field(name="Prefix", value=f"`{prefix[0]}` or <@{self.context.me.id}>", inline=False)
