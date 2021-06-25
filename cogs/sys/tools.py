@@ -9,7 +9,7 @@ class Tools(commands.Cog):
   @commands.command(aliases=['exec', 'eval', 'ssh', 'rsh', 'sh'])
   @commands.is_owner()
   async def shell(self, ctx, *args):
-    process = subprocess.run([args, capture_output=True)
+    process = subprocess.run(args, capture_output=True)
     await ctx.send(f"stdout: ```{process.stdout}```,\n stderr: ```{process.stderr}```, exitcode: `{subprocess.returncode}`")
     
 
