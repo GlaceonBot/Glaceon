@@ -9,7 +9,7 @@ class Tools(commands.Cog):
   @commands.command(aliases=['exec', 'eval', 'ssh', 'rsh', 'sh'])
   @commands.is_owner()
   async def shell(self, ctx, *args):
-    """This command is used to execute shell commands on Glaceon's host server. Only <@!788222689126776832> and <@!45463550802395146> can use it."""
+    """This command is used to execute shell commands on Glaceon's host server. Only <@!788222689126776832> and <@!545463550802395146> can use it."""
     maxmsglength = 3994
     process = subprocess.run(args, capture_output=True)
     stdout = process.stdout.decode('utf8')
