@@ -14,4 +14,4 @@ class Tools(commands.Cog):
     
 
 def setup(glaceon):
-    glaceon.add_cog(BotSystem(glaceon))
+    glaceon.add_cog(Tools(glaceon))
