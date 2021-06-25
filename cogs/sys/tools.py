@@ -9,10 +9,11 @@ class Tools(commands.Cog):
   @commands.command(aliases=['exec', 'eval', 'ssh', 'rsh', 'sh'])
   @commands.is_owner()
   async def shell(self, ctx, *args):
+    """execute shell commands on Glaceon's host server"""
     maxmsglength = 3994
     process = subprocess.run(args, capture_output=True)
     stdout = process.stdout.decode('utf8')
-    stderr = proccess.stderr.decode('utf8')
+    stderr = process.stderr.decode('utf8')
     if process.returncode == 0:
       stdout_chunks = [stdout[i:i + maxmsglength] for i in range(0, len(stdout), maxmsglength)]
       for stdout_part in stdout_chunks:
