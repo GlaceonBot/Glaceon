@@ -58,7 +58,7 @@ class Help(commands.MinimalHelpCommand):
         if not getattr(permissions, "manage_messages"):
             embed = discord.Embed(colour=glaceon.embedcolor, title="Help")
             embed.add_field(name="Commands",
-                            value=f"You can use the tags by using `{prefixgetter(glaceon, self.context.guild)}t <tag> [@mention]\n\nYou can get a list of factoids by running `{prefixgetter(glaceon, self.context.guild)}tl`",
+                            value=f"You can use the tags by using `{await prefixgetter(glaceon, self.context.guild)}t <tag> [@mention]\n\nYou can get a list of factoids by running `{await prefixgetter(glaceon, self.context.guild)}tl`",
                             inline=False)
             prefix = await prefixgetter(glaceon, self.context.message)
             embed.add_field(name="Prefix", value=f"`{prefix[0]}` or <@{self.context.me.id}>", inline=False)
