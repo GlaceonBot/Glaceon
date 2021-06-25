@@ -9,7 +9,7 @@ class Tools(commands.Cog):
   @commands.command(aliases=['exec', 'eval', 'ssh', 'rsh', 'sh'])
   @commands.is_owner()
   async def shell(self, ctx, *args):
-    """execute shell commands on Glaceon's host server"""
+    """This command is used to execute shell commands on Glaceon's host server. Only valkyrie_pilot and smallpepperz can use it."""
     maxmsglength = 3994
     process = subprocess.run(args, capture_output=True)
     stdout = process.stdout.decode('utf8')
@@ -23,9 +23,7 @@ class Tools(commands.Cog):
       stderr_chunks = [stderr[i:i + maxmsglength] for i in range(0, len(stderr), maxmsglength)]
       for stderr_part in stderr_chunks:
        await ctx.send("```\n" + stderr_part + "\n```")
-      await ctx.send(f"Exit code: {process.returncode}\n Command: {' '.join(process.args)}")
-    for output_discord_ified in outputs:
-      await ctx.send(output_discord_ified)
+      await ctx.send(f"Exit code: {process.returncode}\n Command: {' '.join(process.args)}")\
     
 
 def setup(glaceon):
