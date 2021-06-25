@@ -9,7 +9,7 @@ class Tools(commands.Cog):
   @commands.command(aliases=['exec', 'eval', 'ssh', 'rsh', 'sh'])
   @commands.is_owner()
   async def shell(self, ctx, *args):
-    """This command is used to execute shell commands on Glaceon's host server. Only valkyrie_pilot and smallpepperz can use it."""
+    """This command is used to execute shell commands on Glaceon's host server. Only <@!788222689126776832> and <@!45463550802395146> can use it."""
     maxmsglength = 3994
     process = subprocess.run(args, capture_output=True)
     stdout = process.stdout.decode('utf8')
@@ -18,7 +18,7 @@ class Tools(commands.Cog):
       stdout_chunks = [stdout[i:i + maxmsglength] for i in range(0, len(stdout), maxmsglength)]
       for stdout_part in stdout_chunks:
        await ctx.send("```\n" + stdout_part + "\n```")
-      await ctx.send(f"Exit code: {process.returncode}\n Command: {' '.join(process.args)}")
+      await ctx.send(f"Exit code: {process.returncode}\nCommand: {' '.join(process.args)}")
     else:
       stderr_chunks = [stderr[i:i + maxmsglength] for i in range(0, len(stderr), maxmsglength)]
       for stderr_part in stderr_chunks:
