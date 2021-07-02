@@ -112,7 +112,11 @@ for x in pathlib.Path(path / 'cogs').rglob('*.py'):
     glaceon.coglist.append(str(x).replace('\\', '.').replace('/', '.').replace('.py', ''))
 # makes sure this file is the main file, and then loads extentions
 for extension in glaceon.coglist:
-    glaceon.load_extension(extension)
+    try:
+        glaceon.load_extension(extension)
+    except Exception:
+        bug_channel = glaceon.get_channel(845453425722261515)
+        await bug_channel.send("There was a fatal error loading cog " + extension)
 
 
 # error handling is the same as SachiBotPy by @SmallPepperZ.
