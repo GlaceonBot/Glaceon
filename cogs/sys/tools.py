@@ -23,7 +23,7 @@ class Tools(commands.Cog):
       stderr_chunks = [stderr[i:i + maxmsglength] for i in range(0, len(stderr), maxmsglength)]
       for stderr_part in stderr_chunks:
        await ctx.send("```\n" + stderr_part + "\n```")
-      await ctx.send(f"Exit code: {process.returncode}\n Command: {' '.join(args)}")\
+      await ctx.send(f"Exit code: {process.returncode}\n Command: {args}")\
     
 
 def setup(glaceon):
