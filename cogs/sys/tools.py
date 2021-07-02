@@ -12,8 +12,8 @@ class Tools(commands.Cog):
     """This command is used to execute shell commands on Glaceon's host server. Only <@!788222689126776832> and <@!545463550802395146> can use it."""
     maxmsglength = 1988
     process = subprocess.run(['bash', '-c', args], capture_output=True)
-    stdout = process.stdout.decode('utf16')
-    stderr = process.stderr.decode('utf16')
+    stdout = process.stdout.decode()
+    stderr = process.stderr.decode()
     if process.returncode == 0:
       stdout_chunks = [stdout[i:i + maxmsglength] for i in range(0, len(stdout), maxmsglength)]
       for stdout_part in stdout_chunks:
