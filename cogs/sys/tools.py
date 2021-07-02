@@ -11,7 +11,7 @@ class Tools(commands.Cog):
   async def shell(self, ctx, *, args):
     """This command is used to execute shell commands on Glaceon's host server. Only <@!788222689126776832> and <@!545463550802395146> can use it."""
     maxmsglength = 1988
-    process = subprocess.run(args, capture_output=True)
+    process = subprocess.run(['bash', '-c', args], capture_output=True)
     stdout = process.stdout.decode('utf8')
     stderr = process.stderr.decode('utf8')
     if process.returncode == 0:
