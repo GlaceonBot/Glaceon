@@ -18,7 +18,7 @@ class Tools(commands.Cog):
       stdout_chunks = [stdout[i:i + maxmsglength] for i in range(0, len(stdout), maxmsglength)]
       for stdout_part in stdout_chunks:
        await ctx.send("```\n" + stdout_part + "\n```")
-      await ctx.send(f"Exit code: {process.returncode}\nCommand: {' '.join(process.args)}")
+      await ctx.send(f"Exit code: {process.returncode}\nCommand: {args}")
     else:
       stderr_chunks = [stderr[i:i + maxmsglength] for i in range(0, len(stderr), maxmsglength)]
       for stderr_part in stderr_chunks:
