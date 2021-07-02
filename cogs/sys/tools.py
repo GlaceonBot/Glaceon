@@ -12,8 +12,8 @@ class Tools(commands.Cog):
     """This command is used to execute shell commands on Glaceon's host server. Only <@!788222689126776832> and <@!545463550802395146> can use it."""
     maxmsglength = 1988
     process = subprocess.run(['bash', '-c', args], capture_output=True)
-    stdout = process.stdout.decode('utf8')
-    stderr = process.stderr.decode('utf8')
+    stdout = process.stdout.decode('utf16')
+    stderr = process.stderr.decode('utf16')
     if process.returncode == 0:
       stdout_chunks = [stdout[i:i + maxmsglength] for i in range(0, len(stdout), maxmsglength)]
       for stdout_part in stdout_chunks:
@@ -23,7 +23,7 @@ class Tools(commands.Cog):
       stderr_chunks = [stderr[i:i + maxmsglength] for i in range(0, len(stderr), maxmsglength)]
       for stderr_part in stderr_chunks:
        await ctx.send("```\n" + stderr_part + "\n```")
-      await ctx.send(f"Exit code: {process.returncode}\n Command: {' '.join(args).replace('bash -c ', ' ', 1)}")
+      await ctx.send(f"Exit code: {process.returncode}\nCommand: {' '.join(args).replace('bash -c ', ' ', 1)}")
     
 
 def setup(glaceon):
