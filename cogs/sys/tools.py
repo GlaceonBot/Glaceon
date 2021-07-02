@@ -25,11 +25,11 @@ class Tools(commands.Cog):
        await ctx.send("```\n" + stderr_part + "\n```")
       await ctx.send(f"Exit code: {process.returncode}\nCommand: {args.replace('bash -c ', ' ', 1)}")
     
-    @commands.command()
-    @commands.is_owner()
-    async def update(self, ctx):
-      ctx.send("Updating bot!")
-      os.system("./update.sh")
+  @commands.command()
+  @commands.is_owner()
+  async def update(self, ctx):
+    ctx.send("Updating bot!")
+    os.system("./update.sh")
       
 def setup(glaceon):
     glaceon.add_cog(Tools(glaceon))
