@@ -30,7 +30,7 @@ class Tools(commands.Cog):
   @commands.is_owner()
   async def update(self, ctx):
     """Pull from git and restart the bot"""
-    ctx.send("Updating bot!")
+    await ctx.send("Updating bot!")
     os.system("./update.sh")
       
 def setup(glaceon):
