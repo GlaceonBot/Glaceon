@@ -6,6 +6,7 @@ import logging
 import os
 import pathlib
 import traceback
+import asyncio
 # load the token to its variable
 
 import discord
@@ -115,8 +116,10 @@ for extension in glaceon.coglist:
     try:
         glaceon.load_extension(extension)
     except Exception:
+        async def send_bug(channel):
+            await bug_channel.send("There was a fatal error loading cog " + extension)
         bug_channel = glaceon.get_channel(845453425722261515)
-        await bug_channel.send("There was a fatal error loading cog " + extension)
+        asyncio.run(send_bug(bug_channel))
 
 
 # error handling is the same as SachiBotPy by @SmallPepperZ.
