@@ -1,4 +1,5 @@
 import subprocess
+import os
 import discord
 from discord.ext import commands
 
@@ -28,6 +29,7 @@ class Tools(commands.Cog):
   @commands.command()
   @commands.is_owner()
   async def update(self, ctx):
+    """Pull from git and restart the bot"""
     ctx.send("Updating bot!")
     os.system("./update.sh")
       
