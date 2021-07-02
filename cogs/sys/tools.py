@@ -18,12 +18,12 @@ class Tools(commands.Cog):
       stdout_chunks = [stdout[i:i + maxmsglength] for i in range(0, len(stdout), maxmsglength)]
       for stdout_part in stdout_chunks:
        await ctx.send("```\n" + stdout_part + "\n```")
-      await ctx.send(f"Exit code: {process.returncode}\nCommand: {(' '.join(args)).replace('bash -c ', ' ', 1)}")
+      await ctx.send(f"Exit code: {process.returncode}\nCommand: {' '.join(args).replace('bash -c ', ' ', 1)}")
     else:
       stderr_chunks = [stderr[i:i + maxmsglength] for i in range(0, len(stderr), maxmsglength)]
       for stderr_part in stderr_chunks:
        await ctx.send("```\n" + stderr_part + "\n```")
-      await ctx.send(f"Exit code: {process.returncode}\n Command: {(' '.join(args)).replace('bash -c ', ' ', 1)}")
+      await ctx.send(f"Exit code: {process.returncode}\n Command: {' '.join(args).replace('bash -c ', ' ', 1)}")
     
 
 def setup(glaceon):
