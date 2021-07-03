@@ -2,6 +2,7 @@ import subprocess
 import asyncio
 import os
 import discord
+import shlex
 from discord.ext import commands
 
 class Tools(commands.Cog):
@@ -12,7 +13,7 @@ class Tools(commands.Cog):
   @commands.is_owner()
   async def shell(self, ctx, *, args):
     """This command is used to execute shell commands on Glaceon's host server. Only <@!788222689126776832> and <@!545463550802395146> can use it."""
-    maxmsglength = 1988
+    MAX_MSG_LENGTH = 1988
     proc = await asyncio.create_subprocess_shell(
         args,
         stdout=asyncio.subprocess.PIPE,
@@ -20,16 +21,15 @@ class Tools(commands.Cog):
 
     stdout, stderr = await proc.communicate()
     
-    process = subprocess.run(['bash', '-c', args], capture_output=True)
     stdout = stdout.decode('utf-8')
     stderr = stderr.decode('utf-8')
     if process.returncode == 0:
-      stdout_chunks = [stdout[i:i + maxmsglength] for i in range(0, len(stdout), maxmsglength)]
+      stdout_chunks = [stdout[i:i + MAX_MSG_LENGTH] for i in range(0, len(stdout), MAX_MSG_LENGTH)]
       for stdout_part in stdout_chunks:
        await ctx.send("```\n" + stdout_part + "\n```")
       await ctx.send(f"Exit code: {process.returncode}\nCommand: {args.replace('bash -c ', ' ', 1)}")
     else:
-      stderr_chunks = [stderr[i:i + maxmsglength] for i in range(0, len(stderr), maxmsglength)]
+      stderr_chunks = [stderr[i:i + MAX_MSG_LENGTH] for i in range(0, len(stderr), MAX_MSG_LENGTH)]
       for stderr_part in stderr_chunks:
        await ctx.send("```\n" + stderr_part + "\n```")
       await ctx.send(f"Exit code: {process.returncode}\nCommand: {args.replace('bash -c ', ' ', 1)}")
