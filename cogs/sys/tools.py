@@ -14,7 +14,7 @@ class Tools(commands.Cog):
     """This command is used to execute shell commands on Glaceon's host server. Only <@!788222689126776832> and <@!545463550802395146> can use it."""
     maxmsglength = 1988
     proc = await asyncio.create_subprocess_shell(
-        cmd,
+        args,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
 
