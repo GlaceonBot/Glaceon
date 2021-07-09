@@ -15,7 +15,7 @@ class Tools(commands.Cog):
     MAX_MSG_LENGTH = 1988
     
     proc = await asyncio.create_subprocess_shell(
-        '/bin/bash -c ' + args,
+        '/bin/bash -c  \'' + args + '\'',
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
 
