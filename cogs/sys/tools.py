@@ -26,10 +26,14 @@ class Tools(commands.Cog):
 
     stdout_chunks = [stdout[i:i + MAX_MSG_LENGTH] for i in range(0, len(stdout), MAX_MSG_LENGTH)]
     await ctx.send("[stdout]")
+    if not stdout:
+      await ctx.send("None")
     for stdout_part in stdout_chunks:
      await ctx.send("```\n" + stdout_part + "\n```")
     stderr_chunks = [stderr[i:i + MAX_MSG_LENGTH] for i in range(0, len(stderr), MAX_MSG_LENGTH)]
     await ctx.send("[stderr]")
+    if not stderr:
+      await ctx.send("None")
     for stderr_part in stderr_chunks:
      await ctx.send("```\n" + stderr_part + "\n```")
     await ctx.send(f"Exit code: {proc.returncode}\nCommand: {args}")
