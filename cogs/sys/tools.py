@@ -24,16 +24,15 @@ class Tools(commands.Cog):
     stdout = stdout.decode('utf-8')
     stderr = stderr.decode('utf-8')
 
-    if proc.returncode == 0:
-      stdout_chunks = [stdout[i:i + MAX_MSG_LENGTH] for i in range(0, len(stdout), MAX_MSG_LENGTH)]
-      for stdout_part in stdout_chunks:
-       await ctx.send("```\n" + stdout_part + "\n```")
-      await ctx.send(f"Exit code: {proc.returncode}\nCommand: {args}")
-    else:
-      stderr_chunks = [stderr[i:i + MAX_MSG_LENGTH] for i in range(0, len(stderr), MAX_MSG_LENGTH)]
-      for stderr_part in stderr_chunks:
-       await ctx.send("```\n" + stderr_part + "\n```")
-      await ctx.send(f"Exit code: {proc.returncode}\nCommand: {args}")
+    stdout_chunks = [stdout[i:i + MAX_MSG_LENGTH] for i in range(0, len(stdout), MAX_MSG_LENGTH)]
+    await ctx.send("[stdout]")
+    for stdout_part in stdout_chunks:
+     await ctx.send("```\n" + stdout_part + "\n```")
+    stderr_chunks = [stderr[i:i + MAX_MSG_LENGTH] for i in range(0, len(stderr), MAX_MSG_LENGTH)]
+    await ctx.send("[stderr]")
+    for stderr_part in stderr_chunks:
+     await ctx.send("```\n" + stderr_part + "\n```")
+    await ctx.send(f"Exit code: {proc.returncode}\nCommand: {args}")
     
   @commands.command()
   @commands.is_owner()
