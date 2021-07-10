@@ -2,24 +2,26 @@
 import discord
 from discord.ext import commands
 
+import utils
+
 
 class Antiraid(commands.Cog):
-    '''Antiraid coming soon :D'''
+    """Antiraid coming soon :D"""
 
     def __init__(self, glaceon):
         self.glaceon = glaceon
 
     async def is_dehoisting_enabled(self, ctx):
-        db = self.glaceon.sql_server_connection.cursor()
-        db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
-                   (ctx.guild.id, "auto_dehoist"))  # get the current setting
-        if db.fetchone():
+        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
+        await db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
+                         (ctx.guild.id, "auto_dehoist"))  # get the current setting
+        if await db.fetchone():
             try:
-                db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
-                           (ctx.guild.id, "auto_dehoist"))
+                await db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
+                                 (ctx.guild.id, "auto_dehoist"))
             except AttributeError:
                 return 0
-            settings = db.fetchone()
+            settings = await db.fetchone()
             if settings:
                 return settings[0]
             else:

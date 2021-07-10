@@ -7,6 +7,8 @@ import requests
 from discord.ext import commands
 
 # gets global path and embed color
+import utils
+
 path = pathlib.PurePath()
 
 
@@ -23,7 +25,7 @@ async def sendwelcomemessage(glaceon,
 
 
 class BotSystem(commands.Cog):
-    '''Commands for the bot configuration. Admin only.'''  # This is a docstring, used by the auto-help command to describe this class.
+    """Commands for the bot configuration. Admin only."""  # This is a docstring, used by the auto-help command to describe this class.
 
     def __init__(self,
                  glaceon):  # This is an init function. Runs when the class is constructed, and in this case creates a few variables.
@@ -34,9 +36,9 @@ class BotSystem(commands.Cog):
         administrator=True)  # requires that the person issuing the command has administrator perms
     @commands.guild_only()
     async def prefix(self, ctx, newprefix):  # context and what we should set the new prefix to
-        '''Sets the bot prefix for this server'''
+        """Sets the bot prefix for this server"""
         serverid = ctx.guild.id  # gets serverid for convinience
-        db = self.glaceon.sql_server_connection.cursor()  # connect to our server data db
+        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)  # connect to our server data db
         db.execute(
             f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')  # get the current prefix for that server, if it exists
         if db.fetchone():  # actually check if it exists
@@ -45,7 +47,7 @@ class BotSystem(commands.Cog):
         else:
             db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (%s,%s)",
                        (serverid, newprefix))  # set new prefix
-        self.glaceon.sql_server_connection.commit()  # close connection
+          # close connection
         await ctx.send(f"Prefix set to {newprefix}")  # tell admin what happened
 
     @commands.Cog.listener()
@@ -77,7 +79,7 @@ class BotSystem(commands.Cog):
     @commands.command(aliases=['pfp'])
     @commands.is_owner()
     async def set_pfp(self, ctx):
-        '''Sets bot profile picture. Attach a file and it will be used as the bot's PFP'''
+        """Sets bot profile picture. Attach a file and it will be used as the bot's PFP"""
         pathlib.Path(path / "tmp").mkdir(parents=True, exist_ok=True)
         pfp_url = ctx.message.attachments[0].url
         pfp_path = pfp_url.split("/")[-1]
@@ -93,7 +95,7 @@ class BotSystem(commands.Cog):
                         await self.glaceon.user.edit(avatar=pfp)
                     except discord.HTTPException:
                         await ctx.send("You're trying to change my PFP too fast! Try using the console, "
-                                       "https://discord.com/developers/applications/808149899182342145/bot")
+                                       f"https://discord.com/developers/applications/{self.glaceon.user.id}/bot")
             os.remove(path / f'tmp/{pfp_path}')
             await ctx.send("Avatar updated!", delete_after=10)
         else:

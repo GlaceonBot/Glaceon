@@ -6,6 +6,8 @@ import pathlib
 import emoji
 from discord.ext import commands
 
+import utils
+
 path = pathlib.PurePath()  # get path
 
 
@@ -21,8 +23,8 @@ class Logger(commands.Cog):  # Logger class
     def __init__(self, glaceon):  # initializes Glaceon
         self.glaceon = glaceon
 
-    def is_logging_enabled(self, message):
-        db = self.glaceon.sql_server_connection.cursor()
+    async def is_logging_enabled(self, message):
+        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
         try:
             db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
                        (message.guild.id, "message_logging"))
@@ -36,7 +38,7 @@ class Logger(commands.Cog):  # Logger class
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if self.is_logging_enabled(message) == 1:
+        if await self.is_logging_enabled(message) == 1:
             # logs
             if message.guild is None:  # For DMs set the guild ID to one
                 guildid = "DirectMessages"
@@ -59,7 +61,7 @@ class Logger(commands.Cog):  # Logger class
 
     @commands.Cog.listener()
     async def on_message_edit(self, message_before, message):
-        if self.is_logging_enabled(message) == 1:
+        if await self.is_logging_enabled(message) == 1:
             # logs
             if message.guild is None:  # For DMs set the guild ID to one
                 guildid = "DirectMessages"

@@ -1,6 +1,6 @@
 discord
 pynacl
-mysql-connector-python
+aiomysql
 emoji
 python-dotenv
 requests
@@ -8,3 +8,4 @@ disputils==0.1.3
 python-i18n[YAML]
 psutil
 py-cpuinfo
+cryptography

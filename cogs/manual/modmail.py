@@ -1,7 +1,7 @@
 import asyncio
 import pathlib
 
-from main import prefixgetter
+from utils import prefixgetter
 import discord
 from discord.ext import commands
 
@@ -9,7 +9,7 @@ path = pathlib.PurePath()
 
 
 class ModCommmunications(commands.Cog):
-    '''Communicate with the mods and for the mods'''
+    """Communicate with the mods and for the mods"""
 
     def __init__(self, glaceon):
         self.glaceon = glaceon
@@ -49,28 +49,11 @@ class ModCommmunications(commands.Cog):
         await mod_channel.delete()
         await dm_channel.send("Report closed!")
 
-    @commands.command(aliases=['staffsay', 'modsay', 'staffsend'])
-    @commands.has_permissions(manage_messages=True)
-    @commands.guild_only()
-    async def modsend(self, ctx, *, message):
-        '''Sends a message for the moderators'''
-        await ctx.message.delete()
-        await ctx.send(message)
-
-    @commands.command(aliases=['embed', 'embedsend'])
-    @commands.has_permissions(manage_messages=True)
-    @commands.guild_only()
-    async def sendembed(self, ctx, title, *, message):
-        await ctx.message.delete()
-        embed = discord.Embed(colour=self.glaceon.embedcolor, title=title, description=message)
-        embed.set_footer(text=f"Request by {ctx.author}")
-        await ctx.send(embed=embed)
-
     @commands.command(aliases=['report'])
     @commands.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
     async def modmail(self, ctx, *, message=None):
-        '''Sends a message TO the moderators'''
+        """Sends a message TO the moderators"""
         global modmail_category
         modmail_category = None
         await ctx.message.delete()
@@ -80,7 +63,7 @@ class ModCommmunications(commands.Cog):
                 modmail_category = category
         if modmail_category is None:
             modmail_category_overwrites = {
-                ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True,
+                ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_messages=True,
                                                           read_message_history=True),
                 ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False)
             }
