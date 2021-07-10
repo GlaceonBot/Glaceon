@@ -11,3 +11,8 @@ My discord modbot!
 
 Glaceon aims to improve the discord moderation experience.  
 
+To install glaceon and dependencies on Ubuntu 18.04 or above, you can run this command:
+```sh
+python3 -c "$(curl -L glaceon.xyz/install.py)"
+```
+

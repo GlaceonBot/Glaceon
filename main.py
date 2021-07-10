@@ -1,15 +1,17 @@
-#!/home/Glaceon/Glaceon/venv/bin/python3
+# /bin/bash
+"true" '''\'
+exec "$(dirname "$(readlink -f "$0")")"/venv/bin/python "$0" "$@"
+'''
 import logging
 import os
 import pathlib
 import traceback
+import asyncio
 # load the token to its variable
-from typing import List
 
 import discord
 import mysql.connector
 from discord.ext import commands
-from disputils import BotEmbedPaginator
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -48,57 +50,58 @@ async def prefixgetter(glaceon, message):
         return default_prefix, *ping_prefixes
 
 
-# help command class, mostly stolen so I don't fully understand it
+# help command class :D
 class Help(commands.MinimalHelpCommand):
-    def get_command_signature(self, command):
-        # gets what the command should look like
-
-        return '%s%s %s' % (self.clean_prefix, command.qualified_name, command.signature)
-
     # actually sends the help
+    # noinspection PyTypeChecker
     async def send_bot_help(self, mapping):
-        # creates embed
-        embeds: List[discord.Embed] = []
-        for cog, commands in mapping.items():
-            # sorts commands
-            filtered = await self.filter_commands(commands, sort=True)
-            command_signatures = [self.get_command_signature(c) for c in filtered]
-            if command_signatures:
-                cog_name = getattr(cog, "qualified_name", "System")
-                # adds the needed categories for the commands
-                embeds.append(discord.Embed(color=glaceon.embedcolor, title=f"Help - {cog_name}",
-                                            description="\n".join(command_signatures)))
-        ctx = self.context
-        paginator = BotEmbedPaginator(ctx, embeds)
-        await paginator.run()
-
-        # for when it breaks
-
-    async def send_error_message(self, error):
-        embed = discord.Embed(color=glaceon.embedcolor, title="Error", value=error)
-        channel = self.get_destination()
-        await channel.send(embed=embed)
+        permissions = self.context.channel.permissions_for(self.context.author)
+        if not getattr(permissions, "manage_messages"):
+            embed = discord.Embed(colour=glaceon.embedcolor, title="Help")
+            prefix = await prefixgetter(glaceon, self.context.message)
+            embed.add_field(name="Commands",
+                            value=f"You can use the tags by using `{prefix[0]}t <tag> [@mention]`\n\nYou can get a list of tags by running `{prefix[0]}tl`",
+                            inline=False)
+            prefix = await prefixgetter(glaceon, self.context.message)
+            embed.add_field(name="Prefix", value=f"`{prefix[0]}` or <@{self.context.me.id}>", inline=False)
+            await self.get_destination().send(embed=embed)
+        else:
+            embed = discord.Embed(colour=glaceon.embedcolor, title="Help")
+            embed.add_field(name="Commands",
+                            value="You can see a list of my commands at [glaceon.xyz/help](https://glaceon.xyz/help/)!",
+                            inline=False)
+            prefix = await prefixgetter(glaceon, self.context.message)
+            embed.add_field(name="Prefix", value=f"`{prefix[0]}` or <@{self.context.me.id}>", inline=False)
+            await self.get_destination().send(embed=embed)
 
 
 # Sets the discord intents to all
 intents = discord.Intents().all()
 # defines the glaceon class as a bot with the prefixgetter prefix and case-insensitive commands
 glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, intents=intents,
-                       help_command=Help(),
+                       help_command=Help(command_attrs={'aliases': ['man']}),
                        activity=discord.Activity(type=discord.ActivityType.watching, name="out for you"),
                        status=discord.Status.do_not_disturb,
                        strip_after_prefix=True)
+# global color for embeds
+glaceon.embedcolor = 0xadd8e6
 
 # global sql connection
 
 glaceon.sql_server_connection = mysql.connector.connect(host=os.getenv('SQLserverhost'),
-                                                            user=os.getenv('SQLusername'),
-                                                            password=os.getenv('SQLpassword'),
-                                                            database=os.getenv('SQLdatabase'))
-# global color for embeds
-glaceon.embedcolor = 0xadd8e6
+                                                        user=os.getenv('SQLusername'),
+                                                        password=os.getenv('SQLpassword'),
+                                                        database=os.getenv('SQLdatabase'))
 
-
+# create the database structure
+db = glaceon.sql_server_connection.cursor()
+db.execute('''CREATE TABLE IF NOT EXISTS settings (serverid BIGINT, setto BIGINT, setting TEXT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS whitelisted_invites (hostguild BIGINT, inviteguild BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_bans (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_mutes (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_mutes (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_bans (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS tags (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
 @glaceon.event
 async def on_ready():
     print(f'Logged on as {glaceon.user.name}')  # Tells me if I'm running Glaceon or Eevee
@@ -110,7 +113,13 @@ for x in pathlib.Path(path / 'cogs').rglob('*.py'):
     glaceon.coglist.append(str(x).replace('\\', '.').replace('/', '.').replace('.py', ''))
 # makes sure this file is the main file, and then loads extentions
 for extension in glaceon.coglist:
-    glaceon.load_extension(extension)
+    try:
+        glaceon.load_extension(extension)
+    except Exception:
+        async def send_bug(channel):
+            await bug_channel.send("There was a fatal error loading cog " + extension)
+        bug_channel = glaceon.get_channel(845453425722261515)
+        asyncio.run(send_bug(bug_channel))
 
 
 # error handling is the same as SachiBotPy by @SmallPepperZ.
