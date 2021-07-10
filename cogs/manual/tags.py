@@ -9,12 +9,13 @@ path = pathlib.PurePath()
 
 
 class TagSystem(commands.Cog):
-    """tag system"""
+    """Glaceon tag system"""
 
     def __init__(self, glaceon):
         self.glaceon = glaceon
 
     @commands.command(aliases=["t"])
+    @commands.guild_only()
     async def tag(self, ctx, *inputs):
         """Call a tag. (or two, or ten)"""
         await ctx.message.delete()
@@ -35,10 +36,7 @@ class TagSystem(commands.Cog):
             for t in tags:
                 t = t.lower()
                 db = self.glaceon.sql_server_connection.cursor()
-
-                db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                        (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
-                db.execute("""SELECT tagcontent FROM tags WHERE serverid = %s AND tagname = %s""", (sid, t))
+                db.execute('''SELECT tagcontent FROM tags WHERE serverid = %s AND tagname = %s''', (sid, t))
                 factoid = db.fetchone()
                 if factoid:
                     factoids.append(factoid[0])
@@ -56,6 +54,7 @@ class TagSystem(commands.Cog):
 
     @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tm", "ta"])
     @commands.has_guild_permissions(manage_messages=True)
+    @commands.guild_only()
     async def tagadd(self, ctx, name, *, contents):
         """add or edit tags"""
         await ctx.message.delete()
@@ -64,42 +63,36 @@ class TagSystem(commands.Cog):
         if len(contents) > 1900:
             await ctx.send("That factoid is too long!")
         else:
-            db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
             db.execute(f'''SELECT serverid FROM tags WHERE serverid = %s AND tagname = %s''', (serverid, name.lower()))
             if db.fetchone():
-                db.execute("""UPDATE tags SET tagcontent = %s WHERE serverid = %s AND tagname = %s""",
+                db.execute('''UPDATE tags SET tagcontent = %s WHERE serverid = %s AND tagname = %s''',
                            (contents, serverid, name.lower()))
             else:
-                db.execute("""INSERT INTO tags(serverid, tagname, tagcontent) VALUES (%s,%s,%s)""",
+                db.execute('''INSERT INTO tags(serverid, tagname, tagcontent) VALUES (%s,%s,%s)''',
                            (serverid, name.lower(), contents))
             self.glaceon.sql_server_connection.commit()
             await ctx.send(f"Tag added with name `{name.lower()}` and contents `{contents}`", delete_after=10)
 
     @commands.command(aliases=["trm", "tagremove"])
     @commands.has_guild_permissions(manage_messages=True)
+    @commands.guild_only()
     async def tagdelete(self, ctx, name):
         """Remove a tag"""
         await ctx.message.delete()
         sid = ctx.guild.id
         db = self.glaceon.sql_server_connection.cursor()
-
-        db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
-        db.execute("""DELETE FROM tags WHERE serverid = %s AND tagname = %s""", (sid, name.lower()))
+        db.execute('''DELETE FROM tags WHERE serverid = %s AND tagname = %s''', (sid, name.lower()))
         self.glaceon.sql_server_connection.commit()
         await ctx.send(f"tag `{name.lower()}` deleted", delete_after=10)
 
     @commands.command(aliases=["tlist", "tl", "taglist"])
+    @commands.guild_only()
     async def tagslist(self, ctx):
         """list the tags on this server"""
         await ctx.message.delete()
         sid = ctx.guild.id
         db = self.glaceon.sql_server_connection.cursor()
-
-        db.execute('''CREATE TABLE IF NOT EXISTS tags
-                                    (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
-        db.execute("""SELECT tagname FROM tags WHERE serverid = %s""", (sid,))
+        db.execute('''SELECT tagname FROM tags WHERE serverid = %s''', (sid,))
         factoids = db.fetchall()
         if factoids:
             await ctx.send('`' + "`, `".join([i for (i,) in factoids]) + '`')

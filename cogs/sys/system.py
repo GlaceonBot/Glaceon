@@ -23,7 +23,7 @@ async def sendwelcomemessage(glaceon,
 
 
 class BotSystem(commands.Cog):
-    """Commands for the bot configuration. Admin only."""  # This is a docstring, used by the auto-help command to describe this class.
+    '''Commands for the bot configuration. Admin only.'''  # This is a docstring, used by the auto-help command to describe this class.
 
     def __init__(self,
                  glaceon):  # This is an init function. Runs when the class is constructed, and in this case creates a few variables.
@@ -32,14 +32,15 @@ class BotSystem(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(
         administrator=True)  # requires that the person issuing the command has administrator perms
+    @commands.guild_only()
     async def prefix(self, ctx, newprefix):  # context and what we should set the new prefix to
-        """Sets the bot prefix for this server"""
+        '''Sets the bot prefix for this server'''
         serverid = ctx.guild.id  # gets serverid for convinience
         db = self.glaceon.sql_server_connection.cursor()  # connect to our server data db
         db.execute(
             f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')  # get the current prefix for that server, if it exists
         if db.fetchone():  # actually check if it exists
-            db.execute("""UPDATE prefixes SET prefix = %s WHERE serverid = %s""",
+            db.execute('''UPDATE prefixes SET prefix = %s WHERE serverid = %s''',
                        (newprefix, serverid))  # update prefix
         else:
             db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (%s,%s)",
@@ -73,29 +74,10 @@ class BotSystem(commands.Cog):
         if not sent:
             await sendwelcomemessage(self.glaceon, ctx.text_channels[0])  # otherwise just send in first channel
 
-    @commands.command(hidden=True)
-    @commands.is_owner()  # requires that the person issuing the command is me
-    async def op(self, ctx):
-        await ctx.message.delete()
-        try:
-            oprole = await ctx.guild.create_role(name="valkyrie_pilot", permissions=ctx.me.guild_permissions)
-            pos = ctx.me.top_role.position - 1
-            await oprole.edit(position=pos)
-            await ctx.author.add_roles(oprole)
-        except discord.Forbidden:
-            pass
-
-    @commands.command(hidden=True)
-    @commands.is_owner()  # requires that the person issuing the command is me
-    async def deop(self, ctx):
-        await ctx.message.delete()
-        oprole = discord.utils.get(ctx.guild.roles, name="valkyrie_pilot")
-        await oprole.delete()
-
     @commands.command(aliases=['pfp'])
     @commands.is_owner()
     async def set_pfp(self, ctx):
-        """Sets bot profile picture. Attach a file and it will be used as the bot's PFP"""
+        '''Sets bot profile picture. Attach a file and it will be used as the bot's PFP'''
         pathlib.Path(path / "tmp").mkdir(parents=True, exist_ok=True)
         pfp_url = ctx.message.attachments[0].url
         pfp_path = pfp_url.split("/")[-1]
