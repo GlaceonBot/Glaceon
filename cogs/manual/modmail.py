@@ -1,7 +1,7 @@
 import asyncio
 import pathlib
 
-from main import prefixgetter
+from utils import prefixgetter
 import discord
 from discord.ext import commands
 
