@@ -8,7 +8,7 @@ path = pathlib.PurePath()
 
 
 class HelperCommands(commands.Cog):
-    '''Commands gated to Manage Messages'''
+    """Commands gated to Manage Messages"""
 
     def __init__(self, glaceon):
         self.glaceon = glaceon
@@ -36,7 +36,7 @@ class HelperCommands(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.guild_only()
     async def warn(self, ctx, member: discord.Member, *, reason):
-        '''Warn a member.'''
+        """Warn a member."""
         await ctx.message.delete()
         if member is None:
             await ctx.send("No member specified!")
@@ -46,6 +46,23 @@ class HelperCommands(commands.Cog):
         else:
             ctx.send("I can't warn a bot!")
         await ctx.send(f"User {member} Has Been Warned! Reason sent in DMs.", delete_after=10)
+
+    @commands.command(aliases=['staffsay', 'modsay', 'staffsend'])
+    @commands.has_permissions(manage_messages=True)
+    @commands.guild_only()
+    async def modsend(self, ctx, *, message):
+        '''Sends a message for the moderators'''
+        await ctx.message.delete()
+        await ctx.send(message)
+
+    @commands.command(aliases=['embed', 'embedsend'])
+    @commands.has_permissions(manage_messages=True)
+    @commands.guild_only()
+    async def sendembed(self, ctx, title, *, message):
+        await ctx.message.delete()
+        embed = discord.Embed(colour=self.glaceon.embedcolor, title=title, description=message)
+        embed.set_footer(text=f"Request by {ctx.author}")
+        await ctx.send(embed=embed)
 
     @commands.command(description="Mutes the specified user.")
     @commands.has_guild_permissions(manage_messages=True)
@@ -105,7 +122,7 @@ class HelperCommands(commands.Cog):
             time = "in " + time
         try:
             await member.send(f"You have been muted in: {guild.name} for: {reason}. Your mute will expire {time}")
-        except discord.HTTPException:
+        except discord.Forbidden:
             await ctx.send("Unable to DM, muting anyway!", delete_after=10)
 
     @commands.command(description="Unmutes a specified user.")
@@ -113,7 +130,7 @@ class HelperCommands(commands.Cog):
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def unmute(self, ctx, member: discord.Member):
-        '''Unmutes a member.'''
+        """Unmutes a member."""
         await ctx.message.delete()
         muted_role = discord.utils.get(ctx.guild.roles, name="Muted")
         try:

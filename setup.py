@@ -1,11 +1,11 @@
 import os
+from dotenv import load_dotenv
 import pathlib
 import random
 import string
 from sys import platform
 
 path = pathlib.PurePath()
-
 if "linux" not in platform:
     print("This script is for linux!")
     exit(0)
@@ -28,14 +28,29 @@ token = input("Input bot token for .env: ")
 path = pathlib.PurePath("Glaceon")
 os.system(f"mysql -u root -h localhost -e \"CREATE USER 'glaceon'@'localhost' IDENTIFIED BY '{sql_password}'\"")
 os.system(f"mysql -u root -h localhost -e \"GRANT ALL PRIVILEGES ON database_name.* TO 'username'@'localhost'\"")
+
 os.system("git clone https://github.com/GlaceonBot/Glaceon")
 os.system(f"python3 -m venv {path}/venv")
+import mysql.connector
+
 with open("env", 'w+') as dotenv:
     dotenv.write(f"""TOKEN=\"{token}\"
 SQLusername=\"glaceon\"
 SQLpassword=\"{sql_password}\"
 SQLserverhost="localhost"
 SQLdatabase=\"glaceondata\"""")
+load_dotenv()
+db = mysql.connector.connect(host=os.getenv('SQLserverhost'),
+                             user=os.getenv('SQLusername'),
+                             password=os.getenv('SQLpassword'),
+                             db=os.getenv('SQLdatabase'))
+db.execute('''CREATE TABLE IF NOT EXISTS settings (serverid BIGINT, setto BIGINT, setting TEXT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS whitelisted_invites (hostguild BIGINT, inviteguild BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_bans (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_mutes (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_mutes (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS current_bans (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
+db.execute('''CREATE TABLE IF NOT EXISTS tags (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
 try:
     with open("/etc/systemd/system/glaceon.service", "w+") as servicefile:
         servicefile.write(f"""
