@@ -9,5 +9,3 @@ python-i18n[YAML]
 psutil
 py-cpuinfo
 cryptography
-psutil
-py-cpuinfo
