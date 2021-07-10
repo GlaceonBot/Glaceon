@@ -6,12 +6,14 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
+import utils
+
 path = pathlib.PurePath()
 
 
 # kick
 class ModCommands(commands.Cog):
-    '''Commands gated behind kick members, ban members, and manage channels.'''
+    """Commands gated behind kick members, ban members, and manage channels."""
 
     def __init__(self, glaceon):
         self.glaceon = glaceon  # set self.bot
@@ -22,7 +24,7 @@ class ModCommands(commands.Cog):
         yesmoji = '<:allow:843248140551192606>'
 
     async def are_ban_confirms_enabled(self, message):
-        db = self.glaceon.sql_server_connection.cursor()
+        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
         db.execute('''CREATE TABLE IF NOT EXISTS settings_ban_confirm 
                 (serverid BIGINT, setto BIGINT)''')
         db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
@@ -89,7 +91,7 @@ class ModCommands(commands.Cog):
                         else:
                             revoke_in_secs = -1
                         ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
-                        db = self.glaceon.sql_server_connection.cursor()
+                        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
                         db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                             ctx.guild.id,))  # get the current prefix for that server, if it exists
                         if db.fetchone():  # actually check if it exists
@@ -98,7 +100,7 @@ class ModCommands(commands.Cog):
                         else:
                             db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (%s,%s,%s)",
                                        (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
-                        self.glaceon.sql_server_connection.commit()
+                        
                     await ctx.send(f"User {member} Has Been banned!",
                                    delete_after=5)  # says in chat that the user was banned successfully, deletes
                     # after 5s
@@ -122,7 +124,7 @@ class ModCommands(commands.Cog):
     @commands.bot_has_guild_permissions(kick_members=True)
     @commands.guild_only()
     async def kick(self, ctx, member: discord.Member, *, reason="No reason specified."):
-        '''Kicks a user.'''
+        """Kicks a user."""
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
@@ -155,7 +157,7 @@ class ModCommands(commands.Cog):
     @commands.guild_only()
     async def ban(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *,
                   reason="No reason specified."):
-        '''Bans a user.'''
+        """Bans a user."""
         await ctx.message.delete()  # deletes command invocation
         if member is None:  # makes sure there is a member paramater and notify if there isnt
             await ctx.send("No member specified!")
@@ -186,7 +188,7 @@ class ModCommands(commands.Cog):
     @commands.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
     async def lock(self, ctx, channel=None):
-        '''Locks a channel'''
+        """Locks a channel"""
         if channel is None:
             channel = ctx.channel
         await channel.set_permissions(ctx.guild.default_role, send_messages=False)  # disallows default role
@@ -198,7 +200,7 @@ class ModCommands(commands.Cog):
     @commands.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
     async def unlock(self, ctx, channel=None):
-        '''Unlocks a channel'''
+        """Unlocks a channel"""
         if channel is None:
             channel = ctx.channel
         await channel.set_permissions(ctx.guild.default_role, send_messages=True)  # allows default role chatting
@@ -210,7 +212,7 @@ class ModCommands(commands.Cog):
     @commands.bot_has_permissions(ban_members=True)
     @commands.guild_only()
     async def unban(self, ctx, member: discord.User):
-        '''Unbans user.'''
+        """Unbans user."""
         await ctx.message.delete()  # deletes invocation
         user = await self.glaceon.fetch_user(member.id)  # gets the user id so the unban method can be invoked
         try:

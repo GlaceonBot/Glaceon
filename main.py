@@ -6,7 +6,6 @@ import logging
 import os
 import pathlib
 import traceback
-import asyncio
 # load the token to its variable
 
 import discord
@@ -86,22 +85,18 @@ glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, inten
 # global color for embeds
 glaceon.embedcolor = 0xadd8e6
 
+
 # global sql connection
-loop = asyncio.get_event_loop()
-
-
 async def connect_to_sql_server():
-    sql_server_connection = await aiomysql.connect(host=os.getenv('SQLserverhost'),
-                                                   user=os.getenv('SQLusername'),
-                                                   password=os.getenv('SQLpassword'),
-                                                   db=os.getenv('SQLdatabase'))
-
-    db = await sql_server_connection.cursor()
+    sql_server_connection = await aiomysql.create_pool(host=os.getenv('SQLserverhost'),
+                                                       user=os.getenv('SQLusername'),
+                                                       password=os.getenv('SQLpassword'),
+                                                       db=os.getenv('SQLdatabase'),
+                                                       autocommit=True)
     return sql_server_connection
 
 
-glaceon.sql_server_connection = loop.run_until_complete(connect_to_sql_server())
-
+glaceon.sql_server_connection = glaceon.loop.run_until_complete(connect_to_sql_server())
 
 
 @glaceon.event
@@ -110,20 +105,19 @@ async def on_ready():
 
 
 # bot's list of cogs that need to be loaded up, they are all in different files and all do something different.
-glaceon.coglist = []
-for x in pathlib.Path(path / 'cogs').rglob('*.py'):
-    glaceon.coglist.append(str(x).replace('\\', '.').replace('/', '.').replace('.py', ''))
-# makes sure this file is the main file, and then loads extentions
-for extension in glaceon.coglist:
-    try:
-        glaceon.load_extension(extension)
-    except Exception:
-        async def send_bug(channel):
+async def load_extentions():
+    await glaceon.wait_until_ready()
+    glaceon.coglist = []
+    for x in pathlib.Path(path / 'cogs').rglob('*.py'):
+        glaceon.coglist.append(str(x).replace('\\', '.').replace('/', '.').replace('.py', ''))
+    # makes sure this file is the main file, and then loads extentions
+    for extension in glaceon.coglist:
+        try:
+            glaceon.load_extension(extension)
+        except discord.ext.commands.errors.ExtensionError or discord.ext.commands.errors.ExtensionFailed:
+            bug_channel = glaceon.get_channel(int(os.getenv('ErrorChannel')))
             await bug_channel.send("There was a fatal error loading cog " + extension)
-
-
-        bug_channel = glaceon.get_channel(845453425722261515)
-        asyncio.run(send_bug(bug_channel))
+glaceon.loop.create_task(load_extentions())
 
 
 # error handling is the same as SachiBotPy by @SmallPepperZ.
@@ -137,7 +131,7 @@ async def on_command_error(ctx, error):
         return
 
     elif isinstance(error, discord.ext.commands.errors.NotOwner):
-        await ctx.reply("lol only valk can do that")
+        await ctx.reply("Only bot administrators can do that.")
         return
 
     elif isinstance(error, discord.ext.commands.errors.MissingPermissions):

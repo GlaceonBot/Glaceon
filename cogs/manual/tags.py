@@ -4,6 +4,7 @@ import re
 import discord
 from discord.ext import commands
 
+import utils
 
 path = pathlib.PurePath()
 
@@ -35,7 +36,7 @@ class TagSystem(commands.Cog):
             tags = [tag for tag in inputs if not re.match(r'<@(!?)([0-9]*)>', tag)]
             for t in tags:
                 t = t.lower()
-                db = self.glaceon.sql_server_connection.cursor()
+                db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
                 db.execute('''SELECT tagcontent FROM tags WHERE serverid = %s AND tagname = %s''', (sid, t))
                 factoid = db.fetchone()
                 if factoid:
@@ -59,7 +60,7 @@ class TagSystem(commands.Cog):
         """add or edit tags"""
         await ctx.message.delete()
         serverid = ctx.guild.id
-        db = self.glaceon.sql_server_connection.cursor()
+        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
         if len(contents) > 1900:
             await ctx.send("That factoid is too long!")
         else:
@@ -70,7 +71,6 @@ class TagSystem(commands.Cog):
             else:
                 db.execute('''INSERT INTO tags(serverid, tagname, tagcontent) VALUES (%s,%s,%s)''',
                            (serverid, name.lower(), contents))
-            self.glaceon.sql_server_connection.commit()
             await ctx.send(f"Tag added with name `{name.lower()}` and contents `{contents}`", delete_after=10)
 
     @commands.command(aliases=["trm", "tagremove"])
@@ -80,9 +80,8 @@ class TagSystem(commands.Cog):
         """Remove a tag"""
         await ctx.message.delete()
         sid = ctx.guild.id
-        db = self.glaceon.sql_server_connection.cursor()
+        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
         db.execute('''DELETE FROM tags WHERE serverid = %s AND tagname = %s''', (sid, name.lower()))
-        self.glaceon.sql_server_connection.commit()
         await ctx.send(f"tag `{name.lower()}` deleted", delete_after=10)
 
     @commands.command(aliases=["tlist", "tl", "taglist"])
@@ -91,7 +90,7 @@ class TagSystem(commands.Cog):
         """list the tags on this server"""
         await ctx.message.delete()
         sid = ctx.guild.id
-        db = self.glaceon.sql_server_connection.cursor()
+        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
         db.execute('''SELECT tagname FROM tags WHERE serverid = %s''', (sid,))
         factoids = db.fetchall()
         if factoids:

@@ -9,7 +9,7 @@ path = pathlib.PurePath()
 
 
 class ModCommmunications(commands.Cog):
-    '''Communicate with the mods and for the mods'''
+    """Communicate with the mods and for the mods"""
 
     def __init__(self, glaceon):
         self.glaceon = glaceon
@@ -53,7 +53,7 @@ class ModCommmunications(commands.Cog):
     @commands.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
     async def modmail(self, ctx, *, message=None):
-        '''Sends a message TO the moderators'''
+        """Sends a message TO the moderators"""
         global modmail_category
         modmail_category = None
         await ctx.message.delete()
