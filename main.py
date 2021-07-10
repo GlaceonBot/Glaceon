@@ -79,7 +79,7 @@ class Help(commands.MinimalHelpCommand):
 intents = discord.Intents().all()
 # defines the glaceon class as a bot with the prefixgetter prefix and case-insensitive commands
 glaceon = commands.Bot(command_prefix=prefixgetter, case_insensitive=True, intents=intents,
-                       help_command=Help(),
+                       help_command=Help(command_attrs={'aliases': ['man', 'help']}),
                        activity=discord.Activity(type=discord.ActivityType.watching, name="out for you"),
                        status=discord.Status.do_not_disturb,
                        strip_after_prefix=True)
