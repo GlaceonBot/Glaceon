@@ -45,8 +45,9 @@ class Settings(discord.ext.commands.Cog):
         else:
             db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
                        (ctx.guild.id, isenabled, "message_logging"))  # set the new setting
-          # say "yes i want to do this for sure"
-        await ctx.sreply(f"Message logging {enabledtext}!")
+        # say "yes i want to do this for sure"
+        await ctx.reply(f"Message logging {enabledtext}!")
+        del db
 
     @settings.command(aliases=['banconfirms', 'confirmbans', 'banconfirm'])
     async def confirm_bans(self, ctx, isenabled: bool):
@@ -66,8 +67,9 @@ class Settings(discord.ext.commands.Cog):
         else:
             db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
                        (ctx.guild.id, isenabled, "ban_confirms"))  # set the new setting
-          # say "yes i want to do this for sure"
+        # say "yes i want to do this for sure"
         await ctx.reply(f"Ban confirmations {enabledtext}!")
+        del db
 
     @settings.command(aliases=['dehoist', 'dehoister', 'autodehoist'])
     async def auto_dehoist(self, ctx, isenabled: bool):
@@ -93,8 +95,9 @@ class Settings(discord.ext.commands.Cog):
         else:
             db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
                        (ctx.guild.id, isenabled, "auto_dehoist"))  # set the new setting
-          # say "yes i want to do this for sure"
+        # say "yes i want to do this for sure"
         await ctx.reply(f"Auto-dehoisting {enabledtext}!")
+        del db
 
     @settings.command(aliases=['whitelist_invites', 'whitelist_enable'])
     async def whitelisted_invites(self, ctx, isenabled: bool):
@@ -114,16 +117,16 @@ class Settings(discord.ext.commands.Cog):
         else:
             db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
                        (ctx.guild.id, isenabled, "whitelisted_invites"))  # set the new setting
-          # say "yes i want to do this for sure"
         await ctx.reply(f"Invite moderation {enabledtext}!")
+        del db
 
     @settings.command(aliases=['whitelist_invite', 'whitelist_add', 'add_whitelist_invite'])
     async def add_whitelisted_invite(self, ctx, whitelist_guild_id: int):
         """Add an invite to the invite whitelist"""
         db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
         db.execute('''INSERT INTO whitelisted_invites VALUES (%s, %s)''', (ctx.guild.id, whitelist_guild_id))
-          # say "yes i want to do this for sure"
         await ctx.reply(f"Added whitelisted invite for guild {whitelist_guild_id}!")
+        del db
 
     @settings.command(aliases=['dewhitelist_invite', 'whitelist_del', 'whitelist_rem', 'whitelist_remove'])
     async def remove_whitelisted_invite(self, ctx, whitelist_guild_id: int):
@@ -131,8 +134,32 @@ class Settings(discord.ext.commands.Cog):
         db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
         db.execute('''DELETE FROM whitelisted_invites WHERE hostguild = %s AND inviteguild = %s''',
                    (ctx.guild.id, whitelist_guild_id))
-          # say "yes i want to do this for sure"
         await ctx.reply(f"Removed whitelisted invite for guild {whitelist_guild_id}!")
+        del db
+
+    @settings.command()
+    async def disable(self, ctx, command):
+        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
+        all_commands = []
+        for x in self.glaceon.walk_commands():
+            all_commands.append(x.qualified_name)
+        if command not in all_commands:
+            await ctx.send("That is not a valid command.")
+            return
+        await db.execute('''INSERT INTO disabled_commands VALUES (%s, %s, %s)''', (ctx.guild.id, command, 0))
+        await ctx.send(f"Command {command} disabled!")
+
+    @settings.command()
+    async def enable(self, ctx, command):
+        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
+        all_commands = []
+        for x in self.glaceon.walk_commands():
+            all_commands.append(x.qualified_name)
+        if command not in all_commands:
+            await ctx.send("That is not a valid command.")
+            return
+        await db.execute('''INSERT INTO disabled_commands VALUES (%s, %s, %s)''', (ctx.guild.id, command, 1))
+        await ctx.send(f"Command {command} enabled!")
 
 
 def setup(glaceon):

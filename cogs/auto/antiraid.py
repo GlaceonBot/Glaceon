@@ -22,6 +22,7 @@ class Antiraid(commands.Cog):
             except AttributeError:
                 return 0
             settings = await db.fetchone()
+            del db
             if settings:
                 return settings[0]
             else:

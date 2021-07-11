@@ -1,6 +1,7 @@
 import asyncio
 import pathlib
 
+import utils
 from utils import prefixgetter
 import discord
 from discord.ext import commands
@@ -52,6 +53,7 @@ class ModCommmunications(commands.Cog):
     @commands.command(aliases=['report'])
     @commands.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
+    @utils.disableable()
     async def modmail(self, ctx, *, message=None):
         """Sends a message TO the moderators"""
         global modmail_category

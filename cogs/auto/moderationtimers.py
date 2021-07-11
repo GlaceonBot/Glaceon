@@ -41,6 +41,7 @@ class UnCog(commands.Cog):
                     await member.send(f"You have been unbanned in {guild}!")
                 except discord.Forbidden:
                     pass
+            del db
 
     @tasks.loop(seconds=5.0)
     async def unmuter(self):
@@ -64,6 +65,7 @@ class UnCog(commands.Cog):
                     await member.send(f"You have been unmuted in {guild}!")
                 except discord.Forbidden:
                     pass
+            del db
 
     @unmuter.before_loop
     async def before_umuter(self):

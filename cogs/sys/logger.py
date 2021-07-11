@@ -26,11 +26,12 @@ class Logger(commands.Cog):  # Logger class
     async def is_logging_enabled(self, message):
         db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
         try:
-            db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+            await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
                        (message.guild.id, "message_logging"))
         except AttributeError:
             return 1
-        settings = db.fetchone()
+        settings = await db.fetchone()
+        del db
         if settings:
             return settings[0]
         else:
@@ -58,7 +59,6 @@ class Logger(commands.Cog):  # Logger class
             )  # write the output demojized
 
             logfile.close()  # close the log file
-
     @commands.Cog.listener()
     async def on_message_edit(self, message_before, message):
         if await self.is_logging_enabled(message) == 1:

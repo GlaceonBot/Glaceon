@@ -67,6 +67,8 @@ async def connect_to_sql_server():
                                                        user=os.getenv('SQLusername'),
                                                        password=os.getenv('SQLpassword'),
                                                        db=os.getenv('SQLdatabase'),
+                                                       minsize=0, # this needs to be 0, or the database connection closes
+                                                       maxsize=100,
                                                        autocommit=True)
     return sql_server_connection
 
@@ -163,6 +165,9 @@ async def on_command_error(ctx, error):
     elif isinstance(error, discord.ext.commands.errors.NoPrivateMessage):
         await ctx.reply("That can only be used in servers, not DMs!")
         return
+
+    elif isinstance(error, discord.ext.commands.errors.CheckFailure):
+        await ctx.send(error)
 
     else:
         # Send user a message

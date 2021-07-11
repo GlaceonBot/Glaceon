@@ -17,6 +17,7 @@ class TagSystem(commands.Cog):
 
     @commands.command(aliases=["t"])
     @commands.guild_only()
+    @utils.disableable()
     async def tag(self, ctx, *inputs):
         """Call a tag. (or two, or ten)"""
         await ctx.message.delete()
@@ -39,6 +40,7 @@ class TagSystem(commands.Cog):
                 db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
                 db.execute('''SELECT tagcontent FROM tags WHERE serverid = %s AND tagname = %s''', (sid, t))
                 factoid = db.fetchone()
+                del db
                 if factoid:
                     factoids.append(factoid[0])
                 else:
@@ -56,6 +58,7 @@ class TagSystem(commands.Cog):
     @commands.command(aliases=["tmanage", "tagmanage", "tadd", "tm", "ta"])
     @commands.has_guild_permissions(manage_messages=True)
     @commands.guild_only()
+    @utils.disableable()
     async def tagadd(self, ctx, name, *, contents):
         """add or edit tags"""
         await ctx.message.delete()
@@ -72,20 +75,24 @@ class TagSystem(commands.Cog):
                 db.execute('''INSERT INTO tags(serverid, tagname, tagcontent) VALUES (%s,%s,%s)''',
                            (serverid, name.lower(), contents))
             await ctx.send(f"Tag added with name `{name.lower()}` and contents `{contents}`", delete_after=10)
+        del db
 
     @commands.command(aliases=["trm", "tagremove"])
     @commands.has_guild_permissions(manage_messages=True)
     @commands.guild_only()
+    @utils.disableable()
     async def tagdelete(self, ctx, name):
         """Remove a tag"""
         await ctx.message.delete()
         sid = ctx.guild.id
         db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
         db.execute('''DELETE FROM tags WHERE serverid = %s AND tagname = %s''', (sid, name.lower()))
+        del db
         await ctx.send(f"tag `{name.lower()}` deleted", delete_after=10)
 
     @commands.command(aliases=["tlist", "tl", "taglist"])
     @commands.guild_only()
+    @utils.disableable()
     async def tagslist(self, ctx):
         """list the tags on this server"""
         await ctx.message.delete()
@@ -97,6 +104,7 @@ class TagSystem(commands.Cog):
             await ctx.send('`' + "`, `".join([i for (i,) in factoids]) + '`')
         else:
             await ctx.send(f"This guild has no tags!")
+        del db
 
 
 def setup(glaceon):

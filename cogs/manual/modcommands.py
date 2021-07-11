@@ -29,6 +29,7 @@ class ModCommands(commands.Cog):
                 (serverid BIGINT, setto BIGINT)''')
         db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
         settings = db.fetchone()
+        del db
         if settings:
             return settings[0]
         else:
@@ -100,7 +101,7 @@ class ModCommands(commands.Cog):
                         else:
                             db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (%s,%s,%s)",
                                        (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
-                        
+                        del db
                     await ctx.send(f"User {member} Has Been banned!",
                                    delete_after=5)  # says in chat that the user was banned successfully, deletes
                     # after 5s
@@ -123,6 +124,7 @@ class ModCommands(commands.Cog):
     @commands.has_guild_permissions(kick_members=True)
     @commands.bot_has_guild_permissions(kick_members=True)
     @commands.guild_only()
+    @utils.disableable()
     async def kick(self, ctx, member: discord.Member, *, reason="No reason specified."):
         """Kicks a user."""
         await ctx.message.delete()  # deletes command invocation
@@ -155,6 +157,7 @@ class ModCommands(commands.Cog):
     @commands.has_guild_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
     @commands.guild_only()
+    @utils.disableable()
     async def ban(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *,
                   reason="No reason specified."):
         """Bans a user."""
@@ -187,6 +190,7 @@ class ModCommands(commands.Cog):
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
+    @utils.disableable()
     async def lock(self, ctx, channel=None):
         """Locks a channel"""
         if channel is None:
@@ -199,6 +203,7 @@ class ModCommands(commands.Cog):
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
+    @utils.disableable()
     async def unlock(self, ctx, channel=None):
         """Unlocks a channel"""
         if channel is None:
@@ -211,6 +216,7 @@ class ModCommands(commands.Cog):
     @commands.has_guild_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     @commands.guild_only()
+    @utils.disableable()
     async def unban(self, ctx, member: discord.User):
         """Unbans user."""
         await ctx.message.delete()  # deletes invocation

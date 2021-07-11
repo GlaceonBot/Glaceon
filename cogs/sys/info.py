@@ -21,8 +21,9 @@ class Info(commands.Cog):
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
+    @utils.disableable()
     async def ping(self, ctx):
-        """Shows bot ping. 5s cooldown to prevent spam."""
+        """Shows bot ping."""
         await ctx.message.delete()
         embed = discord.Embed(colour=self.glaceon.embedcolor, title="Pong!",
                               description=str(round(self.glaceon.latency * 1000)) + " MS")
@@ -66,7 +67,17 @@ class Info(commands.Cog):
             await ctx.send("`" + "`, `".join(guilds_list) + "`")
         else:
             await ctx.send("No invites are whitelisted in this guild!")
+        del db
 
+    @commands.command()
+    @commands.guild_only()
+    @utils.disableable()
+    async def disabled(self, ctx, command = None):
+        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
+        commands = []
+        for command in self.glaceon.walk_commands():
+            commands.append(command)
+        ctx.send("\n".join(commands))
 
 def setup(glaceon):
     glaceon.add_cog(Info(glaceon))

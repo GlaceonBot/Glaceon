@@ -25,10 +25,13 @@ class Antispam(commands.Cog):
                 return 0
             settings = await db.fetchone()
             if settings:
+                del db
                 return settings[0]
             else:
+                del db
                 return 0
         else:
+            del db
             return 0
 
     @commands.Cog.listener()
@@ -44,6 +47,7 @@ class Antispam(commands.Cog):
                     whitelisted_invites = db.fetchall()
                     if not any(invite.guild.id in whitelisted_invite for whitelisted_invite in whitelisted_invites):
                         await message.delete()
+                    del db
                 except discord.Forbidden or discord.HTTPException:
                     await message.delete()
 

@@ -49,6 +49,7 @@ class BotSystem(commands.Cog):
                        (serverid, newprefix))  # set new prefix
           # close connection
         await ctx.send(f"Prefix set to {newprefix}")  # tell admin what happened
+        del db
 
     @commands.Cog.listener()
     # send a message when the bot is added to a guild
