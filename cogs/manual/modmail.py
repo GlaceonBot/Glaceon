@@ -1,10 +1,11 @@
 import asyncio
 import pathlib
 
-import utils
-from utils import prefixgetter
 import discord
 from discord.ext import commands
+
+import utils
+from utils import prefixgetter
 
 path = pathlib.PurePath()
 

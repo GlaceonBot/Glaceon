@@ -1,10 +1,10 @@
 import pathlib
-import cpuinfo
-import shutil
-import psutil
 import platform
+import shutil
+
+import cpuinfo
 import discord
-import requests
+import psutil
 from discord.ext import commands
 
 import utils
@@ -57,9 +57,13 @@ class Info(commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     async def list_whitelisted_invites(self, ctx):
         guilds_list = []
-        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
-        db.execute(f'''SELECT inviteguild FROM whitelisted_invites WHERE hostguild = {ctx.guild.id}''')
-        guilds = db.fetchall()
+        connection = await self.glaceon.sql_server_pool.acquire()
+        db = await connection.cursor()
+        await db.execute(f'''SELECT inviteguild FROM whitelisted_invites WHERE hostguild = {ctx.guild.id}''')
+        guilds = await db.fetchall()
+        await db.close()
+        connection.close()
+        self.glaceon.sql_server_pool.release(connection)
         if guilds:
             for guild in guilds:
                 for guildid in guild:
@@ -67,17 +71,21 @@ class Info(commands.Cog):
             await ctx.send("`" + "`, `".join(guilds_list) + "`")
         else:
             await ctx.send("No invites are whitelisted in this guild!")
-        del db
 
     @commands.command()
     @commands.guild_only()
     @utils.disableable()
-    async def disabled(self, ctx, command = None):
-        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
+    async def disabled(self, ctx, command=None):
+        connection = await self.glaceon.sql_server_pool.acquire()
+        db = await connection.cursor()
         commands = []
         for command in self.glaceon.walk_commands():
             commands.append(command)
-        ctx.send("\n".join(commands))
+        await ctx.send("\n".join(commands))
+        await db.close()
+        connection.close()
+        self.glaceon.sql_server_pool.release(connection)
+
 
 def setup(glaceon):
     glaceon.add_cog(Info(glaceon))

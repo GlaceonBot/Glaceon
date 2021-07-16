@@ -1,4 +1,5 @@
 # Glaceon
+
 My discord modbot!
 
 [![Support Server](https://img.shields.io/static/v1?logo=discord&logoColor=white&label=&message=Support%20Server&color=blue)](https://discord.gg/NMhj5VedSF)
@@ -8,10 +9,10 @@ My discord modbot!
 [![Top.gg Page](https://img.shields.io/static/v1?logo=discord&logoColor=white&label=&message=Top.gg%20Page&color=Green)](https://top.gg/bot/808149899182342145)
 [![DiscordBotList Page](https://img.shields.io/static/v1?logo=discord&logoColor=white&label=&message=DiscordBotList%20Page&color=Green)](https://discord.ly/glaceon)
 
-
-Glaceon aims to improve the discord moderation experience.  
+Glaceon aims to improve the discord moderation experience.
 
 To install glaceon and dependencies on Ubuntu 18.04 or above, you can run this command:
+
 ```sh
 python3 -c "$(curl -L glaceon.xyz/install.py)"
 ```

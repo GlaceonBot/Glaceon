@@ -4,8 +4,6 @@ from datetime import datetime
 import discord
 from discord.ext import tasks, commands
 
-import utils
-
 path = pathlib.PurePath()
 
 
@@ -25,7 +23,8 @@ class UnCog(commands.Cog):
         current_time = int(datetime.utcnow().timestamp())
         for guild in self.glaceon.guilds:
             # connect to the sqlite database for data
-            db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
+            connection = await self.glaceon.sql_server_pool.acquire()
+            db = await connection.cursor()
             # find which prefix matches this specific server id
             await db.execute(
                 '''SELECT userid FROM current_bans WHERE serverid = %s AND banfinish <= %s AND banfinish <> %s''',
@@ -41,14 +40,17 @@ class UnCog(commands.Cog):
                     await member.send(f"You have been unbanned in {guild}!")
                 except discord.Forbidden:
                     pass
-            del db
+            await db.close()
+            connection.close()
+            self.glaceon.sql_server_pool.release(connection)
 
     @tasks.loop(seconds=5.0)
     async def unmuter(self):
         current_time = int(datetime.utcnow().timestamp())
         for guild in self.glaceon.guilds:
             # connect to the sqlite database for prefixes
-            db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
+            connection = await self.glaceon.sql_server_pool.acquire()
+            db = await connection.cursor()
             # find which prefix matches this specific server id
             await db.execute(
                 '''SELECT userid FROM current_mutes WHERE serverid = %s AND mutefinish <= %s AND mutefinish <> %s''',
@@ -65,7 +67,9 @@ class UnCog(commands.Cog):
                     await member.send(f"You have been unmuted in {guild}!")
                 except discord.Forbidden:
                     pass
-            del db
+            await db.close()
+            connection.close()
+            self.glaceon.sql_server_pool.release(connection)
 
     @unmuter.before_loop
     async def before_umuter(self):

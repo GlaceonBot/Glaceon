@@ -1,9 +1,10 @@
 import os
-from dotenv import load_dotenv
 import pathlib
 import random
 import string
 from sys import platform
+
+from dotenv import load_dotenv
 
 path = pathlib.PurePath()
 if "linux" not in platform:

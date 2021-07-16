@@ -38,7 +38,8 @@ class BotSystem(commands.Cog):
     async def prefix(self, ctx, newprefix):  # context and what we should set the new prefix to
         """Sets the bot prefix for this server"""
         serverid = ctx.guild.id  # gets serverid for convinience
-        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)  # connect to our server data db
+        connection = await self.glaceon.sql_server_pool.acquire()
+        db = await connection.cursor()  # connect to our server database
         db.execute(
             f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')  # get the current prefix for that server, if it exists
         if db.fetchone():  # actually check if it exists
@@ -47,9 +48,11 @@ class BotSystem(commands.Cog):
         else:
             db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (%s,%s)",
                        (serverid, newprefix))  # set new prefix
-          # close connection
+        # close connection
+        await db.close()
+        connection.close()
+        self.glaceon.sql_server_pool.release(connection)
         await ctx.send(f"Prefix set to {newprefix}")  # tell admin what happened
-        del db
 
     @commands.Cog.listener()
     # send a message when the bot is added to a guild

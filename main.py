@@ -7,14 +7,15 @@ import logging
 import os
 import pathlib
 import traceback
-# load the token to its variable
 
-import discord
 import aiomysql
+import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
 import utils
+
+# load the token to its variable
 
 load_dotenv()
 path = pathlib.PurePath()
@@ -60,21 +61,15 @@ glaceon = commands.Bot(command_prefix=utils.prefixgetter, case_insensitive=True,
 # global color for embeds
 glaceon.embedcolor = 0xadd8e6
 
-
 # global sql connection
-async def connect_to_sql_server():
-    sql_server_connection = await aiomysql.create_pool(host=os.getenv('SQLserverhost'),
-                                                       user=os.getenv('SQLusername'),
-                                                       password=os.getenv('SQLpassword'),
-                                                       db=os.getenv('SQLdatabase'),
-                                                       minsize=0, # this needs to be 0, or the database connection closes
-                                                       maxsize=100,
-                                                       autocommit=True)
-    return sql_server_connection
-
-
 loop = asyncio.get_event_loop()
-glaceon.sql_server_connection = loop.run_until_complete(connect_to_sql_server())
+glaceon.sql_server_pool = loop.run_until_complete(await aiomysql.create_pool(host=os.getenv('SQLserverhost'),
+                                                                             user=os.getenv('SQLusername'),
+                                                                             password=os.getenv('SQLpassword'),
+                                                                             db=os.getenv('SQLdatabase'),
+                                                                             minsize=1,
+                                                                             maxsize=100,
+                                                                             autocommit=True))
 
 
 @glaceon.event

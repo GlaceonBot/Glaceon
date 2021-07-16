@@ -1,7 +1,8 @@
 import pathlib
-from datetime import datetime
-import discord
 import typing
+from datetime import datetime
+
+import discord
 from discord.ext import commands
 
 import utils
@@ -98,16 +99,20 @@ class HelperCommands(commands.Cog):
                 revoke_in_secs = -1
                 reason = time + reason
             ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
-            db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
+            connection = await self.glaceon.sql_server_pool.acquire()
+            db = await connection.cursor()
             await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                 ctx.guild.id,))  # get the current prefix for that server, if it exists
             if await db.fetchone():  # actually check if it exists
                 await db.execute('''UPDATE current_mutes SET mutefinish = %s WHERE serverid = %s AND userid = %s''',
-                           (ban_ends_at, ctx.guild.id, member.id))  # update prefix
+                                 (ban_ends_at, ctx.guild.id, member.id))  # update prefix
             else:
                 await db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
-                           (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
-            del db
+                                 (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
+            await db.close()
+            connection.close()
+            self.glaceon.sql_server_pool.release(connection)
+
         guild = ctx.guild
         muted_role = discord.utils.get(guild.roles, name="Muted")
 
