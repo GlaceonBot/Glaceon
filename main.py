@@ -1,4 +1,4 @@
-# /bin/bash
+#/bin/bash
 "true" '''\'
 exec "$(dirname "$(readlink -f "$0")")"/venv/bin/python "$0" "$@"
 '''
@@ -42,7 +42,7 @@ else:
     botactivity = None
     botdoing = None
 
-logging.basicConfig(level=logginglevel, filename=flags.loggingfile, filemode='w+', encoding='utf-8', )
+logging.basicConfig(level=logginglevel, filename=flags.loggingfile, filemode='w+', )
 if wrongflags:
     logging.warning("An unrecognised flag was passed, skipping")
 logging.info("Starting Jolteon.....")
