@@ -110,7 +110,7 @@ class HelperCommands(commands.Cog):
                 await db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
                                  (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
             await db.close()
-            connection.close()
+            await connection.close
             self.glaceon.sql_server_pool.release(connection)
 
         guild = ctx.guild
