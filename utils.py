@@ -14,8 +14,7 @@ async def connect_to_sql_server():
                                                  user=os.getenv('SQLusername'),
                                                  password=os.getenv('SQLpassword'),
                                                  db=os.getenv('SQLdatabase'),
-                                                 autocommit=True,
-                                                 echo=True)
+                                                 autocommit=True)
     return sql_server_pool
 
 
@@ -59,18 +58,14 @@ def disableable():
     async def predicate(ctx):
         connection = await sql_server_pool.acquire()
         db = await connection.cursor()
-        state = await db.execute("""SELECT state FROM disabled_commands WHERE commandname = %s AND serverid = %s""",
+        state = await db.execute("""SELECT state FROM disabled_commands WHERE command = %s AND guildid = %s""",
                                  (ctx.command.qualified_name, ctx.guild.id))
-        if state is None:
-            state = 1
-        if state == 0:
-            raise CommandDisabled("This command is disabled.")
         # deletes database object
         await db.close()
         connection.close()
         sql_server_pool.release(connection)
         if state == 0:
-            return False
+            raise CommandDisabled("This command is disabled.")
         else:
             return True
 

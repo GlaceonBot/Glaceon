@@ -51,8 +51,8 @@ class Antiraid(commands.Cog):
                         '?', '`', '[', ']', '{', '}', ':', ';', '+', '=', '\\']
             for hoisting_char in hoisters:
                 if ctx.display_name.startswith(hoisting_char):
-                    for hoisting_char in hoisters:
-                        if ctx.name.startswith(hoisting_char):
+                    for hoisting_character in hoisters:
+                        if ctx.name.startswith(hoisting_character):
                             can_set_nick_to_username = False
                         if can_set_nick_to_username:
                             try:

@@ -97,13 +97,13 @@ class ModCommands(commands.Cog):
                         ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
                         connection = await self.glaceon.sql_server_pool.acquire()
                         db = await connection.cursor()
-                        db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
+                        await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                             ctx.guild.id,))  # get the current prefix for that server, if it exists
-                        if db.fetchone():  # actually check if it exists
-                            db.execute('''UPDATE current_bans SET banfinish = %s WHERE serverid = %s AND userid = %s''',
+                        if await db.fetchone():  # actually check if it exists
+                            await db.execute('''UPDATE current_bans SET banfinish = %s WHERE serverid = %s AND userid = %s''',
                                        (ban_ends_at, ctx.guild.id, member.id))  # update prefix
                         else:
-                            db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (%s,%s,%s)",
+                            await db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (%s,%s,%s)",
                                        (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
                         await db.close()
                         connection.close()

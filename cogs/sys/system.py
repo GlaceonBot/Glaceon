@@ -40,13 +40,13 @@ class BotSystem(commands.Cog):
         serverid = ctx.guild.id  # gets serverid for convinience
         connection = await self.glaceon.sql_server_pool.acquire()
         db = await connection.cursor()  # connect to our server database
-        db.execute(
+        await db.execute(
             f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')  # get the current prefix for that server, if it exists
-        if db.fetchone():  # actually check if it exists
-            db.execute('''UPDATE prefixes SET prefix = %s WHERE serverid = %s''',
+        if await db.fetchone():  # actually check if it exists
+            await db.execute('''UPDATE prefixes SET prefix = %s WHERE serverid = %s''',
                        (newprefix, serverid))  # update prefix
         else:
-            db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (%s,%s)",
+            await db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (%s,%s)",
                        (serverid, newprefix))  # set new prefix
         # close connection
         await db.close()
