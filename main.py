@@ -7,6 +7,7 @@ import asyncio
 import logging
 import os
 import pathlib
+import signal
 import traceback
 
 import aiomysql
@@ -45,7 +46,26 @@ else:
 logging.basicConfig(level=logginglevel, filename=flags.loggingfile, filemode='w+', )
 if wrongflags:
     logging.warning("An unrecognised flag was passed, skipping")
-logging.info("Starting Jolteon.....")
+logging.info("Starting Glaceon.....")
+
+
+# exit handler
+async def exit_handler():
+    await glaceon.close()
+    glaceon.sql_server_pool.close()
+    await glaceon.sql_server_pool.wait_closed()
+    asyncio.get_event_loop().stop()
+    exit(0)
+
+
+# Handle sigterm and sigint
+loop = asyncio.get_event_loop()
+for signame in ('SIGINT', 'SIGTERM'):
+    try:
+        loop.add_signal_handler(getattr(signal, signame),
+                                lambda: asyncio.create_task(exit_handler()))
+    except NotImplementedError:
+        logging.debug("You are on Windows, clean close is not enabled!")
 
 
 # help command class :D
