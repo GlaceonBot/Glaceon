@@ -21,9 +21,9 @@ class UnCog(commands.Cog):
     @tasks.loop(seconds=5.0)
     async def unbanner(self):
         current_time = int(datetime.utcnow().timestamp())
+        connection = await self.glaceon.sql_server_pool.acquire()
         for guild in self.glaceon.guilds:
             # connect to the sqlite database for data
-            connection = await self.glaceon.sql_server_pool.acquire()
             db = await connection.cursor()
             # find which prefix matches this specific server id
             await db.execute(
@@ -41,15 +41,15 @@ class UnCog(commands.Cog):
                 except discord.Forbidden:
                     pass
             await db.close()
-            connection.close()
-            self.glaceon.sql_server_pool.release(connection)
+        connection.close()
+        self.glaceon.sql_server_pool.release(connection)
 
     @tasks.loop(seconds=5.0)
     async def unmuter(self):
         current_time = int(datetime.utcnow().timestamp())
+        connection = await self.glaceon.sql_server_pool.acquire()
         for guild in self.glaceon.guilds:
             # connect to the sqlite database for prefixes
-            connection = await self.glaceon.sql_server_pool.acquire()
             db = await connection.cursor()
             # find which prefix matches this specific server id
             await db.execute(
@@ -68,8 +68,8 @@ class UnCog(commands.Cog):
                 except discord.Forbidden:
                     pass
             await db.close()
-            connection.close()
-            self.glaceon.sql_server_pool.release(connection)
+        connection.close()
+        self.glaceon.sql_server_pool.release(connection)
 
     @unmuter.before_loop
     async def before_umuter(self):
