@@ -57,50 +57,47 @@ class Info(commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     async def list_whitelisted_invites(self, ctx):
         guilds_list = []
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()
-        await db.execute(f'''SELECT inviteguild FROM whitelisted_invites WHERE hostguild = {ctx.guild.id}''')
-        guilds = await db.fetchall()
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
-        if guilds:
-            for guild in guilds:
-                for guildid in guild:
-                    guilds_list.append(str(guildid))
-            await ctx.send("`" + "`, `".join(guilds_list) + "`")
-        else:
-            await ctx.send("No invites are whitelisted in this guild!")
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                await db.execute(f'''SELECT inviteguild FROM whitelisted_invites WHERE hostguild = {ctx.guild.id}''')
+                guilds = await db.fetchall()
+                await db.close()
+                await connection.close()
+                self.glaceon.sql_server_pool.release(connection)
+                if guilds:
+                    for guild in guilds:
+                        for guildid in guild:
+                            guilds_list.append(str(guildid))
+                    await ctx.send("`" + "`, `".join(guilds_list) + "`")
+                else:
+                    await ctx.send("No invites are whitelisted in this guild!")
 
     @commands.command()
     @commands.guild_only()
     @utils.disableable()
     async def disabled(self, ctx, command=None):
         """List commands that are disabled on this server. <:deny:843248140370313262> means disabled, <:allow:843248140551192606> means enabled, and <:permanantly_enabled:865819204652892201> is for commands that cannot be disabled."""
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()
-        commands = []
-        for command in self.glaceon.walk_commands():
-            await db.execute("""SELECT state FROM disabled_commands WHERE command = %s AND guildid = %s""",
-                             (command.qualified_name, ctx.guild.id))
-            state = await db.fetchone()
-            for check in command.checks:
-                if 'disableable' not in check.__qualname__:
-                    commands.append('<:permanantly_enabled:865819204652892201> ' + command.name)
-                elif state is None:
-                    commands.append('<:allow:843248140551192606> ' + command.name)
-                elif state[0] == 0:
-                    commands.append('<:deny:843248140370313262> ' + command.name)
-                else:
-                    commands.append('<:allow:843248140551192606> ' + command.name)
-                break
-        embed = discord.Embed(colour=self.glaceon.embedcolor, title="Commands currently enabled",
-                              description='\n'.join(commands))
-        embed.set_footer(text=f"Request by {ctx.author}")
-        await ctx.send(embed=embed)
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                commands = []
+                for command in self.glaceon.walk_commands():
+                    await db.execute("""SELECT state FROM disabled_commands WHERE command = %s AND guildid = %s""",
+                                     (command.qualified_name, ctx.guild.id))
+                    state = await db.fetchone()
+                    for check in command.checks:
+                        if 'disableable' not in check.__qualname__:
+                            commands.append('<:permanantly_enabled:865819204652892201> ' + command.name)
+                        elif state is None:
+                            commands.append('<:allow:843248140551192606> ' + command.name)
+                        elif state[0] == 0:
+                            commands.append('<:deny:843248140370313262> ' + command.name)
+                        else:
+                            commands.append('<:allow:843248140551192606> ' + command.name)
+                        break
+                embed = discord.Embed(colour=self.glaceon.embedcolor, title="Commands currently enabled",
+                                      description='\n'.join(commands))
+                embed.set_footer(text=f"Request by {ctx.author}")
+                await ctx.send(embed=embed)
 
 
 def setup(glaceon):

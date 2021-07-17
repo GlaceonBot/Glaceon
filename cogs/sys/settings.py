@@ -36,19 +36,16 @@ class Settings(discord.ext.commands.Cog):
         else:
             isenabled = 0
             enabledtext = "disabled"
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()
-        await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
-                   (ctx.guild.id, "message_logging"))  # get the current setting
-        if await db.fetchone():
-            await db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
-                       (isenabled, ctx.guild.id, "message_logging"))  # update the old setting
-        else:
-            await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
-                       (ctx.guild.id, isenabled, "message_logging"))  # set the new setting
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+                           (ctx.guild.id, "message_logging"))  # get the current setting
+                if await db.fetchone():
+                    await db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
+                               (isenabled, ctx.guild.id, "message_logging"))  # update the old setting
+                else:
+                    await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
+                               (ctx.guild.id, isenabled, "message_logging"))  # set the new setting
         await ctx.reply(f"Message logging {enabledtext}!")
 
     @settings.command(aliases=['banconfirms', 'confirmbans', 'banconfirm'])
@@ -60,19 +57,16 @@ class Settings(discord.ext.commands.Cog):
         else:
             isenabled = 0
             enabledtext = "disabled"
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()
-        await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
-                   (ctx.guild.id, "ban_confirms"))  # get the current setting
-        if await db.fetchone():
-            await db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
-                       (isenabled, ctx.guild.id, "ban_confirms"))  # update the old setting
-        else:
-            await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
-                       (ctx.guild.id, isenabled, "ban_confirms"))  # set the new setting
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+                           (ctx.guild.id, "ban_confirms"))  # get the current setting
+                if await db.fetchone():
+                    await db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
+                               (isenabled, ctx.guild.id, "ban_confirms"))  # update the old setting
+                else:
+                    await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
+                               (ctx.guild.id, isenabled, "ban_confirms"))  # set the new setting
         await ctx.reply(f"Ban confirmations {enabledtext}!")
 
     @settings.command(aliases=['dehoist', 'dehoister', 'autodehoist'])

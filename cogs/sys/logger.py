@@ -24,17 +24,14 @@ class Logger(commands.Cog):  # Logger class
         self.glaceon = glaceon
 
     async def is_logging_enabled(self, message):
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()
-        try:
-            await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
-                             (message.guild.id, "message_logging"))
-        except AttributeError:
-            return 1
-        settings = await db.fetchone()
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                try:
+                    await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+                                     (message.guild.id, "message_logging"))
+                except AttributeError:
+                    return 1
+                settings = await db.fetchone()
         if settings:
             return settings[0]
         else:
