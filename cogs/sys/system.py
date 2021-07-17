@@ -5,9 +5,9 @@ import shutil
 import discord
 import requests
 from discord.ext import commands
+from discord.ext import tasks
 
 # gets global path and embed color
-import utils
 
 path = pathlib.PurePath()
 
@@ -44,10 +44,10 @@ class BotSystem(commands.Cog):
             f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')  # get the current prefix for that server, if it exists
         if await db.fetchone():  # actually check if it exists
             await db.execute('''UPDATE prefixes SET prefix = %s WHERE serverid = %s''',
-                       (newprefix, serverid))  # update prefix
+                             (newprefix, serverid))  # update prefix
         else:
             await db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (%s,%s)",
-                       (serverid, newprefix))  # set new prefix
+                             (serverid, newprefix))  # set new prefix
         # close connection
         await db.close()
         connection.close()
@@ -104,6 +104,10 @@ class BotSystem(commands.Cog):
             await ctx.send("Avatar updated!", delete_after=10)
         else:
             await ctx.send("Failed to update avatar!", delete_after=10)
+
+    @tasks.loop(seconds=1)
+    async def close_freed_connections(self):
+        await self.glaceon.sql_server_pool.clear()
 
 
 def setup(glaceon):
