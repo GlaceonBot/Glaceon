@@ -30,6 +30,10 @@ class BotSystem(commands.Cog):
     def __init__(self,
                  glaceon):  # This is an init function. Runs when the class is constructed, and in this case creates a few variables.
         self.glaceon = glaceon  # making local global
+        self.close_freed_connections.start()
+
+    def cog_unload(self):
+        self.close_freed_connections.cancel()
 
     @commands.command()
     @commands.has_guild_permissions(
@@ -108,6 +112,10 @@ class BotSystem(commands.Cog):
     @tasks.loop(seconds=1)
     async def close_freed_connections(self):
         await self.glaceon.sql_server_pool.clear()
+
+    @close_freed_connections.before_loop
+    async def before_unbanner(self):
+        await self.glaceon.wait_until_ready()
 
 
 def setup(glaceon):
