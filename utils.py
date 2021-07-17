@@ -33,16 +33,13 @@ async def prefixgetter(glaceon, message):
         sid = message.guild.id
     except AttributeError:
         return default_prefix
-    connection = await glaceon.sql_server_pool.acquire()
-    db = await connection.cursor()
-    # find which prefix matches this specific server id
-    await db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {sid}''')
-    # fetch the prefix
-    custom_prefix = await db.fetchone()
+    async with sql_server_pool.acquire() as connection:
+        async with connection.cursor() as db:
+            # find which prefix matches this specific server id
+            await db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {sid}''')
+            # fetch the prefix
+            custom_prefix = await db.fetchone()
     # deletes database object
-    await db.close()
-    connection.close()
-    glaceon.sql_server_pool.release(connection)
     # if the custom prefix exists, then send it back, otherwise return the default one
     if custom_prefix:
         return str(custom_prefix[0]), *ping_prefixes
@@ -56,14 +53,11 @@ class CommandDisabled(commands.CheckFailure):
 
 def disableable():
     async def predicate(ctx):
-        connection = await sql_server_pool.acquire()
-        db = await connection.cursor()
-        state = await db.execute("""SELECT state FROM disabled_commands WHERE command = %s AND guildid = %s""",
-                                 (ctx.command.qualified_name, ctx.guild.id))
+        async with sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                state = await db.execute("""SELECT state FROM disabled_commands WHERE command = %s AND guildid = %s""",
+                                     (ctx.command.qualified_name, ctx.guild.id))
         # deletes database object
-        await db.close()
-        connection.close()
-        sql_server_pool.release(connection)
         if state == 0:
             raise CommandDisabled("This command is disabled.")
         else:

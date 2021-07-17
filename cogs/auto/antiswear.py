@@ -22,11 +22,7 @@ embed_color = 0xadd8e6
 
 
 class AntiSwear(commands.Cog):
-
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        pass
-        re.search("", "")
+    pass
 
 
 def setup(glaceon):

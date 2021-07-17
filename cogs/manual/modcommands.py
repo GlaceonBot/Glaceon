@@ -24,15 +24,12 @@ class ModCommands(commands.Cog):
         yesmoji = '<:allow:843248140551192606>'
 
     async def are_ban_confirms_enabled(self, message):
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()
-        await db.execute('''CREATE TABLE IF NOT EXISTS settings_ban_confirm 
-                (serverid BIGINT, setto BIGINT)''')
-        await db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
-        settings = await db.fetchone()
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                await db.execute('''CREATE TABLE IF NOT EXISTS settings_ban_confirm 
+                        (serverid BIGINT, setto BIGINT)''')
+                await db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
+                settings = await db.fetchone()
         if settings:
             return settings[0]
         else:

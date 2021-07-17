@@ -5,7 +5,6 @@ import shutil
 import discord
 import requests
 from discord.ext import commands
-from discord.ext import tasks
 
 # gets global path and embed color
 
@@ -30,10 +29,6 @@ class BotSystem(commands.Cog):
     def __init__(self,
                  glaceon):  # This is an init function. Runs when the class is constructed, and in this case creates a few variables.
         self.glaceon = glaceon  # making local global
-        self.close_freed_connections.start()
-
-    def cog_unload(self):
-        self.close_freed_connections.cancel()
 
     @commands.command()
     @commands.has_guild_permissions(
@@ -42,21 +37,17 @@ class BotSystem(commands.Cog):
     async def prefix(self, ctx, newprefix):  # context and what we should set the new prefix to
         """Sets the bot prefix for this server"""
         serverid = ctx.guild.id  # gets serverid for convinience
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()  # connect to our server database
-        await db.execute(
-            f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')  # get the current prefix for that server, if it exists
-        if await db.fetchone():  # actually check if it exists
-            await db.execute('''UPDATE prefixes SET prefix = %s WHERE serverid = %s''',
-                             (newprefix, serverid))  # update prefix
-        else:
-            await db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (%s,%s)",
-                             (serverid, newprefix))  # set new prefix
-        # close connection
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
-        await ctx.send(f"Prefix set to {newprefix}")  # tell admin what happened
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                await db.execute(
+                    f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')  # get the current prefix for that server, if it exists
+                if await db.fetchone():  # actually check if it exists
+                    await db.execute('''UPDATE prefixes SET prefix = %s WHERE serverid = %s''',
+                                     (newprefix, serverid))  # update prefix
+                else:
+                    await db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (%s,%s)",
+                                     (serverid, newprefix))  # set new prefix
+                await ctx.send(f"Prefix set to {newprefix}")  # tell admin what happened
 
     @commands.Cog.listener()
     # send a message when the bot is added to a guild
@@ -108,14 +99,6 @@ class BotSystem(commands.Cog):
             await ctx.send("Avatar updated!", delete_after=10)
         else:
             await ctx.send("Failed to update avatar!", delete_after=10)
-
-    @tasks.loop(seconds=1)
-    async def close_freed_connections(self):
-        await self.glaceon.sql_server_pool.clear()
-
-    @close_freed_connections.before_loop
-    async def before_unbanner(self):
-        await self.glaceon.wait_until_ready()
 
 
 def setup(glaceon):

@@ -21,55 +21,48 @@ class UnCog(commands.Cog):
     @tasks.loop(seconds=5.0)
     async def unbanner(self):
         current_time = int(datetime.utcnow().timestamp())
-        connection = await self.glaceon.sql_server_pool.acquire()
-        for guild in self.glaceon.guilds:
-            # connect to the sqlite database for data
-            db = await connection.cursor()
-            # find which prefix matches this specific server id
-            await db.execute(
-                '''SELECT userid FROM current_bans WHERE serverid = %s AND banfinish <= %s AND banfinish <> %s''',
-                (guild.id, current_time, -1))
-            member_line = await db.fetchone()
-            if member_line:
-                await db.execute(
-                    '''DELETE FROM current_bans WHERE serverid = %s AND banfinish <= %s AND banfinish <> %s''',
-                    (guild.id, current_time, -1))
-                member = self.glaceon.get_user(member_line[0])
-                try:
-                    await guild.unban(member)
-                    await member.send(f"You have been unbanned in {guild}!")
-                except discord.Forbidden:
-                    pass
-            await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            for guild in self.glaceon.guilds:
+                # connect to the sqlite database for data
+                async with connection.cursor() as db:
+                    await db.execute(
+                        '''SELECT userid FROM current_bans WHERE serverid = %s AND banfinish <= %s AND banfinish <> %s''',
+                        (guild.id, current_time, -1))
+                    member_line = await db.fetchone()
+                    if member_line:
+                        await db.execute(
+                            '''DELETE FROM current_bans WHERE serverid = %s AND banfinish <= %s AND banfinish <> %s''',
+                            (guild.id, current_time, -1))
+                        member = self.glaceon.get_user(member_line[0])
+                        try:
+                            await guild.unban(member)
+                            await member.send(f"You have been unbanned in {guild}!")
+                        except discord.Forbidden:
+                            pass
 
     @tasks.loop(seconds=5.0)
     async def unmuter(self):
         current_time = int(datetime.utcnow().timestamp())
-        connection = await self.glaceon.sql_server_pool.acquire()
-        for guild in self.glaceon.guilds:
-            # connect to the sqlite database for prefixes
-            db = await connection.cursor()
-            # find which prefix matches this specific server id
-            await db.execute(
-                '''SELECT userid FROM current_mutes WHERE serverid = %s AND mutefinish <= %s AND mutefinish <> %s''',
-                (guild.id, current_time, -1))
-            member_line = await db.fetchone()
-            if member_line:
-                await db.execute(
-                    '''DELETE FROM current_mutes WHERE serverid = %s AND mutefinish <= %s AND mutefinish <> %s''',
-                    (guild.id, current_time, -1))
-                member = guild.get_member(member_line[0])
-                muted_role = discord.utils.get(guild.roles, name="Muted")
-                try:
-                    await member.remove_roles(muted_role)
-                    await member.send(f"You have been unmuted in {guild}!")
-                except discord.Forbidden:
-                    pass
-            await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            for guild in self.glaceon.guilds:
+                # connect to the sqlite database for prefixes
+                async with connection.cursor() as db:
+                    # find which prefix matches this specific server id
+                    await db.execute(
+                        '''SELECT userid FROM current_mutes WHERE serverid = %s AND mutefinish <= %s AND mutefinish <> %s''',
+                        (guild.id, current_time, -1))
+                    member_line = await db.fetchone()
+                    if member_line:
+                        await db.execute(
+                            '''DELETE FROM current_mutes WHERE serverid = %s AND mutefinish <= %s AND mutefinish <> %s''',
+                            (guild.id, current_time, -1))
+                        member = guild.get_member(member_line[0])
+                        muted_role = discord.utils.get(guild.roles, name="Muted")
+                        try:
+                            await member.remove_roles(muted_role)
+                            await member.send(f"You have been unmuted in {guild}!")
+                        except discord.Forbidden:
+                            pass
 
     @unmuter.before_loop
     async def before_umuter(self):

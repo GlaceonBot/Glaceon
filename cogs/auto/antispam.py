@@ -14,29 +14,17 @@ class Antispam(commands.Cog):
         self.glaceon = glaceon
 
     async def is_invite_link_filtering_enabled(self, ctx):
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()
-        await db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
-                         (ctx.guild.id, "whitelisted_invites"))  # get the current setting
-        if await db.fetchone():
-            try:
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
                 await db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
-                                 (ctx.guild.id, "whitelisted_invites"))
-            except AttributeError:
-                return 0
-            settings = await db.fetchone()
-            await db.close()
-            await connection.close()
-            self.glaceon.sql_server_pool.release(connection)
+                                 (ctx.guild.id, "whitelisted_invites"))  # get the current setting
+                settings = await db.fetchone()
             if settings:
 
                 return settings[0]
             else:
 
                 return 0
-        else:
-
-            return 0
 
     @commands.Cog.listener()
     async def on_message(self, message):
