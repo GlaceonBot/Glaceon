@@ -26,7 +26,7 @@ class Antispam(commands.Cog):
                 return 0
             settings = await db.fetchone()
             await db.close()
-            await connection.close
+            await connection.close()
             self.glaceon.sql_server_pool.release(connection)
             if settings:
 
@@ -53,7 +53,7 @@ class Antispam(commands.Cog):
                     if not any(invite.guild.id in whitelisted_invite for whitelisted_invite in whitelisted_invites):
                         await message.delete()
                     await db.close()
-                    await connection.close
+                    await connection.close()
                     self.glaceon.sql_server_pool.release(connection)
                 except discord.Forbidden or discord.HTTPException:
                     await message.delete()

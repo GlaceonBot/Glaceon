@@ -24,7 +24,7 @@ class Antiraid(commands.Cog):
                 return 0
             settings = await db.fetchone()
             await db.close()
-            await connection.close
+            await connection.close()
             self.glaceon.sql_server_pool.release(connection)
             if settings:
                 return settings[0]

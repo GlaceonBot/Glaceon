@@ -62,7 +62,7 @@ class Info(commands.Cog):
         await db.execute(f'''SELECT inviteguild FROM whitelisted_invites WHERE hostguild = {ctx.guild.id}''')
         guilds = await db.fetchall()
         await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
         if guilds:
             for guild in guilds:
@@ -99,7 +99,7 @@ class Info(commands.Cog):
         embed.set_footer(text=f"Request by {ctx.author}")
         await ctx.send(embed=embed)
         await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
 
 
