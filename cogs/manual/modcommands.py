@@ -31,7 +31,7 @@ class ModCommands(commands.Cog):
         await db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
         settings = await db.fetchone()
         await db.close()
-        connection.close()
+        await connection.close
         self.glaceon.sql_server_pool.release(connection)
         if settings:
             return settings[0]
@@ -106,7 +106,7 @@ class ModCommands(commands.Cog):
                             await db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (%s,%s,%s)",
                                        (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
                         await db.close()
-                        connection.close()
+                        await connection.close
                         self.glaceon.sql_server_pool.release(connection)
                     await ctx.send(f"User {member} Has Been banned!",
                                    delete_after=5)  # says in chat that the user was banned successfully, deletes

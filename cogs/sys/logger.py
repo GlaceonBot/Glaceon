@@ -33,7 +33,7 @@ class Logger(commands.Cog):  # Logger class
             return 1
         settings = await db.fetchone()
         await db.close()
-        connection.close()
+        await connection.close
         self.glaceon.sql_server_pool.release(connection)
         if settings:
             return settings[0]
