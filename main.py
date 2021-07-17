@@ -2,6 +2,7 @@
 "true" '''\'
 exec "$(dirname "$(readlink -f "$0")")"/venv/bin/python "$0" "$@"
 '''
+import argparse
 import asyncio
 import logging
 import os
@@ -22,7 +23,29 @@ path = pathlib.PurePath()
 TOKEN = os.getenv('TOKEN')
 
 # Basic logging
-logging.basicConfig(level=logging.INFO)
+argparser = argparse.ArgumentParser(description='Launch Glaceon discord bot')
+argparser.add_argument('--loglevel', help='Set the logging level of Glaceon', dest='logginglevel', default='INFO')
+argparser.add_argument('--logfile', help='Set the file for Glaceon to log to', dest='loggingfile',
+                       default='glaceon.log')
+argparser.add_argument('--status', help='Set Glaceon\'s status ', dest='botstatus', default=os.getenv('status'))
+argparser.add_argument('--activity', help='Set Glaceon\'s activity', dest='botactivity', default=os.getenv('activity'))
+flags, wrongflags = argparser.parse_known_args()
+logginglevel = getattr(logging, flags.logginglevel.upper())
+if flags.botstatus:
+    botstatus = getattr(discord.Status, flags.botstatus.lower())
+else:
+    botstatus = discord.Status.online
+if flags.botactivity:
+    botactivity = getattr(discord.ActivityType, flags.botactivity.split()[0].lower())
+    botdoing = flags.botactivity.split(' ', 1)[1]
+else:
+    botactivity = None
+    botdoing = None
+
+logging.basicConfig(level=logginglevel, filename=flags.loggingfile, filemode='w+', encoding='utf-8', )
+if wrongflags:
+    logging.warning("An unrecognised flag was passed, skipping")
+logging.info("Starting Jolteon.....")
 
 
 # help command class :D
@@ -55,8 +78,8 @@ intents = discord.Intents().all()
 # defines the glaceon class as a bot with the prefixgetter prefix and case-insensitive commands
 glaceon = commands.Bot(command_prefix=utils.prefixgetter, case_insensitive=True, intents=intents,
                        help_command=Help(command_attrs={'aliases': ['man']}),
-                       activity=discord.Activity(type=discord.ActivityType.watching, name="out for you"),
-                       status=discord.Status.do_not_disturb,
+                       activity=discord.Activity(type=botactivity, name=botdoing),
+                       status=botstatus,
                        strip_after_prefix=True)
 # global color for embeds
 glaceon.embedcolor = 0xadd8e6
