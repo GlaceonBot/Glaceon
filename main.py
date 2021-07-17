@@ -116,7 +116,7 @@ async def create_pool():
                                       password=os.getenv('SQLpassword'),
                                       db=os.getenv('SQLdatabase'),
                                       minsize=1,
-                                      maxsize=3,
+                                      maxsize=300,
                                       autocommit=True)
     return conn
 glaceon.sql_server_pool = loop.run_until_complete(create_pool())
