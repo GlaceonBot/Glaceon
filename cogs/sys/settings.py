@@ -47,7 +47,7 @@ class Settings(discord.ext.commands.Cog):
             await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
                        (ctx.guild.id, isenabled, "message_logging"))  # set the new setting
         await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
         await ctx.reply(f"Message logging {enabledtext}!")
 
@@ -71,7 +71,7 @@ class Settings(discord.ext.commands.Cog):
             await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
                        (ctx.guild.id, isenabled, "ban_confirms"))  # set the new setting
         await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
         await ctx.reply(f"Ban confirmations {enabledtext}!")
 
@@ -101,7 +101,7 @@ class Settings(discord.ext.commands.Cog):
             await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
                        (ctx.guild.id, isenabled, "auto_dehoist"))  # set the new setting
         await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
         await ctx.reply(f"Auto-dehoisting {enabledtext}!")
 
@@ -125,7 +125,7 @@ class Settings(discord.ext.commands.Cog):
             await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
                        (ctx.guild.id, isenabled, "whitelisted_invites"))  # set the new setting
         await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
         await ctx.reply(f"Invite moderation {enabledtext}!")
 
@@ -136,7 +136,7 @@ class Settings(discord.ext.commands.Cog):
         db = await connection.cursor()
         await db.execute('''INSERT INTO whitelisted_invites VALUES (%s, %s)''', (ctx.guild.id, whitelist_guild_id))
         await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
         await ctx.reply(f"Added whitelisted invite for guild {whitelist_guild_id}!")
 
@@ -148,7 +148,7 @@ class Settings(discord.ext.commands.Cog):
         await db.execute('''DELETE FROM whitelisted_invites WHERE hostguild = %s AND inviteguild = %s''',
                    (ctx.guild.id, whitelist_guild_id))
         await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
         await ctx.reply(f"Removed whitelisted invite for guild {whitelist_guild_id}!")
 
@@ -166,7 +166,7 @@ class Settings(discord.ext.commands.Cog):
                          (ctx.guild.id, command))
         await db.execute('''INSERT INTO disabled_commands VALUES (%s, %s, %s)''', (ctx.guild.id, command, 0))
         await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
         await ctx.reply(f"Command {command} disabled!")
 
@@ -183,7 +183,7 @@ class Settings(discord.ext.commands.Cog):
         await db.execute('''DELETE FROM disabled_commands WHERE guildid = %s AND command = %s''', (ctx.guild.id, command))
         await db.execute('''INSERT INTO disabled_commands VALUES (%s, %s, %s)''', (ctx.guild.id, command, 1))
         await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
         await ctx.reply(f"Command {command} enabled!")
 

@@ -41,7 +41,7 @@ class UnCog(commands.Cog):
                 except discord.Forbidden:
                     pass
             await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
 
     @tasks.loop(seconds=5.0)
@@ -68,7 +68,7 @@ class UnCog(commands.Cog):
                 except discord.Forbidden:
                     pass
             await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
 
     @unmuter.before_loop

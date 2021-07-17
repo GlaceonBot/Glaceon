@@ -54,7 +54,7 @@ class BotSystem(commands.Cog):
                              (serverid, newprefix))  # set new prefix
         # close connection
         await db.close()
-        await connection.close
+        await connection.close()
         self.glaceon.sql_server_pool.release(connection)
         await ctx.send(f"Prefix set to {newprefix}")  # tell admin what happened
 
