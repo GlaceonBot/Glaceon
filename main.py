@@ -108,13 +108,18 @@ glaceon.embedcolor = 0xadd8e6
 
 # global sql connection
 loop = asyncio.get_event_loop()
-glaceon.sql_server_pool = loop.run_until_complete(aiomysql.create_pool(host=os.getenv('SQLserverhost'),
-                                                                       user=os.getenv('SQLusername'),
-                                                                       password=os.getenv('SQLpassword'),
-                                                                       db=os.getenv('SQLdatabase'),
-                                                                       minsize=1,
-                                                                       maxsize=100,
-                                                                       autocommit=True))
+
+
+async def create_pool():
+    conn = await aiomysql.create_pool(host=os.getenv('SQLserverhost'),
+                                      user=os.getenv('SQLusername'),
+                                      password=os.getenv('SQLpassword'),
+                                      db=os.getenv('SQLdatabase'),
+                                      minsize=1,
+                                      maxsize=100,
+                                      autocommit=True)
+    return conn
+glaceon.sql_server_pool = loop.run_until_complete(create_pool())
 
 
 @glaceon.event
