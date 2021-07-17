@@ -51,10 +51,12 @@ logging.info("Starting Glaceon.....")
 
 # exit handler
 async def exit_handler():
-    await glaceon.close()
     glaceon.sql_server_pool.close()
     await glaceon.sql_server_pool.wait_closed()
-    asyncio.get_event_loop().stop()
+    await glaceon.close()
+    asyncio.get_event_loop().close()
+    while not asyncio.get_event_loop().is_closed():
+        pass
     exit(0)
 
 
