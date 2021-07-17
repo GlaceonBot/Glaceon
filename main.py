@@ -116,7 +116,7 @@ async def create_pool():
                                       password=os.getenv('SQLpassword'),
                                       db=os.getenv('SQLdatabase'),
                                       minsize=1,
-                                      maxsize=100,
+                                      maxsize=300,
                                       autocommit=True)
     return conn
 glaceon.sql_server_pool = loop.run_until_complete(create_pool())
@@ -254,7 +254,13 @@ async def reload(ctx):
 @commands.is_owner()
 async def restart(ctx):
     await ctx.send("Restarting bot!")
-    os.system("reload")
+    glaceon.sql_server_pool.close()
+    await glaceon.sql_server_pool.wait_closed()
+    await glaceon.close()
+    asyncio.get_event_loop().close()
+    while not asyncio.get_event_loop().is_closed():
+        pass
+    exit(0)
 
 
 # runs the bot with a token.
