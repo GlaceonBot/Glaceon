@@ -24,11 +24,15 @@ class ModCommands(commands.Cog):
         yesmoji = '<:allow:843248140551192606>'
 
     async def are_ban_confirms_enabled(self, message):
-        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
-        db.execute('''CREATE TABLE IF NOT EXISTS settings_ban_confirm 
+        connection = await self.glaceon.sql_server_pool.acquire()
+        db = await connection.cursor()
+        await db.execute('''CREATE TABLE IF NOT EXISTS settings_ban_confirm 
                 (serverid BIGINT, setto BIGINT)''')
-        db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
-        settings = db.fetchone()
+        await db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
+        settings = await db.fetchone()
+        await db.close()
+        connection.close()
+        self.glaceon.sql_server_pool.release(connection)
         if settings:
             return settings[0]
         else:
@@ -91,7 +95,8 @@ class ModCommands(commands.Cog):
                         else:
                             revoke_in_secs = -1
                         ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
-                        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
+                        connection = await self.glaceon.sql_server_pool.acquire()
+                        db = await connection.cursor()
                         db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                             ctx.guild.id,))  # get the current prefix for that server, if it exists
                         if db.fetchone():  # actually check if it exists
@@ -100,7 +105,9 @@ class ModCommands(commands.Cog):
                         else:
                             db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (%s,%s,%s)",
                                        (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
-                        
+                        await db.close()
+                        connection.close()
+                        self.glaceon.sql_server_pool.release(connection)
                     await ctx.send(f"User {member} Has Been banned!",
                                    delete_after=5)  # says in chat that the user was banned successfully, deletes
                     # after 5s
@@ -123,6 +130,7 @@ class ModCommands(commands.Cog):
     @commands.has_guild_permissions(kick_members=True)
     @commands.bot_has_guild_permissions(kick_members=True)
     @commands.guild_only()
+    @utils.disableable()
     async def kick(self, ctx, member: discord.Member, *, reason="No reason specified."):
         """Kicks a user."""
         await ctx.message.delete()  # deletes command invocation
@@ -155,6 +163,7 @@ class ModCommands(commands.Cog):
     @commands.has_guild_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
     @commands.guild_only()
+    @utils.disableable()
     async def ban(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *,
                   reason="No reason specified."):
         """Bans a user."""
@@ -187,6 +196,7 @@ class ModCommands(commands.Cog):
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
+    @utils.disableable()
     async def lock(self, ctx, channel=None):
         """Locks a channel"""
         if channel is None:
@@ -199,6 +209,7 @@ class ModCommands(commands.Cog):
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
+    @utils.disableable()
     async def unlock(self, ctx, channel=None):
         """Unlocks a channel"""
         if channel is None:
@@ -211,6 +222,7 @@ class ModCommands(commands.Cog):
     @commands.has_guild_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     @commands.guild_only()
+    @utils.disableable()
     async def unban(self, ctx, member: discord.User):
         """Unbans user."""
         await ctx.message.delete()  # deletes invocation
@@ -229,37 +241,29 @@ class ModCommands(commands.Cog):
     @commands.cooldown(1, 3600, commands.BucketType.guild)
     @commands.guild_only()
     async def cleanhoists(self, ctx):
-        await ctx.reply("This command has had to be disabled until the bot is verified or a better way to find the top users is found.")
-        return
-        await ctx.send("Dehoisting in progress (THIS WILL TAKE WHILE)")
+        await ctx.reply("Dehoisting in progress.")
         permissions = discord.Permissions(manage_nicknames=True)
-        can_set_nick_to_username = True
         hoisting_chars = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '.', ',', '/', '>', '<', '\'',
                           '"', '?', '`', '[', ']', '{', '}', ':', ';', '+', '=', '\\']
-        while True:
-            member = None
-            for hoisting_char in hoisting_chars:
-                member = discord.utils.find(lambda m: m.permissions_in(ctx.channel) != permissions and m.display_name.startswith(hoisting_char), ctx.guild.members)
-                if member:
-                    break
-            if member is None:
-                await ctx.send("Hoisted members cleaned!")
-                return
-            for hoisting_char in hoisting_chars:
-                if member.display_name.startswith(hoisting_char):
-                    for hoisting_char in hoisting_chars:
-                        if member.name.startswith(hoisting_char):
-                            can_set_nick_to_username = False
-                        if can_set_nick_to_username:
-                            try:
-                                await member.edit(nick=member.name)
-                            except discord.Forbidden:
-                                pass
-                        else:
-                            try:
-                                await member.edit(nick="Dehoisted")
-                            except discord.Forbidden:
-                                pass
+        for member in ctx.guild.members:
+            if member.display_name.startswith(tuple(hoisting_chars)):
+                if member.name.startswith(tuple(hoisting_chars)):
+                    can_set_nick_to_username = False
+                else:
+                    can_set_nick_to_username = True
+                if can_set_nick_to_username:
+                    try:
+                        if not getattr(permissions, 'manage_nicknames'):
+                            await member.edit(nick=member.name)
+                    except discord.Forbidden:
+                        pass
+                else:
+                    try:
+                        if not getattr(permissions, 'manage_nicknames'):
+                            await member.edit(nick="Dehoisted")
+                    except discord.Forbidden:
+                        pass
+        await ctx.reply("Dehoisting completed!")
 
 
 def setup(glaceon):  # dpy setup cog

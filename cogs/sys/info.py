@@ -1,10 +1,10 @@
 import pathlib
-import cpuinfo
-import shutil
-import psutil
 import platform
+import shutil
+
+import cpuinfo
 import discord
-import requests
+import psutil
 from discord.ext import commands
 
 import utils
@@ -21,8 +21,9 @@ class Info(commands.Cog):
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
+    @utils.disableable()
     async def ping(self, ctx):
-        """Shows bot ping. 5s cooldown to prevent spam."""
+        """Shows bot ping."""
         await ctx.message.delete()
         embed = discord.Embed(colour=self.glaceon.embedcolor, title="Pong!",
                               description=str(round(self.glaceon.latency * 1000)) + " MS")
@@ -56,9 +57,13 @@ class Info(commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     async def list_whitelisted_invites(self, ctx):
         guilds_list = []
-        db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
-        db.execute(f'''SELECT inviteguild FROM whitelisted_invites WHERE hostguild = {ctx.guild.id}''')
-        guilds = db.fetchall()
+        connection = await self.glaceon.sql_server_pool.acquire()
+        db = await connection.cursor()
+        await db.execute(f'''SELECT inviteguild FROM whitelisted_invites WHERE hostguild = {ctx.guild.id}''')
+        guilds = await db.fetchall()
+        await db.close()
+        connection.close()
+        self.glaceon.sql_server_pool.release(connection)
         if guilds:
             for guild in guilds:
                 for guildid in guild:
@@ -66,6 +71,20 @@ class Info(commands.Cog):
             await ctx.send("`" + "`, `".join(guilds_list) + "`")
         else:
             await ctx.send("No invites are whitelisted in this guild!")
+
+    @commands.command()
+    @commands.guild_only()
+    @utils.disableable()
+    async def disabled(self, ctx, command=None):
+        connection = await self.glaceon.sql_server_pool.acquire()
+        db = await connection.cursor()
+        commands = []
+        for command in self.glaceon.walk_commands():
+            commands.append(command)
+        await ctx.send("\n".join(commands))
+        await db.close()
+        connection.close()
+        self.glaceon.sql_server_pool.release(connection)
 
 
 def setup(glaceon):

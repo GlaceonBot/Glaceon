@@ -7,14 +7,15 @@ import logging
 import os
 import pathlib
 import traceback
-# load the token to its variable
 
-import discord
 import aiomysql
+import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
 import utils
+
+# load the token to its variable
 
 load_dotenv()
 path = pathlib.PurePath()
@@ -60,19 +61,15 @@ glaceon = commands.Bot(command_prefix=utils.prefixgetter, case_insensitive=True,
 # global color for embeds
 glaceon.embedcolor = 0xadd8e6
 
-
 # global sql connection
-async def connect_to_sql_server():
-    sql_server_connection = await aiomysql.create_pool(host=os.getenv('SQLserverhost'),
-                                                       user=os.getenv('SQLusername'),
-                                                       password=os.getenv('SQLpassword'),
-                                                       db=os.getenv('SQLdatabase'),
-                                                       autocommit=True)
-    return sql_server_connection
-
-
 loop = asyncio.get_event_loop()
-glaceon.sql_server_connection = loop.run_until_complete(connect_to_sql_server())
+glaceon.sql_server_pool = loop.run_until_complete(await aiomysql.create_pool(host=os.getenv('SQLserverhost'),
+                                                                             user=os.getenv('SQLusername'),
+                                                                             password=os.getenv('SQLpassword'),
+                                                                             db=os.getenv('SQLdatabase'),
+                                                                             minsize=1,
+                                                                             maxsize=100,
+                                                                             autocommit=True))
 
 
 @glaceon.event
@@ -163,6 +160,9 @@ async def on_command_error(ctx, error):
     elif isinstance(error, discord.ext.commands.errors.NoPrivateMessage):
         await ctx.reply("That can only be used in servers, not DMs!")
         return
+
+    elif isinstance(error, discord.ext.commands.errors.CheckFailure):
+        await ctx.send(error)
 
     else:
         # Send user a message

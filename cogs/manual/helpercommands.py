@@ -1,7 +1,8 @@
 import pathlib
-from datetime import datetime
-import discord
 import typing
+from datetime import datetime
+
+import discord
 from discord.ext import commands
 
 import utils
@@ -19,6 +20,7 @@ class HelperCommands(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
     @commands.guild_only()
+    @utils.disableable()
     async def purge(self, ctx, clear: int = 10, user: discord.Member = None):
         """Clear channel of messages, optionally from a specific user.
         Add their ping/ID to the end of the command to set it to only delete messages from that user."""
@@ -37,6 +39,7 @@ class HelperCommands(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     @commands.guild_only()
+    @utils.disableable()
     async def warn(self, ctx, member: discord.Member, *, reason):
         """Warn a member."""
         await ctx.message.delete()
@@ -52,6 +55,7 @@ class HelperCommands(commands.Cog):
     @commands.command(aliases=['staffsay', 'modsay', 'staffsend'])
     @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
+    @utils.disableable()
     async def modsend(self, ctx, *, message):
         """Sends a message for the moderators"""
         await ctx.message.delete()
@@ -60,6 +64,7 @@ class HelperCommands(commands.Cog):
     @commands.command(aliases=['embed', 'embedsend'])
     @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
+    @utils.disableable()
     async def sendembed(self, ctx, title, *, message):
         await ctx.message.delete()
         embed = discord.Embed(colour=self.glaceon.embedcolor, title=title, description=message)
@@ -70,6 +75,7 @@ class HelperCommands(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
+    @utils.disableable()
     async def mute(self, ctx, member: discord.Member, time: typing.Optional[str] = None, *,
                    reason="No reason specified"):
         """Mute a user. Optionally has a time and a reason.
@@ -93,15 +99,20 @@ class HelperCommands(commands.Cog):
                 revoke_in_secs = -1
                 reason = time + reason
             ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
-            db = await utils.get_sql_cursor(self.glaceon.sql_server_connection)
-            db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
+            connection = await self.glaceon.sql_server_pool.acquire()
+            db = await connection.cursor()
+            await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
                 ctx.guild.id,))  # get the current prefix for that server, if it exists
-            if db.fetchone():  # actually check if it exists
-                db.execute('''UPDATE current_mutes SET mutefinish = %s WHERE serverid = %s AND userid = %s''',
-                           (ban_ends_at, ctx.guild.id, member.id))  # update prefix
+            if await db.fetchone():  # actually check if it exists
+                await db.execute('''UPDATE current_mutes SET mutefinish = %s WHERE serverid = %s AND userid = %s''',
+                                 (ban_ends_at, ctx.guild.id, member.id))  # update prefix
             else:
-                db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
-                           (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
+                await db.execute("INSERT INTO current_mutes(serverid, userid, mutefinish) VALUES (%s,%s,%s)",
+                                 (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
+            await db.close()
+            connection.close()
+            self.glaceon.sql_server_pool.release(connection)
+
         guild = ctx.guild
         muted_role = discord.utils.get(guild.roles, name="Muted")
 
@@ -131,6 +142,7 @@ class HelperCommands(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
+    @utils.disableable()
     async def unmute(self, ctx, member: discord.Member):
         """Unmutes a member."""
         await ctx.message.delete()
