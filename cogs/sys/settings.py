@@ -162,11 +162,13 @@ class Settings(discord.ext.commands.Cog):
         if command not in all_commands:
             await ctx.send("That is not a valid command.")
             return
+        await db.execute('''DELETE FROM disabled_commands WHERE guildid = %s AND command = %s''',
+                         (ctx.guild.id, command))
         await db.execute('''INSERT INTO disabled_commands VALUES (%s, %s, %s)''', (ctx.guild.id, command, 0))
         await db.close()
         connection.close()
         self.glaceon.sql_server_pool.release(connection)
-        await ctx.send(f"Command {command} disabled!")
+        await ctx.reply(f"Command {command} disabled!")
 
     @settings.command()
     async def enable(self, ctx, command):
@@ -178,11 +180,12 @@ class Settings(discord.ext.commands.Cog):
         if command not in all_commands:
             await ctx.send("That is not a valid command.")
             return
+        await db.execute('''DELETE FROM disabled_commands WHERE guildid = %s AND command = %s''', (ctx.guild.id, command))
         await db.execute('''INSERT INTO disabled_commands VALUES (%s, %s, %s)''', (ctx.guild.id, command, 1))
         await db.close()
         connection.close()
         self.glaceon.sql_server_pool.release(connection)
-        await ctx.send(f"Command {command} enabled!")
+        await ctx.reply(f"Command {command} enabled!")
 
 
 def setup(glaceon):

@@ -74,7 +74,7 @@ glaceon.sql_server_pool = loop.run_until_complete(aiomysql.create_pool(host=os.g
 
 @glaceon.event
 async def on_ready():
-    print(f'Logged on as {glaceon.user.name}')  # Tells me if I'm running Glaceon or Eevee
+    logging.info(f'Logged on as {glaceon.user.name}')  # Tells me if I'm running Glaceon or Eevee
 
 
 # bot's list of cogs that need to be loaded up, they are all in different files and all do something different.
