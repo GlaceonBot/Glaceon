@@ -48,28 +48,6 @@ if wrongflags:
     logging.warning("An unrecognised flag was passed, skipping")
 logging.info("Starting Glaceon.....")
 
-
-# exit handler
-async def exit_handler():
-    glaceon.sql_server_pool.close()
-    await glaceon.sql_server_pool.wait_closed()
-    await glaceon.close()
-    asyncio.get_event_loop().close()
-    while not asyncio.get_event_loop().is_closed():
-        pass
-    exit(0)
-
-
-# Handle sigterm and sigint
-loop = asyncio.get_event_loop()
-for signame in ('SIGINT', 'SIGTERM'):
-    try:
-        loop.add_signal_handler(getattr(signal, signame),
-                                lambda: asyncio.create_task(exit_handler()))
-    except NotImplementedError:
-        logging.debug("You are on Windows, clean close is not enabled!")
-
-
 # help command class :D
 class Help(commands.MinimalHelpCommand):
     # actually sends the help
@@ -77,14 +55,7 @@ class Help(commands.MinimalHelpCommand):
     async def send_bot_help(self, mapping):
         permissions = self.context.channel.permissions_for(self.context.author)
         if not getattr(permissions, "manage_messages"):
-            embed = discord.Embed(colour=glaceon.embedcolor, title="Help")
-            prefix = await utils.prefixgetter(glaceon, self.context.message)
-            embed.add_field(name="Commands",
-                            value=f"You can use the tags by using `{prefix[0]}t <tag> [@mention]`\n\nYou can get a list of tags by running `{prefix[0]}tl`",
-                            inline=False)
-            prefix = await utils.prefixgetter(glaceon, self.context.message)
-            embed.add_field(name="Prefix", value=f"`{prefix[0]}` or <@{self.context.me.id}>", inline=False)
-            await self.get_destination().send(embed=embed)
+            pass
         else:
             embed = discord.Embed(colour=glaceon.embedcolor, title="Help")
             embed.add_field(name="Commands",
