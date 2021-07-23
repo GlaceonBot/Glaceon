@@ -1,6 +1,6 @@
 #!/bin/bash
 git reset --hard origin/master
-chmod +x start.sh
-chmod +x update.sh
-chmod +x main.py
-systemctl restart glaceon.service
+sudo chmod +x start.sh
+sudo chmod +x update.sh
+sudo chmod +x main.py
+sudo systemctl restart glaceon.service
