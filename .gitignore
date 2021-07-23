@@ -6,10 +6,6 @@
 **/tmp
 .env
 
-# Files for deployment
-start.sh
-update.sh
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
