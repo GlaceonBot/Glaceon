@@ -84,19 +84,16 @@ class Settings(discord.ext.commands.Cog):
         if not getattr(permissions, "manage_nicknames") and isenabled == 1:
             await ctx.send("Dehoisting will not work unless the bot has the Manage Nicknames permission!")
             return
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()
-        await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
-                   (ctx.guild.id, "auto_dehoist"))  # get the current setting
-        if await db.fetchone():
-            await db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
-                       (isenabled, ctx.guild.id, "auto_dehoist"))  # update the old setting
-        else:
-            await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
-                       (ctx.guild.id, isenabled, "auto_dehoist"))  # set the new setting
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+                           (ctx.guild.id, "auto_dehoist"))  # get the current setting
+                if await db.fetchone():
+                    await db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
+                               (isenabled, ctx.guild.id, "auto_dehoist"))  # update the old setting
+                else:
+                    await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
+                            (ctx.guild.id, isenabled, "auto_dehoist"))  # set the new setting
         await ctx.reply(f"Auto-dehoisting {enabledtext}!")
 
     @settings.command(aliases=['whitelist_invites', 'whitelist_enable'])
@@ -108,42 +105,33 @@ class Settings(discord.ext.commands.Cog):
         else:
             isenabled = 0
             enabledtext = "disabled"
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()
-        await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
-                   (ctx.guild.id, "whitelisted_invites"))  # get the current setting
-        if await db.fetchone():
-            await db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
-                       (isenabled, ctx.guild.id, "whitelisted_invites"))  # update the old setting
-        else:
-            await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
-                       (ctx.guild.id, isenabled, "whitelisted_invites"))  # set the new setting
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+                           (ctx.guild.id, "whitelisted_invites"))  # get the current setting
+                if await db.fetchone():
+                    await db.execute('''UPDATE settings SET setto = %s WHERE serverid = %s AND setting = %s''',
+                            (isenabled, ctx.guild.id, "whitelisted_invites"))  # update the old setting
+                else:
+                    await db.execute("INSERT INTO settings VALUES (%s,%s,%s)",
+                                    (ctx.guild.id, isenabled, "whitelisted_invites"))  # set the new setting
         await ctx.reply(f"Invite moderation {enabledtext}!")
 
     @settings.command(aliases=['whitelist_invite', 'whitelist_add', 'add_whitelist_invite'])
     async def add_whitelisted_invite(self, ctx, whitelist_guild_id: int):
         """Add an invite to the invite whitelist"""
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()
-        await db.execute('''INSERT INTO whitelisted_invites VALUES (%s, %s)''', (ctx.guild.id, whitelist_guild_id))
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                await db.execute('''INSERT INTO whitelisted_invites VALUES (%s, %s)''', (ctx.guild.id, whitelist_guild_id))
         await ctx.reply(f"Added whitelisted invite for guild {whitelist_guild_id}!")
 
     @settings.command(aliases=['dewhitelist_invite', 'whitelist_del', 'whitelist_rem', 'whitelist_remove'])
     async def remove_whitelisted_invite(self, ctx, whitelist_guild_id: int):
         """Remove an invite from the invite whitelist"""
-        connection = await self.glaceon.sql_server_pool.acquire()
-        db = await connection.cursor()
-        await db.execute('''DELETE FROM whitelisted_invites WHERE hostguild = %s AND inviteguild = %s''',
-                   (ctx.guild.id, whitelist_guild_id))
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                await db.execute('''DELETE FROM whitelisted_invites WHERE hostguild = %s AND inviteguild = %s''',
+                           (ctx.guild.id, whitelist_guild_id))
         await ctx.reply(f"Removed whitelisted invite for guild {whitelist_guild_id}!")
 
     @settings.command()
@@ -156,12 +144,11 @@ class Settings(discord.ext.commands.Cog):
         if command not in all_commands:
             await ctx.send("That is not a valid command.")
             return
-        await db.execute('''DELETE FROM disabled_commands WHERE guildid = %s AND command = %s''',
-                         (ctx.guild.id, command))
-        await db.execute('''INSERT INTO disabled_commands VALUES (%s, %s, %s)''', (ctx.guild.id, command, 0))
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                await db.execute('''DELETE FROM disabled_commands WHERE guildid = %s AND command = %s''',
+                                 (ctx.guild.id, command))
+                await db.execute('''INSERT INTO disabled_commands VALUES (%s, %s, %s)''', (ctx.guild.id, command, 0))
         await ctx.reply(f"Command {command} disabled!")
 
     @settings.command()
@@ -174,11 +161,10 @@ class Settings(discord.ext.commands.Cog):
         if command not in all_commands:
             await ctx.send("That is not a valid command.")
             return
-        await db.execute('''DELETE FROM disabled_commands WHERE guildid = %s AND command = %s''', (ctx.guild.id, command))
-        await db.execute('''INSERT INTO disabled_commands VALUES (%s, %s, %s)''', (ctx.guild.id, command, 1))
-        await db.close()
-        await connection.close()
-        self.glaceon.sql_server_pool.release(connection)
+        async with self.glaceon.sql_server_pool.acquire() as connection:
+            async with connection.cursor() as db:
+                await db.execute('''DELETE FROM disabled_commands WHERE guildid = %s AND command = %s''', (ctx.guild.id, command))
+                await db.execute('''INSERT INTO disabled_commands VALUES (%s, %s, %s)''', (ctx.guild.id, command, 1))
         await ctx.reply(f"Command {command} enabled!")
 
 
