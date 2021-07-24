@@ -36,7 +36,7 @@ async def prefixgetter(glaceon, message):
     async with sql_server_pool.acquire() as connection:
         async with connection.cursor() as db:
             # find which prefix matches this specific server id
-            await db.execute(f'''SELECT prefix FROM prefixes WHERE serverid = {sid}''')
+            await db.execute(f'''SELECT prefix FROM prefixes WHERE guildid = {sid}''')
             # fetch the prefix
             custom_prefix = await db.fetchone()
     # deletes database object

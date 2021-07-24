@@ -45,15 +45,15 @@ db = mysql.connector.connect(host=os.getenv('SQLserverhost'),
                              user=os.getenv('SQLusername'),
                              password=os.getenv('SQLpassword'),
                              db=os.getenv('SQLdatabase')).cursor()
-await db.execute('''CREATE TABLE IF NOT EXISTS settings (serverid BIGINT, setto BIGINT, setting TEXT)''')
+await db.execute('''CREATE TABLE IF NOT EXISTS settings (guildid BIGINT, setto BIGINT, setting TEXT)''')
 await db.execute('''CREATE TABLE IF NOT EXISTS whitelisted_invites (hostguild BIGINT, inviteguild BIGINT)''')
-await db.execute('''CREATE TABLE IF NOT EXISTS current_bans (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
-await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
-await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes (serverid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
-await db.execute('''CREATE TABLE IF NOT EXISTS current_bans (serverid BIGINT,  userid BIGINT, banfinish BIGINT)''')
-await db.execute('''CREATE TABLE IF NOT EXISTS tags (serverid BIGINT, tagname TEXT, tagcontent TEXT)''')
-await db.execute('''CREATE TABLE IF NOT EXISTS prefixes (serverid BIGINT, prefix TEXT)''')
-await db.execute('''CREATE TABLE IF NOT EXISTS disabled_commands (serverid BIGINT, commandname TEXT, state BIT)''')
+await db.execute('''CREATE TABLE IF NOT EXISTS current_bans (guildid BIGINT,  userid BIGINT, banfinish BIGINT)''')
+await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes (guildid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
+await db.execute('''CREATE TABLE IF NOT EXISTS current_mutes (guildid BIGINT,  userid BIGINT, mutefinish BIGINT)''')
+await db.execute('''CREATE TABLE IF NOT EXISTS current_bans (guildid BIGINT,  userid BIGINT, banfinish BIGINT)''')
+await db.execute('''CREATE TABLE IF NOT EXISTS tags (guildid BIGINT, tagname TEXT, tagcontent TEXT)''')
+await db.execute('''CREATE TABLE IF NOT EXISTS prefixes (guildid BIGINT, prefix TEXT)''')
+await db.execute('''CREATE TABLE IF NOT EXISTS disabled_commands (guildid BIGINT, commandname TEXT, state BIT)''')
 try:
     with open("/etc/systemd/system/glaceon.service", "w+") as servicefile:
         servicefile.write(f"""

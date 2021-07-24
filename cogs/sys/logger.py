@@ -27,7 +27,7 @@ class Logger(commands.Cog):  # Logger class
         async with self.glaceon.sql_server_pool.acquire() as connection:
             async with connection.cursor() as db:
                 try:
-                    await db.execute(f'''SELECT serverid FROM settings WHERE serverid = %s AND setting = %s''',
+                    await db.execute(f'''SELECT guildid FROM settings WHERE guildid = %s AND setting = %s''',
                                      (message.guild.id, "message_logging"))
                 except AttributeError:
                     return 1

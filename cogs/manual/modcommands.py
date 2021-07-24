@@ -27,8 +27,8 @@ class ModCommands(commands.Cog):
         async with self.glaceon.sql_server_pool.acquire() as connection:
             async with connection.cursor() as db:
                 await db.execute('''CREATE TABLE IF NOT EXISTS settings_ban_confirm 
-                        (serverid BIGINT, setto BIGINT)''')
-                await db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE serverid = {message.guild.id}''')
+                        (guildid BIGINT, setto BIGINT)''')
+                await db.execute(f'''SELECT setto FROM settings_ban_confirm WHERE guildid = {message.guild.id}''')
                 settings = await db.fetchone()
         if settings:
             return settings[0]
@@ -94,13 +94,13 @@ class ModCommands(commands.Cog):
                         ban_ends_at = int(datetime.utcnow().timestamp()) + revoke_in_secs
                         connection = await self.glaceon.sql_server_pool.acquire()
                         db = await connection.cursor()
-                        await db.execute(f'''SELECT userid FROM current_bans WHERE serverid = %s''', (
+                        await db.execute(f'''SELECT userid FROM current_bans WHERE guildid = %s''', (
                             ctx.guild.id,))  # get the current prefix for that server, if it exists
                         if await db.fetchone():  # actually check if it exists
-                            await db.execute('''UPDATE current_bans SET banfinish = %s WHERE serverid = %s AND userid = %s''',
+                            await db.execute('''UPDATE current_bans SET banfinish = %s WHERE guildid = %s AND userid = %s''',
                                        (ban_ends_at, ctx.guild.id, member.id))  # update prefix
                         else:
-                            await db.execute("INSERT INTO current_bans(serverid, userid, banfinish) VALUES (%s,%s,%s)",
+                            await db.execute("INSERT INTO current_bans(guildid, userid, banfinish) VALUES (%s,%s,%s)",
                                        (ctx.guild.id, member.id, ban_ends_at))  # set new prefix
                         await db.close()
                         await connection.close()

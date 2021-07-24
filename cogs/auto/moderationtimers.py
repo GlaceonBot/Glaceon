@@ -26,12 +26,12 @@ class UnCog(commands.Cog):
                 # connect to the sqlite database for data
                 async with connection.cursor() as db:
                     await db.execute(
-                        '''SELECT userid FROM current_bans WHERE serverid = %s AND banfinish <= %s AND banfinish <> %s''',
+                        '''SELECT userid FROM current_bans WHERE guildid = %s AND banfinish <= %s AND banfinish <> %s''',
                         (guild.id, current_time, -1))
                     member_line = await db.fetchone()
                     if member_line:
                         await db.execute(
-                            '''DELETE FROM current_bans WHERE serverid = %s AND banfinish <= %s AND banfinish <> %s''',
+                            '''DELETE FROM current_bans WHERE guildid = %s AND banfinish <= %s AND banfinish <> %s''',
                             (guild.id, current_time, -1))
                         member = self.glaceon.get_user(member_line[0])
                         try:
@@ -49,12 +49,12 @@ class UnCog(commands.Cog):
                 async with connection.cursor() as db:
                     # find which prefix matches this specific server id
                     await db.execute(
-                        '''SELECT userid FROM current_mutes WHERE serverid = %s AND mutefinish <= %s AND mutefinish <> %s''',
+                        '''SELECT userid FROM current_mutes WHERE guildid = %s AND mutefinish <= %s AND mutefinish <> %s''',
                         (guild.id, current_time, -1))
                     member_line = await db.fetchone()
                     if member_line:
                         await db.execute(
-                            '''DELETE FROM current_mutes WHERE serverid = %s AND mutefinish <= %s AND mutefinish <> %s''',
+                            '''DELETE FROM current_mutes WHERE guildid = %s AND mutefinish <= %s AND mutefinish <> %s''',
                             (guild.id, current_time, -1))
                         member = guild.get_member(member_line[0])
                         muted_role = discord.utils.get(guild.roles, name="Muted")

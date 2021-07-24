@@ -36,17 +36,17 @@ class BotSystem(commands.Cog):
     @commands.guild_only()
     async def prefix(self, ctx, newprefix):  # context and what we should set the new prefix to
         """Sets the bot prefix for this server"""
-        serverid = ctx.guild.id  # gets serverid for convinience
+        guildid = ctx.guild.id  # gets guildid for convinience
         async with self.glaceon.sql_server_pool.acquire() as connection:
             async with connection.cursor() as db:
                 await db.execute(
-                    f'''SELECT prefix FROM prefixes WHERE serverid = {serverid}''')  # get the current prefix for that server, if it exists
+                    f'''SELECT prefix FROM prefixes WHERE guildid = {guildid}''')  # get the current prefix for that server, if it exists
                 if await db.fetchone():  # actually check if it exists
-                    await db.execute('''UPDATE prefixes SET prefix = %s WHERE serverid = %s''',
-                                     (newprefix, serverid))  # update prefix
+                    await db.execute('''UPDATE prefixes SET prefix = %s WHERE guildid = %s''',
+                                     (newprefix, guildid))  # update prefix
                 else:
-                    await db.execute("INSERT INTO prefixes(serverid, prefix) VALUES (%s,%s)",
-                                     (serverid, newprefix))  # set new prefix
+                    await db.execute("INSERT INTO prefixes(guildid, prefix) VALUES (%s,%s)",
+                                     (guildid, newprefix))  # set new prefix
                 await ctx.send(f"Prefix set to {newprefix}")  # tell admin what happened
 
     @commands.Cog.listener()

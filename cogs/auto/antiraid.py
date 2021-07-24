@@ -12,11 +12,11 @@ class Antiraid(commands.Cog):
     async def is_dehoisting_enabled(self, ctx):
         async with self.glaceon.sql_server_pool.acquire() as connection:
             async with connection.cursor() as db:
-                await db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
+                await db.execute(f'''SELECT setto FROM settings WHERE guildid = %s AND setting = %s''',
                                  (ctx.guild.id, "auto_dehoist"))  # get the current setting
                 if await db.fetchone():
                     try:
-                        await db.execute(f'''SELECT setto FROM settings WHERE serverid = %s AND setting = %s''',
+                        await db.execute(f'''SELECT setto FROM settings WHERE guildid = %s AND setting = %s''',
                                          (ctx.guild.id, "auto_dehoist"))
                     except AttributeError:
                         return 0
