@@ -20,11 +20,11 @@ class Antiraid(commands.Cog):
                                          (ctx.guild.id, "auto_dehoist"))
                     except AttributeError:
                         return 0
-                    settings = await db.fetchone()
-            if settings:
-                return settings[0]
-            else:
-                return 0
+                settings = await db.fetchone()
+                if settings:
+                    return settings[0]
+                else:
+                    return 0
 
     @commands.Cog.listener()
     async def on_member_join(self, ctx):
