@@ -94,7 +94,7 @@ class Info(commands.Cog):
                         else:
                             commands.append('<:allow:843248140551192606> ' + command.name)
                         break
-                embed = discord.Embed(colour=self.glaceon.embedcolor, title="Commands currently enabled",
+                embed = discord.Embed(colour=self.glaceon.embedcolor, title="Enabled commands",
                                       description='\n'.join(commands))
                 embed.set_footer(text=f"Request by {ctx.author}")
                 await ctx.send(embed=embed)
