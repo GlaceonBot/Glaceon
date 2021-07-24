@@ -58,9 +58,12 @@ def disableable():
                 await db.execute("""SELECT state FROM disabled_commands WHERE command = %s AND guildid = %s""",
                                      (ctx.command.qualified_name, ctx.guild.id))
                 state = await db.fetchone()
-        logging.info("state = " + str(state))
+        if state:
+            pass
+        else:
+            state = 1
         # deletes database object
-        if state == 0:
+        if state[0] == 0:
             raise CommandDisabled("This command is disabled.")
         else:
             return True
