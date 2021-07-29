@@ -215,6 +215,10 @@ async def reload(ctx):
     # for everything in that cog list, it unloads and then loads the extention.
     for ext in glaceon.coglist:
         glaceon.unload_extension(ext)
+        await asyncio.create_subprocess_shell(
+            './update.sh',
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE)
         glaceon.load_extension(ext)
     await ctx.send("Reloaded cogs!")
 
@@ -222,13 +226,9 @@ async def reload(ctx):
 @glaceon.command()
 @commands.is_owner()
 async def restart(ctx):
-    await ctx.send("Restarting bot!")
+    await ctx.reply("Restarting bot!")
     glaceon.sql_server_pool.close()
-    await glaceon.sql_server_pool.wait_closed()
-    await glaceon.close()
-    asyncio.get_event_loop().close()
-    while not asyncio.get_event_loop().is_closed():
-        pass
+    os.system("./start.sh")
     exit(0)
 
 
