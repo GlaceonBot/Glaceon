@@ -1,6 +1,5 @@
-discord
+git+git://github.com/rapptz/discord.py@master
 pynacl
-aiomysql
 emoji
 python-dotenv
 requests
