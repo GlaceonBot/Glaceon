@@ -8,3 +8,4 @@ python-i18n[YAML]
 psutil
 py-cpuinfo
 cryptography
+aiomysql
