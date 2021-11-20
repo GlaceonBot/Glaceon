@@ -1,5 +1,5 @@
 # Glaceon
-
+## Glaceon is no longer maintained due to the EOLing of discord.py and the lack of a sutibly secure replacement. It will continue to function until discord.py breaks.
 My discord modbot!
 
 [![Support Server](https://img.shields.io/static/v1?logo=discord&logoColor=white&label=&message=Support%20Server&color=blue)](https://discord.gg/NMhj5VedSF)
